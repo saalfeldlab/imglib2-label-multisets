@@ -1,10 +1,13 @@
-package net.imglib.type.label;
+package net.imglib2.type.label;
 
 import java.nio.ByteBuffer;
 
 import net.imglib2.cache.CacheLoader;
 import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
+import net.imglib2.type.label.ByteUtils;
+import net.imglib2.type.label.LongMappedAccessData;
+import net.imglib2.type.label.VolatileLabelMultisetArray;
 import net.imglib2.util.Intervals;
 
 /**
