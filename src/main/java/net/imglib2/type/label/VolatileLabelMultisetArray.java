@@ -1,5 +1,6 @@
 package net.imglib2.type.label;
 
+import gnu.trove.set.hash.TLongHashSet;
 import net.imglib2.img.basictypeaccess.volatiles.VolatileAccess;
 import net.imglib2.img.basictypeaccess.volatiles.VolatileArrayDataAccess;
 
@@ -13,6 +14,8 @@ public class VolatileLabelMultisetArray implements VolatileAccess, VolatileArray
 
 	private final long listDataUsedSizeInBytes;
 
+	private final TLongHashSet containedLabels;
+
 	public VolatileLabelMultisetArray( final int numEntities, final boolean isValid )
 	{
 		this.data = new int[ numEntities ];
@@ -20,26 +23,30 @@ public class VolatileLabelMultisetArray implements VolatileAccess, VolatileArray
 		listDataUsedSizeInBytes = 0;
 		new MappedObjectArrayList<>( LabelMultisetEntry.type, listData, 0 ).add( new LabelMultisetEntry() );
 		this.isValid = isValid;
+		this.containedLabels = new TLongHashSet();
 	}
 
 	public VolatileLabelMultisetArray(
 			final int[] data,
 			final MappedAccessData< LongMappedAccess > listData,
-			final boolean isValid )
+			final boolean isValid,
+			final TLongHashSet containedLabels )
 	{
-		this( data, listData, -1, isValid );
+		this( data, listData, -1, isValid, containedLabels );
 	}
 
 	public VolatileLabelMultisetArray(
 			final int[] data,
 			final MappedAccessData< LongMappedAccess > listData,
 			final long listDataUsedSizeInBytes,
-			final boolean isValid )
+			final boolean isValid,
+			final TLongHashSet containedLabels )
 	{
 		this.data = data;
 		this.listData = listData;
 		this.listDataUsedSizeInBytes = listDataUsedSizeInBytes;
 		this.isValid = isValid;
+		this.containedLabels = containedLabels;
 	}
 
 	public void getValue( final int index, final LabelMultisetEntryList ref )
@@ -79,6 +86,21 @@ public class VolatileLabelMultisetArray implements VolatileAccess, VolatileArray
 	public boolean isValid()
 	{
 		return isValid;
+	}
+
+	public boolean containsLabel( final long label )
+	{
+		return this.containedLabels.contains( label );
+	}
+
+	public int numContainedLabels()
+	{
+		return this.containedLabels.size();
+	}
+
+	public long[] containedLabels()
+	{
+		return this.containedLabels.toArray();
 	}
 
 	// TODO do we need this? I do not think so but I am not 100% sure

@@ -1,8 +1,10 @@
 package net.imglib2.type.label;
 
 import java.nio.ByteBuffer;
+import java.util.function.LongConsumer;
 
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.set.hash.TLongHashSet;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessible;
@@ -13,12 +15,49 @@ import net.imglib2.view.Views;
 public class LabelMultisetTypeDownscaler
 {
 
-	public static VolatileLabelMultisetArray createDownscaledCell( final RandomAccessible< LabelMultisetType > source, final Interval interval, final int[] factor )
+	public static VolatileLabelMultisetArray createDownscaledCell(
+			final RandomAccessible< LabelMultisetType > source,
+			final Interval interval,
+			final int[] factor,
+			final int maxNumEntriesPerPixel )
 	{
-		return createDownscaledCell( Views.interval( source, interval ), factor );
+		return createDownscaledCell( Views.interval( source, interval ), factor, maxNumEntriesPerPixel );
 	}
 
-	public static VolatileLabelMultisetArray createDownscaledCell( final RandomAccessibleInterval< LabelMultisetType > source, final int[] factor )
+	public static VolatileLabelMultisetArray createDownscaledCell(
+			final RandomAccessible< LabelMultisetType > source,
+			final Interval interval,
+			final int[] factor,
+			final TLongHashSet precomputedContainedLabels,
+			final int maxNumEntriesPerPixel )
+	{
+		return createDownscaledCell( Views.interval( source, interval ), factor, precomputedContainedLabels, maxNumEntriesPerPixel );
+	}
+
+	public static VolatileLabelMultisetArray createDownscaledCell(
+			final RandomAccessibleInterval< LabelMultisetType > source,
+			final int[] factor,
+			final int maxNumEntriesPerPixel )
+	{
+		final TLongHashSet set = new TLongHashSet();
+		return createDownscaledCell( source, factor, set, set::add, maxNumEntriesPerPixel );
+	}
+
+	public static VolatileLabelMultisetArray createDownscaledCell(
+			final RandomAccessibleInterval< LabelMultisetType > source,
+			final int[] factor,
+			final TLongHashSet precomputedContainedLabels,
+			final int maxNumEntriesPerPixel )
+	{
+		return createDownscaledCell( source, factor, precomputedContainedLabels, id -> {}, maxNumEntriesPerPixel );
+	}
+
+	private static VolatileLabelMultisetArray createDownscaledCell(
+			final RandomAccessibleInterval< LabelMultisetType > source,
+			final int[] factor,
+			final TLongHashSet labelsInBlock,
+			final LongConsumer addToList,
+			final int maxNumEntriesPerPixel )
 	{
 
 		final RandomAccess< LabelMultisetType > randomAccess = source.randomAccess();
@@ -62,7 +101,10 @@ public class LabelMultisetTypeDownscaler
 				randomAccess.setPosition( totalOffset );
 				for ( final Entry< Label > sourceEntry : randomAccess.get().entrySet() )
 				{
-					searchIndex = list.binarySearch( sourceEntry.getElement().id() );
+					final long id = sourceEntry.getElement().id();
+					addToList.accept( id );
+//					labelsInBlock.add( id );
+					searchIndex = list.binarySearch( id );
 					if ( list.size() > 0 && searchIndex >= 0 )
 						// just add 1 to the count of existing label
 						list.get( searchIndex ).setCount( list.get( searchIndex ).getCount() + 1 );
@@ -115,12 +157,12 @@ public class LabelMultisetTypeDownscaler
 					cellOffset[ d ] = 0;
 			}
 		}
-		return new VolatileLabelMultisetArray( data, listData, nextListOffset, true );
+		return new VolatileLabelMultisetArray( data, listData, nextListOffset, true, labelsInBlock );
 	}
 
 	public static int getSerializedVolatileLabelMultisetArraySize( final VolatileLabelMultisetArray array )
 	{
-		return ( int ) ( array.getCurrentStorageArray().length * Integer.BYTES + array.getListDataUsedSizeInBytes() );
+		return ( int ) ( Integer.BYTES + Long.BYTES * array.numContainedLabels() + array.getCurrentStorageArray().length * Integer.BYTES + array.getListDataUsedSizeInBytes() );
 	}
 
 	public static void serializeVolatileLabelMultisetArray( final VolatileLabelMultisetArray array, final byte[] bytes )
@@ -130,6 +172,9 @@ public class LabelMultisetTypeDownscaler
 		final long[] data = ( ( LongMappedAccessData ) array.getListData() ).data;
 
 		final ByteBuffer bb = ByteBuffer.wrap( bytes );
+
+		bb.putInt( array.numContainedLabels() );
+		bb.asLongBuffer().put( array.containedLabels() );
 
 		for ( final int d : curStorage )
 			bb.putInt( d );

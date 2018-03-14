@@ -3,17 +3,20 @@ package net.imglib2.type.label;
 import java.nio.ByteBuffer;
 
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.set.hash.TLongHashSet;
 import net.imglib2.IterableInterval;
 import net.imglib2.type.label.Multiset.Entry;
 
 public class LabelUtils
 {
 
-	// TODO don't return bytes, take as argument
-	public static byte[] serializeLabelMultisetTypes( final IterableInterval< LabelMultisetType > lmts, final int numElements )
+	public static byte[] serializeLabelMultisetTypes(
+			final IterableInterval< LabelMultisetType > lmts,
+			final int numElements )
 	{
 
 		final int[] data = new int[ numElements ];
+		final TLongHashSet containedLabels = new TLongHashSet();
 
 		final LongMappedAccessData listData = LongMappedAccessData.factory.createStorage( 32 );
 
@@ -29,7 +32,9 @@ public class LabelUtils
 
 			for ( final Entry< Label > entry : lmt.entrySet() )
 			{
-				tentry.setId( entry.getElement().id() );
+				final long id = entry.getElement().id();
+				containedLabels.add( id );
+				tentry.setId( id );
 				tentry.setCount( entry.getCount() );
 				list.add( tentry );
 			}
@@ -56,9 +61,11 @@ public class LabelUtils
 			}
 		}
 
-		final byte[] bytes = new byte[ 4 * data.length + nextListOffset ];
+		final byte[] bytes = new byte[ Integer.BYTES + Long.BYTES * containedLabels.size() + Integer.BYTES * data.length + nextListOffset ];
 
 		final ByteBuffer bb = ByteBuffer.wrap( bytes );
+		bb.putInt( containedLabels.size() );
+		bb.asLongBuffer().put( containedLabels.toArray() );
 
 		for ( final int d : data )
 			bb.putInt( d );
@@ -89,6 +96,9 @@ public class LabelUtils
 
 		final int[] data = new int[] { 0 };
 
-		return new LabelMultisetType( new VolatileLabelMultisetArray( data, listData, true ) );
+		final TLongHashSet containedLabels = new TLongHashSet();
+		containedLabels.add( Label.OUTSIDE );
+
+		return new LabelMultisetType( new VolatileLabelMultisetArray( data, listData, true, containedLabels ) );
 	}
 }
