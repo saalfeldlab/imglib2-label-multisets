@@ -285,6 +285,20 @@ public class MappedObjectArrayList< O extends MappedObject< O, T >, T extends Ma
 		releaseRef( r1 );
 	}
 
+	/**
+	 * Limit list of list to sizeLimit if sizeLimit is smaller than current
+	 * size.
+	 *
+	 * @param sizeLimit
+	 *
+	 *            TODO is this the best way to do this?
+	 */
+	public void limitSize( final int sizeLimit )
+	{
+		if ( size() > sizeLimit )
+			access.putInt( /* value */ sizeLimit, /* offset */ 0 );
+	}
+
 	private void quicksort( final int low, final int high, final Comparator< ? super O > comparator, final O tmpRef1, final O tmpRef2, final O tmpRef3 )
 	{
 		int pivotpos = ( low + high ) / 2;
