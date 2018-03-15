@@ -78,6 +78,8 @@ public class LabelMultisetTypeDownscaler
 
 		final LongMappedAccessData listData = LongMappedAccessData.factory.createStorage( 32 );
 
+		// list: create new list
+		// list2: compare with other lists
 		final LabelMultisetEntryList list = new LabelMultisetEntryList( listData, 0 );
 		final LabelMultisetEntryList list2 = new LabelMultisetEntryList();
 		final TIntArrayList listHashesAndOffsets = new TIntArrayList();
@@ -95,6 +97,7 @@ public class LabelMultisetTypeDownscaler
 			for ( int i = 0; i < numDim; i++ )
 				totalOffset[ i ] = cellOffset[ i ];
 
+			// populate list with all entries
 			for ( int g = 0; g < numDim; )
 			{
 
@@ -125,6 +128,16 @@ public class LabelMultisetTypeDownscaler
 					else
 						totalOffset[ g ] = cellOffset[ g ];
 				}
+			}
+
+			// sort by count and restrict to maxNumEntriesPerPixel (if
+			// applicable)
+			if ( maxNumEntriesPerPixel > 0 && list.size() > maxNumEntriesPerPixel )
+			{
+				// change order of e2, e1 for decreasing sort
+				list.sort( ( e1, e2 ) -> Long.compare( e2.getCount(), e1.getCount() ) );
+				list.limitSize( maxNumEntriesPerPixel );
+				list.sortById();
 			}
 
 			boolean makeNewList = true;
