@@ -61,7 +61,7 @@ public class LabelUtils
 			}
 		}
 
-		final byte[] bytes = new byte[ Integer.BYTES + Long.BYTES * containedLabels.size() + Integer.BYTES * data.length + nextListOffset ];
+		final byte[] bytes = new byte[ VolatileLabelMultisetArray.getRequiredNumberOfBytes( containedLabels.size(), data, nextListOffset ) ];
 
 		final ByteBuffer bb = ByteBuffer.wrap( bytes );
 		bb.putInt( containedLabels.size() );

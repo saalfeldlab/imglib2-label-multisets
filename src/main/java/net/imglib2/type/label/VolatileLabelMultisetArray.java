@@ -103,6 +103,21 @@ public class VolatileLabelMultisetArray implements VolatileAccess, VolatileArray
 		return this.containedLabels.toArray();
 	}
 
+	public int getRequiredNumberOfBytes()
+	{
+		return getRequiredNumberOfBytes( this );
+	}
+
+	public static int getRequiredNumberOfBytes( final VolatileLabelMultisetArray array )
+	{
+		return getRequiredNumberOfBytes( array.containedLabels.size(), array.data, ( int ) array.getListDataUsedSizeInBytes() );
+	}
+
+	public static int getRequiredNumberOfBytes( final int numberOfContainedLabels, final int[] listOffsets, final int listSizeInBytes )
+	{
+		return Integer.BYTES + Long.BYTES * numberOfContainedLabels + Integer.BYTES * listOffsets.length + listSizeInBytes;
+	}
+
 	// TODO do we need this? I do not think so but I am not 100% sure
 //	public static DefaultEmptyArrayCreator< VolatileLabelMultisetArray > emptyArrayCreator = new DefaultEmptyArrayCreator<>( new VolatileLabelMultisetArray( 1, false ) );
 }
