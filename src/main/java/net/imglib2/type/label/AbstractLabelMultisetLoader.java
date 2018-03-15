@@ -1,7 +1,6 @@
 package net.imglib2.type.label;
 
 import java.nio.ByteBuffer;
-import java.nio.LongBuffer;
 
 import gnu.trove.set.hash.TLongHashSet;
 import net.imglib2.cache.CacheLoader;
@@ -56,10 +55,10 @@ public abstract class AbstractLabelMultisetLoader implements CacheLoader< Long, 
 
 		final int labelsInBlockListSize = bb.getInt();
 		final long[] labelsInBlockList = new long[ labelsInBlockListSize ];
-		LongBuffer.wrap( labelsInBlockList ).put( bb.asLongBuffer() );
+		bb.asLongBuffer().get( labelsInBlockList );
 
 		final int[] data = new int[ ( int ) Intervals.numElements( cellSize ) ];
-		final int listDataSize = bytes.length - ( 4 * data.length + Long.BYTES * labelsInBlockListSize + Integer.BYTES );
+		final int listDataSize = bytes.length - ( listOffsetsSizeInBytes( data.length ) + labelsListSizeInBytes( labelsInBlockListSize ) );
 		final LongMappedAccessData listData = LongMappedAccessData.factory.createStorage( listDataSize );
 
 		for ( int i = 0; i < data.length; ++i )
@@ -69,5 +68,15 @@ public abstract class AbstractLabelMultisetLoader implements CacheLoader< Long, 
 			ByteUtils.putByte( bb.get(), listData.data, i );
 
 		return new Cell<>( cellSize, cellMin, new VolatileLabelMultisetArray( data, listData, true, new TLongHashSet( labelsInBlockList ) ) );
+	}
+
+	public static int labelsListSizeInBytes( final int numLabels )
+	{
+		return Long.BYTES * numLabels + Integer.BYTES;
+	}
+
+	public static int listOffsetsSizeInBytes( final int numOffsets )
+	{
+		return Integer.BYTES * numOffsets;
 	}
 }
