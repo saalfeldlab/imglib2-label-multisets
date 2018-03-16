@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.function.LongConsumer;
 
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.hash.TLongHashSet;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccess;
@@ -82,12 +83,11 @@ public class LabelMultisetTypeDownscaler
 		// list2: compare with other lists
 		final LabelMultisetEntryList list = new LabelMultisetEntryList( listData, 0 );
 		final LabelMultisetEntryList list2 = new LabelMultisetEntryList();
-		final TIntArrayList listHashesAndOffsets = new TIntArrayList();
 		final LabelMultisetEntry entry = new LabelMultisetEntry( 0, 1 );
 		int nextListOffset = 0;
 		int o = 0;
 
-		int searchIndex;
+		final TIntObjectHashMap< TIntArrayList > offsetsForHashes = new TIntObjectHashMap<>();
 
 		for ( int d = 0; d < numDim; )
 		{
@@ -107,7 +107,7 @@ public class LabelMultisetTypeDownscaler
 					final long id = sourceEntry.getElement().id();
 					addToList.accept( id );
 //					labelsInBlock.add( id );
-					searchIndex = list.binarySearch( id );
+					final int searchIndex = list.binarySearch( id );
 					if ( list.size() > 0 && searchIndex >= 0 )
 						// just add 1 to the count of existing label
 						list.get( searchIndex ).setCount( list.get( searchIndex ).getCount() + sourceEntry.getCount() );
@@ -142,22 +142,27 @@ public class LabelMultisetTypeDownscaler
 
 			boolean makeNewList = true;
 			final int hash = list.hashCode();
-			for ( int i = 0; i < listHashesAndOffsets.size(); i += 2 )
-				if ( hash == listHashesAndOffsets.get( i ) )
+			TIntArrayList offsetsForHash = offsetsForHashes.get( hash );
+			if ( offsetsForHash == null )
+			{
+				offsetsForHash = new TIntArrayList();
+				offsetsForHashes.put( hash, offsetsForHash );
+			}
+			for ( int i = 0; i < offsetsForHash.size(); ++i )
+			{
+				final int offset = offsetsForHash.get( i );
+				list2.referToDataAt( listData, offset );
+				if ( list.equals( list2 ) )
 				{
-					list2.referToDataAt( listData, listHashesAndOffsets.get( i + 1 ) );
-					if ( list.equals( list2 ) )
-					{
-						makeNewList = false;
-						data[ o++ ] = listHashesAndOffsets.get( i + 1 );
-						break;
-					}
+					makeNewList = false;
+					data[ o++ ] = offset;
+					break;
 				}
+			}
 			if ( makeNewList )
 			{
 				data[ o++ ] = nextListOffset;
-				listHashesAndOffsets.add( hash );
-				listHashesAndOffsets.add( nextListOffset );
+				offsetsForHash.add( nextListOffset );
 				nextListOffset += list.getSizeInBytes();
 			}
 
