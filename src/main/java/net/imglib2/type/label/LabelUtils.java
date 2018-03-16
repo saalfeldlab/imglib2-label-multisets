@@ -2,6 +2,7 @@ package net.imglib2.type.label;
 
 import java.nio.ByteBuffer;
 
+import gnu.trove.iterator.TLongIterator;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.hash.TLongHashSet;
 import net.imglib2.IterableInterval;
@@ -65,7 +66,8 @@ public class LabelUtils
 
 		final ByteBuffer bb = ByteBuffer.wrap( bytes );
 		bb.putInt( containedLabels.size() );
-		bb.asLongBuffer().put( containedLabels.toArray() );
+		for ( final TLongIterator it = containedLabels.iterator(); it.hasNext(); )
+			bb.putLong( it.next() );
 
 		for ( final int d : data )
 			bb.putInt( d );

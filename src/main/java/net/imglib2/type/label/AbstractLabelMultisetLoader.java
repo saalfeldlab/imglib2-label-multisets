@@ -51,23 +51,7 @@ public abstract class AbstractLabelMultisetLoader implements CacheLoader< Long, 
 
 		final byte[] bytes = this.getData( gridPosition );
 
-		final ByteBuffer bb = ByteBuffer.wrap( bytes );
-
-		final int labelsInBlockListSize = bb.getInt();
-		final long[] labelsInBlockList = new long[ labelsInBlockListSize ];
-		bb.asLongBuffer().get( labelsInBlockList );
-
-		final int[] data = new int[ ( int ) Intervals.numElements( cellSize ) ];
-		final int listDataSize = bytes.length - ( listOffsetsSizeInBytes( data.length ) + labelsListSizeInBytes( labelsInBlockListSize ) );
-		final LongMappedAccessData listData = LongMappedAccessData.factory.createStorage( listDataSize );
-
-		for ( int i = 0; i < data.length; ++i )
-			data[ i ] = bb.getInt();
-
-		for ( int i = 0; i < listDataSize; ++i )
-			ByteUtils.putByte( bb.get(), listData.data, i );
-
-		return new Cell<>( cellSize, cellMin, new VolatileLabelMultisetArray( data, listData, true, new TLongHashSet( labelsInBlockList ) ) );
+		return new Cell<>( cellSize, cellMin, fromBytes( bytes, ( int ) Intervals.numElements( cellSize ) ) );
 	}
 
 	public static int labelsListSizeInBytes( final int numLabels )
@@ -78,5 +62,26 @@ public abstract class AbstractLabelMultisetLoader implements CacheLoader< Long, 
 	public static int listOffsetsSizeInBytes( final int numOffsets )
 	{
 		return Integer.BYTES * numOffsets;
+	}
+
+	public static VolatileLabelMultisetArray fromBytes( final byte[] bytes, final int numElements )
+	{
+		final ByteBuffer bb = ByteBuffer.wrap( bytes );
+
+		final int labelsInBlockListSize = bb.getInt();
+		final long[] labelsInBlockList = new long[ labelsInBlockListSize ];
+		for ( int i = 0; i < labelsInBlockListSize; ++i )
+			labelsInBlockList[ i ] = bb.getLong();
+
+		final int[] data = new int[ numElements ];
+		final int listDataSize = bytes.length - ( listOffsetsSizeInBytes( data.length ) + labelsListSizeInBytes( labelsInBlockListSize ) );
+		final LongMappedAccessData listData = LongMappedAccessData.factory.createStorage( listDataSize );
+
+		for ( int i = 0; i < data.length; ++i )
+			data[ i ] = bb.getInt();
+
+		for ( int i = 0; i < listDataSize; ++i )
+			ByteUtils.putByte( bb.get(), listData.data, i );
+		return new VolatileLabelMultisetArray( data, listData, true, new TLongHashSet( labelsInBlockList ) );
 	}
 }

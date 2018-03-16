@@ -1,6 +1,7 @@
 package net.imglib2.type.label;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.function.LongConsumer;
 
 import gnu.trove.list.array.TIntArrayList;
@@ -192,7 +193,7 @@ public class LabelMultisetTypeDownscaler
 		final ByteBuffer bb = ByteBuffer.wrap( bytes );
 
 		bb.putInt( array.numContainedLabels() );
-		bb.asLongBuffer().put( array.containedLabels() );
+		Arrays.stream( array.containedLabels() ).forEach( bb::putLong );
 
 		for ( final int d : curStorage )
 			bb.putInt( d );
