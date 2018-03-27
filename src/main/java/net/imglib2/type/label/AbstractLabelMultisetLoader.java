@@ -24,9 +24,17 @@ public abstract class AbstractLabelMultisetLoader implements CacheLoader< Long, 
 
 	protected final CellGrid grid;
 
+	private final long invalidLabel;
+
 	public AbstractLabelMultisetLoader( final CellGrid grid )
 	{
+		this( grid, Label.INVALID );
+	}
+
+	public AbstractLabelMultisetLoader( final CellGrid grid, final long invalidLabel )
+	{
 		this.grid = grid;
+		this.invalidLabel = invalidLabel;
 	}
 
 	protected abstract byte[] getData( long... gridPosition );
@@ -51,7 +59,8 @@ public abstract class AbstractLabelMultisetLoader implements CacheLoader< Long, 
 
 		final byte[] bytes = this.getData( gridPosition );
 
-		return new Cell<>( cellSize, cellMin, fromBytes( bytes, ( int ) Intervals.numElements( cellSize ) ) );
+		final int n = ( int ) Intervals.numElements( cellSize );
+		return new Cell<>( cellSize, cellMin, bytes == null ? dummy( n, invalidLabel ) : fromBytes( bytes, n ) );
 	}
 
 	public static int labelsListSizeInBytes( final int numLabels )
@@ -62,6 +71,17 @@ public abstract class AbstractLabelMultisetLoader implements CacheLoader< Long, 
 	public static int listOffsetsSizeInBytes( final int numOffsets )
 	{
 		return Integer.BYTES * numOffsets;
+	}
+
+	public static VolatileLabelMultisetArray dummy( final int numElements, final long label )
+	{
+		final LongMappedAccessData store = LongMappedAccessData.factory.createStorage( 16 );
+		final LongMappedAccess access = store.createAccess();
+		access.putInt( 1, 0 );
+		access.putLong( label, Integer.BYTES );
+		access.putInt( 1, Integer.BYTES + Long.BYTES );
+		final int[] data = new int[ numElements ];
+		return new VolatileLabelMultisetArray( data, store, true, new TLongHashSet( new long[] { label } ) );
 	}
 
 	public static VolatileLabelMultisetArray fromBytes( final byte[] bytes, final int numElements )

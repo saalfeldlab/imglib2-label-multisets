@@ -43,6 +43,6 @@ public class N5CacheLoader extends AbstractLabelMultisetLoader
 		{
 			throw new RuntimeException( e );
 		}
-		return ( byte[] ) block.getData();
+		return block == null ? null : ( byte[] ) block.getData();
 	}
 }
