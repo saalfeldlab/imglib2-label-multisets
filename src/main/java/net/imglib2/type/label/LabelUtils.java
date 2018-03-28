@@ -1,11 +1,20 @@
 package net.imglib2.type.label;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
+
+import org.janelia.saalfeldlab.n5.DatasetAttributes;
+import org.janelia.saalfeldlab.n5.N5Reader;
 
 import gnu.trove.iterator.TLongIterator;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.hash.TLongHashSet;
-import net.imglib2.IterableInterval;
+import net.imglib2.cache.CacheLoader;
+import net.imglib2.cache.img.CachedCellImg;
+import net.imglib2.cache.ref.SoftRefLoaderCache;
+import net.imglib2.cache.util.LoaderCacheAsCacheAdapter;
+import net.imglib2.img.cell.Cell;
+import net.imglib2.img.cell.CellGrid;
 import net.imglib2.type.label.Multiset.Entry;
 
 public class LabelUtils
@@ -123,5 +132,35 @@ public class LabelUtils
 		for ( int i = 0; i < listDataSize; ++i )
 			ByteUtils.putByte( bb.get(), listData.data, i );
 		return new VolatileLabelMultisetArray( data, listData, true, new TLongHashSet( labelsInBlockList ) );
+	}
+
+	public static CachedCellImg< LabelMultisetType, VolatileLabelMultisetArray > openVolatile(
+			final N5Reader n5,
+			final String dataset ) throws IOException
+	{
+		final DatasetAttributes attrs = n5.getDatasetAttributes( dataset );
+		return openVolatile( new N5CacheLoader( n5, dataset ), attrs.getDimensions(), attrs.getBlockSize() );
+	}
+
+	public static CachedCellImg< LabelMultisetType, VolatileLabelMultisetArray > openVolatile(
+			final CacheLoader< Long, Cell< VolatileLabelMultisetArray > > loader,
+			final long[] dimensions,
+			final int[] blockSize )
+	{
+		return openVolatile( loader, new CellGrid( dimensions, blockSize ) );
+	}
+
+	public static CachedCellImg< LabelMultisetType, VolatileLabelMultisetArray > openVolatile(
+			final CacheLoader< Long, Cell< VolatileLabelMultisetArray > > loader,
+			final CellGrid grid )
+	{
+		final SoftRefLoaderCache< Long, Cell< VolatileLabelMultisetArray > > cache = new SoftRefLoaderCache<>();
+		final LoaderCacheAsCacheAdapter< Long, Cell< VolatileLabelMultisetArray > > wrappedCache = new LoaderCacheAsCacheAdapter<>( cache, loader );
+		final CachedCellImg< LabelMultisetType, VolatileLabelMultisetArray > cachedImg = new CachedCellImg<>(
+				grid,
+				new LabelMultisetType(),
+				wrappedCache,
+				new VolatileLabelMultisetArray( 0, true ) );
+		return cachedImg;
 	}
 }
