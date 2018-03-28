@@ -12,7 +12,7 @@ public class LabelUtils
 {
 
 	public static byte[] serializeLabelMultisetTypes(
-			final IterableInterval< LabelMultisetType > lmts,
+			final Iterable< LabelMultisetType > lmts,
 			final int numElements )
 	{
 
