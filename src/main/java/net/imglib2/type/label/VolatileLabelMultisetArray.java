@@ -118,6 +118,12 @@ public class VolatileLabelMultisetArray implements VolatileAccess, VolatileArray
 		return Integer.BYTES + Long.BYTES * numberOfContainedLabels + Integer.BYTES * listOffsets.length + listSizeInBytes;
 	}
 
+	@Override
+	public int getArrayLength()
+	{
+		return this.data.length;
+	}
+
 	// TODO do we need this? I do not think so but I am not 100% sure
 //	public static DefaultEmptyArrayCreator< VolatileLabelMultisetArray > emptyArrayCreator = new DefaultEmptyArrayCreator<>( new VolatileLabelMultisetArray( 1, false ) );
 }
