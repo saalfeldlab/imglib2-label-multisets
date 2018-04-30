@@ -2,13 +2,13 @@ package net.imglib2.type.label;
 
 import net.imglib2.Volatile;
 import net.imglib2.img.NativeImg;
-import net.imglib2.img.NativeImgFactory;
 import net.imglib2.type.NativeType;
+import net.imglib2.type.NativeTypeFactory;
 import net.imglib2.util.Fraction;
 
 public class VolatileLabelMultisetType
-	extends Volatile< LabelMultisetType >
-	implements NativeType< VolatileLabelMultisetType >
+		extends Volatile< LabelMultisetType >
+		implements NativeType< VolatileLabelMultisetType >
 {
 	public static final VolatileLabelMultisetType type = new VolatileLabelMultisetType();
 
@@ -96,7 +96,7 @@ public class VolatileLabelMultisetType
 	}
 
 	@Override
-	public NativeImg< VolatileLabelMultisetType, ? > createSuitableNativeImg( final NativeImgFactory< VolatileLabelMultisetType > storageFactory, final long[] dim )
+	public NativeTypeFactory< VolatileLabelMultisetType, ? > getNativeTypeFactory()
 	{
 		throw new UnsupportedOperationException();
 	}
@@ -115,7 +115,7 @@ public class VolatileLabelMultisetType
 	}
 
 	@Override
-	public boolean valueEquals( VolatileLabelMultisetType other )
+	public boolean valueEquals( final VolatileLabelMultisetType other )
 	{
 		return isValid() && other.isValid() && t.valueEquals( other.t );
 	}

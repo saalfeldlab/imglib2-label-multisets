@@ -158,9 +158,10 @@ public class LabelUtils
 		final LoaderCacheAsCacheAdapter< Long, Cell< VolatileLabelMultisetArray > > wrappedCache = new LoaderCacheAsCacheAdapter<>( cache, loader );
 		final CachedCellImg< LabelMultisetType, VolatileLabelMultisetArray > cachedImg = new CachedCellImg<>(
 				grid,
-				new LabelMultisetType(),
+				new LabelMultisetType().getEntitiesPerPixel(),
 				wrappedCache,
 				new VolatileLabelMultisetArray( 0, true ) );
+		cachedImg.setLinkedType( new LabelMultisetType( cachedImg ) );
 		return cachedImg;
 	}
 }

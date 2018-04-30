@@ -6,8 +6,8 @@ import java.util.Iterator;
 import java.util.Set;
 
 import net.imglib2.img.NativeImg;
-import net.imglib2.img.NativeImgFactory;
 import net.imglib2.type.AbstractNativeType;
+import net.imglib2.type.NativeTypeFactory;
 import net.imglib2.type.label.RefList.RefIterator;
 import net.imglib2.util.Fraction;
 
@@ -123,7 +123,7 @@ public class LabelMultisetType extends AbstractNativeType< LabelMultisetType > i
 	}
 
 	@Override
-	public NativeImg< LabelMultisetType, ? > createSuitableNativeImg( final NativeImgFactory< LabelMultisetType > storageFactory, final long[] dim )
+	public NativeTypeFactory< LabelMultisetType, ? > getNativeTypeFactory()
 	{
 		throw new UnsupportedOperationException();
 	}
