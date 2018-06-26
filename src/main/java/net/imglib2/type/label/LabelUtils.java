@@ -149,7 +149,9 @@ public class LabelUtils
 		}
 
 		final int[] data = new int[ numElements ];
-		final int listDataSize = bytes.length - ( AbstractLabelMultisetLoader.listOffsetsSizeInBytes( data.length ) + AbstractLabelMultisetLoader.labelsListSizeInBytes( labelsInBlockListSize ) );
+		final int listDataSize = bytes.length - ( AbstractLabelMultisetLoader.listOffsetsSizeInBytes( data.length )
+				+ AbstractLabelMultisetLoader.argMaxListSizeInBytes( argMax.length )
+				+ AbstractLabelMultisetLoader.labelsListSizeInBytes( labelsInBlockListSize ) );
 		final LongMappedAccessData listData = LongMappedAccessData.factory.createStorage( listDataSize );
 
 		for ( int i = 0; i < data.length; ++i )

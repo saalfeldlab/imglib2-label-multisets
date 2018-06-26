@@ -68,6 +68,11 @@ public abstract class AbstractLabelMultisetLoader implements CacheLoader< Long, 
 		return Long.BYTES * numLabels + Integer.BYTES;
 	}
 
+	public static int argMaxListSizeInBytes( final int numEntries )
+	{
+		return Long.BYTES * numEntries + Integer.BYTES;
+	}
+
 	public static int listOffsetsSizeInBytes( final int numOffsets )
 	{
 		return Integer.BYTES * numOffsets;
