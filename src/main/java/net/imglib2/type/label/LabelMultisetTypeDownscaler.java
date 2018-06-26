@@ -217,6 +217,10 @@ public class LabelMultisetTypeDownscaler
 		bb.putInt( array.numContainedLabels() );
 		Arrays.stream( array.containedLabels() ).forEach( bb::putLong );
 
+		final long[] argMax = array.argMaxCopy();
+		bb.putInt( argMax.length );
+		Arrays.stream( argMax ).forEach( bb::putLong );
+
 		for ( final int d : curStorage )
 		{
 			bb.putInt( d );

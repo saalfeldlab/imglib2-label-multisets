@@ -139,6 +139,11 @@ public class VolatileLabelMultisetArray implements VolatileAccess, VolatileArray
 		return this.argMax[ offset ];
 	}
 
+	public long[] argMaxCopy()
+	{
+		return this.argMax.clone();
+	}
+
 	// TODO do we need this? I do not think so but I am not 100% sure
 //	public static DefaultEmptyArrayCreator< VolatileLabelMultisetArray > emptyArrayCreator = new DefaultEmptyArrayCreator<>( new VolatileLabelMultisetArray( 1, false ) );
 }
