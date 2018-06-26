@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
 
+import net.imglib2.type.label.LabelMultisetType.Entry;
+
 public class LabelMultiset implements Multiset< Label >
 {
 	private final LabelMultisetEntryList entries;
@@ -46,7 +48,9 @@ public class LabelMultiset implements Multiset< Label >
 		this.entries = entries;
 		int s = 0;
 		for ( final LabelMultisetEntry entry : entries )
+		{
 			s += entry.getCount();
+		}
 		this.totalSize = s;
 	}
 
@@ -93,20 +97,19 @@ public class LabelMultiset implements Multiset< Label >
 	public boolean containsAll( final Collection< ? > c )
 	{
 		for ( final Object e : c )
-			if ( !contains( e ) )
-				return false;
+		{
+			if ( !contains( e ) ) { return false; }
+		}
 		return true;
 	}
 
 	@Override
 	public int count( final Object o )
 	{
-		if ( ! ( o instanceof Label ) )
-			return 0;
+		if ( !( o instanceof Label ) ) { return 0; }
 
 		final int pos = entries.binarySearch( ( ( Label ) o ).id() );
-		if ( pos < 0 )
-			return 0;
+		if ( pos < 0 ) { return 0; }
 
 		return entries.get( pos ).getCount();
 	}

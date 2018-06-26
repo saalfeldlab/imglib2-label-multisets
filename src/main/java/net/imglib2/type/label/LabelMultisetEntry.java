@@ -2,7 +2,7 @@ package net.imglib2.type.label;
 
 public class LabelMultisetEntry
 		extends MappedObject< LabelMultisetEntry, LongMappedAccess >
-		implements Multiset.Entry< Label >
+		implements LabelMultisetType.Entry< Label >
 {
 	public static final LabelMultisetEntry type = new LabelMultisetEntry();
 
@@ -59,8 +59,7 @@ public class LabelMultisetEntry
 	@Override
 	public boolean equals( final Object obj )
 	{
-		if ( !( obj instanceof LabelMultisetEntry ) )
-			return false;
+		if ( !( obj instanceof LabelMultisetEntry ) ) { return false; }
 
 		final LabelMultisetEntry svo = ( LabelMultisetEntry ) obj;
 		return svo.getId() == getId() && svo.getCount() == getCount();

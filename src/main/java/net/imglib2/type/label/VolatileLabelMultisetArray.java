@@ -10,15 +10,18 @@ public class VolatileLabelMultisetArray implements VolatileAccess, VolatileArray
 
 	private final int[] data;
 
+	private final long[] argMax;
+
 	private final MappedAccessData< LongMappedAccess > listData;
 
 	private final long listDataUsedSizeInBytes;
 
 	private final TLongHashSet containedLabels;
 
-	public VolatileLabelMultisetArray( final int numEntities, final boolean isValid )
+	public VolatileLabelMultisetArray( final int numEntities, final boolean isValid, final long[] argMax )
 	{
 		this.data = new int[ numEntities ];
+		this.argMax = argMax;
 		listData = LongMappedAccessData.factory.createStorage( 16 );
 		listDataUsedSizeInBytes = 0;
 		new MappedObjectArrayList<>( LabelMultisetEntry.type, listData, 0 ).add( new LabelMultisetEntry() );
@@ -30,9 +33,10 @@ public class VolatileLabelMultisetArray implements VolatileAccess, VolatileArray
 			final int[] data,
 			final MappedAccessData< LongMappedAccess > listData,
 			final boolean isValid,
-			final TLongHashSet containedLabels )
+			final TLongHashSet containedLabels,
+			final long[] argMax )
 	{
-		this( data, listData, -1, isValid, containedLabels );
+		this( data, listData, -1, isValid, containedLabels, argMax );
 	}
 
 	public VolatileLabelMultisetArray(
@@ -40,9 +44,11 @@ public class VolatileLabelMultisetArray implements VolatileAccess, VolatileArray
 			final MappedAccessData< LongMappedAccess > listData,
 			final long listDataUsedSizeInBytes,
 			final boolean isValid,
-			final TLongHashSet containedLabels )
+			final TLongHashSet containedLabels,
+			final long[] argMax )
 	{
 		this.data = data;
+		this.argMax = argMax;
 		this.listData = listData;
 		this.listDataUsedSizeInBytes = listDataUsedSizeInBytes;
 		this.isValid = isValid;
@@ -57,13 +63,13 @@ public class VolatileLabelMultisetArray implements VolatileAccess, VolatileArray
 	@Override
 	public VolatileLabelMultisetArray createArray( final int numEntities )
 	{
-		return new VolatileLabelMultisetArray( numEntities, true );
+		return new VolatileLabelMultisetArray( numEntities, true, new long[] { Label.INVALID } );
 	}
 
 	@Override
 	public VolatileLabelMultisetArray createArray( final int numEntities, final boolean isValid )
 	{
-		return new VolatileLabelMultisetArray( numEntities, isValid );
+		return new VolatileLabelMultisetArray( numEntities, isValid, new long[] { Label.INVALID } );
 	}
 
 	@Override
@@ -110,18 +116,32 @@ public class VolatileLabelMultisetArray implements VolatileAccess, VolatileArray
 
 	public static int getRequiredNumberOfBytes( final VolatileLabelMultisetArray array )
 	{
-		return getRequiredNumberOfBytes( array.containedLabels.size(), array.data, ( int ) array.getListDataUsedSizeInBytes() );
+		return getRequiredNumberOfBytes( array.containedLabels.size(), array.argMax.length, array.data, ( int ) array.getListDataUsedSizeInBytes() );
 	}
 
-	public static int getRequiredNumberOfBytes( final int numberOfContainedLabels, final int[] listOffsets, final int listSizeInBytes )
+	public static int getRequiredNumberOfBytes( final int numberOfContainedLabels, final int numArgMax, final int[] listOffsets, final int listSizeInBytes )
 	{
-		return Integer.BYTES + Long.BYTES * numberOfContainedLabels + Integer.BYTES * listOffsets.length + listSizeInBytes;
+		return 0
+				+ Integer.BYTES + Long.BYTES * numberOfContainedLabels
+				+ Integer.BYTES + Long.BYTES * numArgMax
+				+ Integer.BYTES * listOffsets.length
+				+ listSizeInBytes;
 	}
 
 	@Override
 	public int getArrayLength()
 	{
 		return this.data.length;
+	}
+
+	public long argMax( final int offset )
+	{
+		return this.argMax[ offset ];
+	}
+
+	public long[] argMaxCopy()
+	{
+		return this.argMax.clone();
 	}
 
 	// TODO do we need this? I do not think so but I am not 100% sure

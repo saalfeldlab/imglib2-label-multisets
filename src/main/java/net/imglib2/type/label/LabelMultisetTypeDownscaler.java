@@ -5,13 +5,14 @@ import java.util.Arrays;
 import java.util.function.LongConsumer;
 
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.list.array.TLongArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.hash.TLongHashSet;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.type.label.Multiset.Entry;
+import net.imglib2.type.label.LabelMultisetType.Entry;
 import net.imglib2.view.Views;
 
 public class LabelMultisetTypeDownscaler
@@ -71,11 +72,15 @@ public class LabelMultisetTypeDownscaler
 														// cell
 
 		for ( int i = 0; i < numDim; i++ )
+		{
 			maxOffset[ i ] = source.max( i ) + 1; // interval is inclusive
+		}
 
 		int numDownscaledLists = 1;
 		for ( int i = 0; i < numDim; i++ )
+		{
 			numDownscaledLists *= ( long ) Math.ceil( ( double ) maxOffset[ i ] / factor[ i ] );
+		}
 		final int[] data = new int[ numDownscaledLists ];
 
 		final LongMappedAccessData listData = LongMappedAccessData.factory.createStorage( 32 );
@@ -90,13 +95,17 @@ public class LabelMultisetTypeDownscaler
 
 		final TIntObjectHashMap< TIntArrayList > offsetsForHashes = new TIntObjectHashMap<>();
 
+		final TLongArrayList argMax = new TLongArrayList();
+
 		for ( int d = 0; d < numDim; )
 		{
 
 			list.createListAt( listData, nextListOffset );
 
 			for ( int i = 0; i < numDim; i++ )
+			{
 				totalOffset[ i ] = cellOffset[ i ];
+			}
 
 			// populate list with all entries
 			for ( int g = 0; g < numDim; )
@@ -110,8 +119,10 @@ public class LabelMultisetTypeDownscaler
 //					labelsInBlock.add( id );
 					final int searchIndex = list.binarySearch( id );
 					if ( list.size() > 0 && searchIndex >= 0 )
+					{
 						// just add 1 to the count of existing label
 						list.get( searchIndex ).setCount( list.get( searchIndex ).getCount() + sourceEntry.getCount() );
+					}
 					else
 					{
 						entry.setId( sourceEntry.getElement().id() );
@@ -125,9 +136,13 @@ public class LabelMultisetTypeDownscaler
 				{
 					totalOffset[ g ] += 1;
 					if ( totalOffset[ g ] < cellOffset[ g ] + factor[ g ] && totalOffset[ g ] < maxOffset[ g ] )
+					{
 						break;
+					}
 					else
+					{
 						totalOffset[ g ] = cellOffset[ g ];
+					}
 				}
 			}
 
@@ -165,18 +180,25 @@ public class LabelMultisetTypeDownscaler
 				data[ o++ ] = nextListOffset;
 				offsetsForHash.add( nextListOffset );
 				nextListOffset += list.getSizeInBytes();
+
+				// add entry with max count
+				argMax.add( list.stream().max( ( e1, e2 ) -> Integer.compare( e1.getCount(), e2.getCount() ) ).map( LabelMultisetEntry::getId ).orElse( Label.INVALID ) );
 			}
 
 			for ( d = 0; d < numDim; d++ )
 			{
 				cellOffset[ d ] += factor[ d ];
 				if ( cellOffset[ d ] < maxOffset[ d ] )
+				{
 					break;
+				}
 				else
+				{
 					cellOffset[ d ] = 0;
+				}
 			}
 		}
-		return new VolatileLabelMultisetArray( data, listData, nextListOffset, true, labelsInBlock );
+		return new VolatileLabelMultisetArray( data, listData, nextListOffset, true, labelsInBlock, argMax.toArray() );
 	}
 
 	public static int getSerializedVolatileLabelMultisetArraySize( final VolatileLabelMultisetArray array )
@@ -195,11 +217,19 @@ public class LabelMultisetTypeDownscaler
 		bb.putInt( array.numContainedLabels() );
 		Arrays.stream( array.containedLabels() ).forEach( bb::putLong );
 
+		final long[] argMax = array.argMaxCopy();
+		bb.putInt( argMax.length );
+		Arrays.stream( argMax ).forEach( bb::putLong );
+
 		for ( final int d : curStorage )
+		{
 			bb.putInt( d );
+		}
 
 		for ( long i = 0; i < array.getListDataUsedSizeInBytes(); i++ )
+		{
 			bb.put( ByteUtils.getByte( data, i ) );
+		}
 
 	}
 

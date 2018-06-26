@@ -1,18 +1,27 @@
 package net.imglib2.type.label;
 
+import java.math.BigInteger;
 import java.util.AbstractSet;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Set;
 
 import net.imglib2.img.NativeImg;
 import net.imglib2.type.AbstractNativeType;
 import net.imglib2.type.NativeTypeFactory;
 import net.imglib2.type.label.RefList.RefIterator;
+import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.util.Fraction;
 
-public class LabelMultisetType extends AbstractNativeType< LabelMultisetType > implements Multiset< Label >
+public class LabelMultisetType extends AbstractNativeType< LabelMultisetType > implements IntegerType< LabelMultisetType >
 {
+
+	public interface Entry< E >
+	{
+		public E getElement();
+
+		public int getCount();
+	}
+
 	public static final LabelMultisetType type = new LabelMultisetType();
 
 	private final NativeImg< ?, VolatileLabelMultisetArray > img;
@@ -38,7 +47,7 @@ public class LabelMultisetType extends AbstractNativeType< LabelMultisetType > i
 	// this is the constructor if you want it to be a variable
 	public LabelMultisetType()
 	{
-		this( null, new VolatileLabelMultisetArray( 1, true ) );
+		this( null, new VolatileLabelMultisetArray( 1, true, new long[] { Label.INVALID } ) );
 	}
 
 	private LabelMultisetType( final NativeImg< ?, VolatileLabelMultisetArray > img, final VolatileLabelMultisetArray access )
@@ -136,21 +145,18 @@ public class LabelMultisetType extends AbstractNativeType< LabelMultisetType > i
 
 	// ==== Multiset< SuperVoxel > =====
 
-	@Override
 	public int size()
 	{
 		access.getValue( i, entries );
 		return entries.multisetSize();
 	}
 
-	@Override
 	public boolean isEmpty()
 	{
 		access.getValue( i, entries );
 		return entries.isEmpty();
 	}
 
-	@Override
 	public boolean contains( final Object o )
 	{
 		access.getValue( i, entries );
@@ -167,36 +173,33 @@ public class LabelMultisetType extends AbstractNativeType< LabelMultisetType > i
 	{
 		access.getValue( i, entries );
 		for ( final long id : ids )
-			if ( entries.binarySearch( id ) < 0 )
-				return false;
+		{
+			if ( entries.binarySearch( id ) < 0 ) { return false; }
+		}
 		return true;
 	}
 
-	@Override
 	public boolean containsAll( final Collection< ? > c )
 	{
 		access.getValue( i, entries );
 		for ( final Object o : c )
-			if ( !( o instanceof Label && entries.binarySearch( ( ( Label ) o ).id() ) >= 0 ) )
-				return false;
+		{
+			if ( !( o instanceof Label && entries.binarySearch( ( ( Label ) o ).id() ) >= 0 ) ) { return false; }
+		}
 		return true;
 	}
 
-	@Override
 	public int count( final Object o )
 	{
 		access.getValue( i, entries );
-		if ( !( o instanceof Label ) )
-			return 0;
+		if ( !( o instanceof Label ) ) { return 0; }
 
 		final int pos = entries.binarySearch( ( ( Label ) o ).id() );
-		if ( pos < 0 )
-			return 0;
+		if ( pos < 0 ) { return 0; }
 
 		return entries.get( pos ).getCount();
 	}
 
-	@Override
 	public Set< Entry< Label > > entrySet()
 	{
 		access.getValue( i, entries );
@@ -217,64 +220,9 @@ public class LabelMultisetType extends AbstractNativeType< LabelMultisetType > i
 	}
 
 	@Override
-	public Iterator< Label > iterator()
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public Object[] toArray()
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public < T > T[] toArray( final T[] a )
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public boolean add( final Label e )
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public boolean remove( final Object o )
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public boolean addAll( final Collection< ? extends Label > c )
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public boolean removeAll( final Collection< ? > c )
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public boolean retainAll( final Collection< ? > c )
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void clear()
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	public boolean valueEquals( final LabelMultisetType other )
 	{
-		if ( entries.size() != other.entries.size() )
-			return false;
+		if ( entries.size() != other.entries.size() ) { return false; }
 
 		final RefIterator< LabelMultisetEntry > ai = entries.iterator();
 		final RefIterator< LabelMultisetEntry > bi = other.entries.iterator();
@@ -283,8 +231,7 @@ public class LabelMultisetType extends AbstractNativeType< LabelMultisetType > i
 		{
 			final LabelMultisetEntry a = ai.next();
 			final LabelMultisetEntry b = ai.next();
-			if ( !( a.getId() == b.getId() && a.getCount() == b.getCount() ) )
-				return false;
+			if ( !( a.getId() == b.getId() && a.getCount() == b.getCount() ) ) { return false; }
 		}
 		return true;
 	}
@@ -292,5 +239,227 @@ public class LabelMultisetType extends AbstractNativeType< LabelMultisetType > i
 	public VolatileLabelMultisetArray getAccess()
 	{
 		return this.access;
+	}
+
+	@Override
+	public void inc()
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void dec()
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public double getMaxValue()
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public double getMinValue()
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public double getMinIncrement()
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public int getBitsPerPixel()
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public double getRealDouble()
+	{
+		return getIntegerLong();
+	}
+
+	@Override
+	public float getRealFloat()
+	{
+		return getIntegerLong();
+	}
+
+	@Override
+	public double getImaginaryDouble()
+	{
+		return 0;
+	}
+
+	@Override
+	public float getImaginaryFloat()
+	{
+		return 0;
+	}
+
+	@Override
+	public void setReal( final float f )
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void setReal( final double f )
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void setImaginary( final float f )
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void setImaginary( final double f )
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void setComplexNumber( final float r, final float i )
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void setComplexNumber( final double r, final double i )
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public float getPowerFloat()
+	{
+		return getRealFloat();
+	}
+
+	@Override
+	public double getPowerDouble()
+	{
+		return getRealDouble();
+	}
+
+	@Override
+	public float getPhaseFloat()
+	{
+		return 0;
+	}
+
+	@Override
+	public double getPhaseDouble()
+	{
+		return 0;
+	}
+
+	@Override
+	public void complexConjugate()
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void add( final LabelMultisetType c )
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void mul( final LabelMultisetType c )
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void sub( final LabelMultisetType c )
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void div( final LabelMultisetType c )
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void setOne()
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void setZero()
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void mul( final float c )
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void mul( final double c )
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public int compareTo( final LabelMultisetType arg0 )
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public int getInteger()
+	{
+		return ( int ) getIntegerLong();
+	}
+
+	@Override
+	public long getIntegerLong()
+	{
+		return argMax();
+	}
+
+	@Override
+	public BigInteger getBigInteger()
+	{
+		final BigInteger mask = new BigInteger( "FFFFFFFFFFFFFFFF", 16 );
+		return BigInteger.valueOf( argMax() ).and( mask );
+	}
+
+	@Override
+	public void setInteger( final int f )
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void setInteger( final long f )
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void setBigInteger( final BigInteger b )
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	public long argMax()
+	{
+		return this.access.argMax( i );
 	}
 }

@@ -17,7 +17,7 @@ public class FromIntegerTypeConverter< I extends IntegerType< I > > implements C
 
 	public static LabelMultisetType geAppropriateType()
 	{
-		final LabelMultisetType type = new LabelMultisetType( new VolatileLabelMultisetArray( 1, true ) );
+		final LabelMultisetType type = new LabelMultisetType( new VolatileLabelMultisetArray( 1, true, new long[] { Label.INVALID } ) );
 		final LongMappedAccessData listData = getListData( type );
 		final LongMappedAccess access = listData.createAccess();
 		access.putInt( 1, Long.BYTES + Integer.BYTES );
@@ -26,7 +26,7 @@ public class FromIntegerTypeConverter< I extends IntegerType< I > > implements C
 
 	public static VolatileLabelMultisetType geAppropriateVolatileType()
 	{
-		final VolatileLabelMultisetType type = new VolatileLabelMultisetType( new VolatileLabelMultisetArray( 1, true ), true );
+		final VolatileLabelMultisetType type = new VolatileLabelMultisetType( new VolatileLabelMultisetArray( 1, true, new long[] { Label.INVALID } ), true );
 		final LongMappedAccessData listData = getListData( type.get() );
 		final LongMappedAccess access = listData.createAccess();
 		access.putInt( 1, Long.BYTES + Integer.BYTES );
