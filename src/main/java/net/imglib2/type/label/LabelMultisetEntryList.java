@@ -3,7 +3,7 @@ package net.imglib2.type.label;
 import java.util.Iterator;
 import java.util.Set;
 
-import net.imglib2.type.label.Multiset.Entry;
+import net.imglib2.type.label.LabelMultisetType.Entry;
 
 public class LabelMultisetEntryList
 		extends MappedObjectArrayList< LabelMultisetEntry, LongMappedAccess >
@@ -33,7 +33,9 @@ public class LabelMultisetEntryList
 	{
 		int size = 0;
 		for ( final LabelMultisetEntry e : this )
+		{
 			size += e.getCount();
+		}
 		return size;
 	}
 
@@ -70,10 +72,8 @@ public class LabelMultisetEntryList
 	 */
 	public int binarySearch( final long id, final int fromIndex, final int toIndex )
 	{
-		if ( fromIndex < 0 )
-			throw new ArrayIndexOutOfBoundsException( fromIndex );
-		if ( toIndex > size() )
-			throw new ArrayIndexOutOfBoundsException( toIndex );
+		if ( fromIndex < 0 ) { throw new ArrayIndexOutOfBoundsException( fromIndex ); }
+		if ( toIndex > size() ) { throw new ArrayIndexOutOfBoundsException( toIndex ); }
 
 		int low = fromIndex;
 		int high = toIndex - 1;
@@ -84,9 +84,13 @@ public class LabelMultisetEntryList
 			final int mid = low + high >>> 1;
 			final long midVal = get( mid, ref ).getId();
 			if ( midVal < id )
+			{
 				low = mid + 1;
+			}
 			else if ( midVal > id )
+			{
 				high = mid - 1;
+			}
 			else
 			{
 				releaseRef( ref );
@@ -121,8 +125,7 @@ public class LabelMultisetEntryList
 	public void mergeConsecutiveEntries()
 	{
 		final int oldSize = size();
-		if ( oldSize < 2 )
-			return;
+		if ( oldSize < 2 ) { return; }
 
 		int newSize = oldSize;
 		final LabelMultisetEntry oldTail = createRef();
@@ -141,7 +144,9 @@ public class LabelMultisetEntryList
 			{
 				get( ++newPos, newTail );
 				if ( newPos != oldPos )
+				{
 					newTail.set( oldTail );
+				}
 			}
 		}
 
@@ -155,13 +160,14 @@ public class LabelMultisetEntryList
 	 */
 	public void mergeWith( final LabelMultisetEntryList list )
 	{
-		if ( list.isEmpty() )
-			return;
+		if ( list.isEmpty() ) { return; }
 
 		if ( isEmpty() )
 		{
 			for ( final LabelMultisetEntry e : list )
+			{
 				this.add( e );
+			}
 			return;
 		}
 
@@ -172,11 +178,14 @@ public class LabelMultisetEntryList
 		long id1 = this.get( i, e1 ).getId();
 		long id2 = list.get( j, e2 ).getId();
 		A: while ( true )
+		{
 			if ( id1 == id2 )
 			{
 				e1.setCount( e1.getCount() + e2.getCount() );
 				if ( ++j >= list.size() )
+				{
 					break;
+				}
 				id2 = list.get( j, e2 ).getId();
 			}
 			else if ( id2 < id1 )
@@ -185,7 +194,9 @@ public class LabelMultisetEntryList
 				get( ++i, e1 ).getId(); // e1 ends up at same element which is
 										// now shifted
 				if ( ++j >= list.size() )
+				{
 					break;
+				}
 				id2 = list.get( j, e2 ).getId();
 			}
 			else // ( id2 > id1 )
@@ -194,12 +205,17 @@ public class LabelMultisetEntryList
 				{
 					id1 = get( i, e1 ).getId();
 					if ( id2 <= id1 )
+					{
 						continue A;
+					}
 				}
 				for ( ; j < list.size(); ++j )
+				{
 					this.add( list.get( j, e2 ) );
+				}
 				break;
 			}
+		}
 		releaseRef( e2 );
 		releaseRef( e1 );
 	}
@@ -211,8 +227,7 @@ public class LabelMultisetEntryList
 
 	public void mergeWith( final Set< Entry< Label > > entrySet )
 	{
-		if ( entrySet.isEmpty() )
-			return;
+		if ( entrySet.isEmpty() ) { return; }
 
 		if ( isEmpty() )
 		{
@@ -237,11 +252,14 @@ public class LabelMultisetEntryList
 		long id1 = get( i, e1 ).getId();
 		long id2 = e2.getElement().id();
 		A: while ( true )
+		{
 			if ( id1 == id2 )
 			{
 				e1.setCount( e1.getCount() + e2.getCount() );
 				if ( !iter.hasNext() )
+				{
 					break;
+				}
 				e2 = iter.next();
 				id2 = e2.getElement().id();
 			}
@@ -253,7 +271,9 @@ public class LabelMultisetEntryList
 				get( ++i, e1 ).getId(); // e1 ends up at same element which is
 										// now shifted
 				if ( !iter.hasNext() )
+				{
 					break;
+				}
 				e2 = iter.next();
 				id2 = e2.getElement().id();
 			}
@@ -263,7 +283,9 @@ public class LabelMultisetEntryList
 				{
 					id1 = get( i, e1 ).getId();
 					if ( id2 <= id1 )
+					{
 						continue A;
+					}
 				}
 				while ( true )
 				{
@@ -272,12 +294,15 @@ public class LabelMultisetEntryList
 					e1.setId( id2 );
 					e1.setCount( e2.getCount() );
 					if ( !iter.hasNext() )
+					{
 						break;
+					}
 					e2 = iter.next();
 					id2 = e2.getElement().id();
 				}
 				break;
 			}
+		}
 		releaseRef( e1 );
 	}
 }

@@ -12,12 +12,5 @@ public interface Multiset< E > extends Collection< E >
 
 //	public Set< E > elementSet();
 
-	public Set< Entry< E > > entrySet();
-
-	public interface Entry< E >
-	{
-		public E getElement();
-
-		public int getCount();
-	}
+	public Set< LabelMultisetType.Entry< E > > entrySet();
 }

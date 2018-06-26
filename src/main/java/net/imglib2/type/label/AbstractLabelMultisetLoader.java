@@ -53,7 +53,9 @@ public abstract class AbstractLabelMultisetLoader implements CacheLoader< Long, 
 		grid.getCellDimensions( key, cellMin, cellSize );
 
 		for ( int i = 0; i < numDimensions; ++i )
+		{
 			gridPosition[ i ] = cellMin[ i ] / cellDimensions[ i ];
+		}
 
 		final byte[] bytes = this.getData( gridPosition );
 
@@ -79,6 +81,7 @@ public abstract class AbstractLabelMultisetLoader implements CacheLoader< Long, 
 		access.putLong( label, Integer.BYTES );
 		access.putInt( 1, Integer.BYTES + Long.BYTES );
 		final int[] data = new int[ numElements ];
-		return new VolatileLabelMultisetArray( data, store, true, new TLongHashSet( new long[] { label } ) );
+		final long[] argMax = { label };
+		return new VolatileLabelMultisetArray( data, store, true, new TLongHashSet( new long[] { label } ), argMax );
 	}
 }

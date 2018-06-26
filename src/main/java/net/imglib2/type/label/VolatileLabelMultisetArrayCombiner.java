@@ -5,6 +5,7 @@ import java.util.Collection;
 import gnu.trove.set.hash.TLongHashSet;
 import net.imglib2.RandomAccessibleInterval;
 
+@Deprecated
 public class VolatileLabelMultisetArrayCombiner
 {
 	/**
@@ -20,11 +21,9 @@ public class VolatileLabelMultisetArrayCombiner
 			final int maxNumEntriesPerPixel )
 	{
 
-		if ( arrays.size() == 0 )
-			return new VolatileLabelMultisetArray( 0, true );
+		if ( arrays.size() == 0 ) { return new VolatileLabelMultisetArray( 0, true, new long[] { Label.INVALID } ); }
 
-		if ( arrays.size() == 1 )
-			return arrays.iterator().next();
+		if ( arrays.size() == 1 ) { return arrays.iterator().next(); }
 
 		final TLongHashSet labelsInBlock = new TLongHashSet();
 		arrays.stream().map( VolatileLabelMultisetArray::containedLabels ).forEach( labelsInBlock::addAll );
