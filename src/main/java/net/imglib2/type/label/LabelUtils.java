@@ -50,6 +50,7 @@ public class LabelUtils
 				tentry.setCount( entry.getCount() );
 				list.add( tentry );
 			}
+			argMax.add( lmt.argMax() );
 
 			boolean makeNewList = true;
 			final int hash = list.hashCode();
@@ -71,7 +72,6 @@ public class LabelUtils
 				data[ o++ ] = nextListOffset;
 				listHashesAndOffsets.add( hash );
 				listHashesAndOffsets.add( nextListOffset );
-				argMax.add( lmt.argMax() );
 				nextListOffset += list.getSizeInBytes();
 			}
 		}
