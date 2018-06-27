@@ -139,9 +139,19 @@ public class VolatileLabelMultisetArray implements VolatileAccess, VolatileArray
 		return this.argMax[ offset ];
 	}
 
+	public void setArgMax( final int offset, final long val )
+	{
+		this.argMax[ offset ] = val;
+	}
+
 	public long[] argMaxCopy()
 	{
 		return this.argMax.clone();
+	}
+
+	private int toIndex( final int offset )
+	{
+		return data[ offset ];
 	}
 
 	// TODO do we need this? I do not think so but I am not 100% sure

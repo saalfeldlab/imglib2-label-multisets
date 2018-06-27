@@ -462,4 +462,16 @@ public class LabelMultisetType extends AbstractNativeType< LabelMultisetType > i
 	{
 		return this.access.argMax( i );
 	}
+
+	public void updateArgMax()
+	{
+		this.access.setArgMax(
+				i,
+				this
+						.entrySet()
+						.stream()
+						.max( ( e1, e2 ) -> Integer.compare( e1.getCount(), e2.getCount() ) )
+						.map( e -> e.getElement().id() )
+						.orElse( Label.INVALID ) );
+	}
 }
