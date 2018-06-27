@@ -136,12 +136,12 @@ public class VolatileLabelMultisetArray implements VolatileAccess, VolatileArray
 
 	public long argMax( final int offset )
 	{
-		return this.argMax[ offset ];
+		return this.argMax[ toIndex( offset ) ];
 	}
 
 	public void setArgMax( final int offset, final long val )
 	{
-		this.argMax[ offset ] = val;
+		this.argMax[ toIndex( offset ) ] = val;
 	}
 
 	public long[] argMaxCopy()
