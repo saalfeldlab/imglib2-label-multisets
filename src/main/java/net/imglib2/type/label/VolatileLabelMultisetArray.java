@@ -1,6 +1,5 @@
 package net.imglib2.type.label;
 
-import gnu.trove.set.hash.TLongHashSet;
 import net.imglib2.img.basictypeaccess.volatiles.VolatileAccess;
 import net.imglib2.img.basictypeaccess.volatiles.VolatileArrayDataAccess;
 
@@ -16,8 +15,6 @@ public class VolatileLabelMultisetArray implements VolatileAccess, VolatileArray
 
 	private final long listDataUsedSizeInBytes;
 
-	private final TLongHashSet containedLabels;
-
 	public VolatileLabelMultisetArray( final int numEntities, final boolean isValid, final long[] argMax )
 	{
 		this.data = new int[ numEntities ];
@@ -26,17 +23,15 @@ public class VolatileLabelMultisetArray implements VolatileAccess, VolatileArray
 		listDataUsedSizeInBytes = 0;
 		new MappedObjectArrayList<>( LabelMultisetEntry.type, listData, 0 ).add( new LabelMultisetEntry() );
 		this.isValid = isValid;
-		this.containedLabels = new TLongHashSet();
 	}
 
 	public VolatileLabelMultisetArray(
 			final int[] data,
 			final MappedAccessData< LongMappedAccess > listData,
 			final boolean isValid,
-			final TLongHashSet containedLabels,
 			final long[] argMax )
 	{
-		this( data, listData, -1, isValid, containedLabels, argMax );
+		this( data, listData, -1, isValid, argMax );
 	}
 
 	public VolatileLabelMultisetArray(
@@ -44,7 +39,6 @@ public class VolatileLabelMultisetArray implements VolatileAccess, VolatileArray
 			final MappedAccessData< LongMappedAccess > listData,
 			final long listDataUsedSizeInBytes,
 			final boolean isValid,
-			final TLongHashSet containedLabels,
 			final long[] argMax )
 	{
 		this.data = data;
@@ -52,7 +46,6 @@ public class VolatileLabelMultisetArray implements VolatileAccess, VolatileArray
 		this.listData = listData;
 		this.listDataUsedSizeInBytes = listDataUsedSizeInBytes;
 		this.isValid = isValid;
-		this.containedLabels = containedLabels;
 	}
 
 	public void getValue( final int index, final LabelMultisetEntryList ref )
@@ -94,21 +87,6 @@ public class VolatileLabelMultisetArray implements VolatileAccess, VolatileArray
 		return isValid;
 	}
 
-	public boolean containsLabel( final long label )
-	{
-		return this.containedLabels.contains( label );
-	}
-
-	public int numContainedLabels()
-	{
-		return this.containedLabels.size();
-	}
-
-	public long[] containedLabels()
-	{
-		return this.containedLabels.toArray();
-	}
-
 	public int getRequiredNumberOfBytes()
 	{
 		return getRequiredNumberOfBytes( this );
@@ -116,13 +94,12 @@ public class VolatileLabelMultisetArray implements VolatileAccess, VolatileArray
 
 	public static int getRequiredNumberOfBytes( final VolatileLabelMultisetArray array )
 	{
-		return getRequiredNumberOfBytes( array.containedLabels.size(), array.argMax.length, array.data, ( int ) array.getListDataUsedSizeInBytes() );
+		return getRequiredNumberOfBytes( array.argMax.length, array.data, ( int ) array.getListDataUsedSizeInBytes() );
 	}
 
-	public static int getRequiredNumberOfBytes( final int numberOfContainedLabels, final int numArgMax, final int[] listOffsets, final int listSizeInBytes )
+	public static int getRequiredNumberOfBytes( final int numArgMax, final int[] listOffsets, final int listSizeInBytes )
 	{
 		return 0
-				+ Integer.BYTES + Long.BYTES * numberOfContainedLabels
 				+ Integer.BYTES + Long.BYTES * numArgMax
 				+ Integer.BYTES * listOffsets.length
 				+ listSizeInBytes;

@@ -1,6 +1,5 @@
 package net.imglib2.type.label;
 
-import gnu.trove.set.hash.TLongHashSet;
 import net.imglib2.cache.CacheLoader;
 import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
@@ -63,11 +62,6 @@ public abstract class AbstractLabelMultisetLoader implements CacheLoader< Long, 
 		return new Cell<>( cellSize, cellMin, bytes == null ? dummy( n, invalidLabel ) : LabelUtils.fromBytes( bytes, n ) );
 	}
 
-	public static int labelsListSizeInBytes( final int numLabels )
-	{
-		return Long.BYTES * numLabels + Integer.BYTES;
-	}
-
 	public static int argMaxListSizeInBytes( final int numEntries )
 	{
 		return Long.BYTES * numEntries + Integer.BYTES;
@@ -87,6 +81,6 @@ public abstract class AbstractLabelMultisetLoader implements CacheLoader< Long, 
 		access.putInt( 1, Integer.BYTES + Long.BYTES );
 		final int[] data = new int[ numElements ];
 		final long[] argMax = { label };
-		return new VolatileLabelMultisetArray( data, store, true, new TLongHashSet( new long[] { label } ), argMax );
+		return new VolatileLabelMultisetArray( data, store, true, argMax );
 	}
 }
