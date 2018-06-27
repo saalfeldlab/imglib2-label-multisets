@@ -25,7 +25,7 @@ public class LabelMultisetTypeDownscaler
 		return createDownscaledCell( Views.interval( source, interval ), factor, maxNumEntriesPerPixel );
 	}
 
-	private static VolatileLabelMultisetArray createDownscaledCell(
+	public static VolatileLabelMultisetArray createDownscaledCell(
 			final RandomAccessibleInterval< LabelMultisetType > source,
 			final int[] factor,
 			final int maxNumEntriesPerPixel )
