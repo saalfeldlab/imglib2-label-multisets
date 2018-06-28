@@ -122,6 +122,7 @@ public class LabelMultisetTypeDownscaler
 				list.limitSize( maxNumEntriesPerPixel );
 				list.sortById();
 			}
+			argMax.add( list.stream().max( ( e1, e2 ) -> Integer.compare( e1.getCount(), e2.getCount() ) ).map( LabelMultisetEntry::getId ).orElse( Label.INVALID ) );
 
 			boolean makeNewList = true;
 			final int hash = list.hashCode();
@@ -149,7 +150,6 @@ public class LabelMultisetTypeDownscaler
 				nextListOffset += list.getSizeInBytes();
 
 				// add entry with max count
-				argMax.add( list.stream().max( ( e1, e2 ) -> Integer.compare( e1.getCount(), e2.getCount() ) ).map( LabelMultisetEntry::getId ).orElse( Label.INVALID ) );
 			}
 
 			for ( d = 0; d < numDim; d++ )
