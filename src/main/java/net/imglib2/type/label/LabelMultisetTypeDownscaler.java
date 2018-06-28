@@ -2,12 +2,10 @@ package net.imglib2.type.label;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.function.LongConsumer;
 
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.array.TLongArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.set.hash.TLongHashSet;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessible;
@@ -28,38 +26,8 @@ public class LabelMultisetTypeDownscaler
 	}
 
 	public static VolatileLabelMultisetArray createDownscaledCell(
-			final RandomAccessible< LabelMultisetType > source,
-			final Interval interval,
-			final int[] factor,
-			final TLongHashSet precomputedContainedLabels,
-			final int maxNumEntriesPerPixel )
-	{
-		return createDownscaledCell( Views.interval( source, interval ), factor, precomputedContainedLabels, maxNumEntriesPerPixel );
-	}
-
-	public static VolatileLabelMultisetArray createDownscaledCell(
 			final RandomAccessibleInterval< LabelMultisetType > source,
 			final int[] factor,
-			final int maxNumEntriesPerPixel )
-	{
-		final TLongHashSet set = new TLongHashSet();
-		return createDownscaledCell( source, factor, set, set::add, maxNumEntriesPerPixel );
-	}
-
-	public static VolatileLabelMultisetArray createDownscaledCell(
-			final RandomAccessibleInterval< LabelMultisetType > source,
-			final int[] factor,
-			final TLongHashSet precomputedContainedLabels,
-			final int maxNumEntriesPerPixel )
-	{
-		return createDownscaledCell( source, factor, precomputedContainedLabels, id -> {}, maxNumEntriesPerPixel );
-	}
-
-	private static VolatileLabelMultisetArray createDownscaledCell(
-			final RandomAccessibleInterval< LabelMultisetType > source,
-			final int[] factor,
-			final TLongHashSet labelsInBlock,
-			final LongConsumer addToList,
 			final int maxNumEntriesPerPixel )
 	{
 
@@ -115,7 +83,6 @@ public class LabelMultisetTypeDownscaler
 				for ( final Entry< Label > sourceEntry : randomAccess.get().entrySet() )
 				{
 					final long id = sourceEntry.getElement().id();
-					addToList.accept( id );
 //					labelsInBlock.add( id );
 					final int searchIndex = list.binarySearch( id );
 					if ( list.size() > 0 && searchIndex >= 0 )
@@ -155,6 +122,7 @@ public class LabelMultisetTypeDownscaler
 				list.limitSize( maxNumEntriesPerPixel );
 				list.sortById();
 			}
+			argMax.add( list.stream().max( ( e1, e2 ) -> Integer.compare( e1.getCount(), e2.getCount() ) ).map( LabelMultisetEntry::getId ).orElse( Label.INVALID ) );
 
 			boolean makeNewList = true;
 			final int hash = list.hashCode();
@@ -182,7 +150,6 @@ public class LabelMultisetTypeDownscaler
 				nextListOffset += list.getSizeInBytes();
 
 				// add entry with max count
-				argMax.add( list.stream().max( ( e1, e2 ) -> Integer.compare( e1.getCount(), e2.getCount() ) ).map( LabelMultisetEntry::getId ).orElse( Label.INVALID ) );
 			}
 
 			for ( d = 0; d < numDim; d++ )
@@ -198,12 +165,12 @@ public class LabelMultisetTypeDownscaler
 				}
 			}
 		}
-		return new VolatileLabelMultisetArray( data, listData, nextListOffset, true, labelsInBlock, argMax.toArray() );
+		return new VolatileLabelMultisetArray( data, listData, nextListOffset, true, argMax.toArray() );
 	}
 
 	public static int getSerializedVolatileLabelMultisetArraySize( final VolatileLabelMultisetArray array )
 	{
-		return ( int ) ( Integer.BYTES + Long.BYTES * array.numContainedLabels() + array.getCurrentStorageArray().length * Integer.BYTES + array.getListDataUsedSizeInBytes() );
+		return VolatileLabelMultisetArray.getRequiredNumberOfBytes( array );
 	}
 
 	public static void serializeVolatileLabelMultisetArray( final VolatileLabelMultisetArray array, final byte[] bytes )
@@ -213,9 +180,6 @@ public class LabelMultisetTypeDownscaler
 		final long[] data = ( ( LongMappedAccessData ) array.getListData() ).data;
 
 		final ByteBuffer bb = ByteBuffer.wrap( bytes );
-
-		bb.putInt( array.numContainedLabels() );
-		Arrays.stream( array.containedLabels() ).forEach( bb::putLong );
 
 		final long[] argMax = array.argMaxCopy();
 		bb.putInt( argMax.length );

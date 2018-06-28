@@ -27,7 +27,6 @@ public class LabelUtils
 	{
 
 		final int[] data = new int[ numElements ];
-		final TLongHashSet containedLabels = new TLongHashSet();
 		final TLongArrayList argMax = new TLongArrayList();
 
 		final LongMappedAccessData listData = LongMappedAccessData.factory.createStorage( 32 );
@@ -45,11 +44,11 @@ public class LabelUtils
 			for ( final Entry< Label > entry : lmt.entrySet() )
 			{
 				final long id = entry.getElement().id();
-				containedLabels.add( id );
 				tentry.setId( id );
 				tentry.setCount( entry.getCount() );
 				list.add( tentry );
 			}
+			argMax.add( lmt.argMax() );
 
 			boolean makeNewList = true;
 			final int hash = list.hashCode();
@@ -71,19 +70,13 @@ public class LabelUtils
 				data[ o++ ] = nextListOffset;
 				listHashesAndOffsets.add( hash );
 				listHashesAndOffsets.add( nextListOffset );
-				argMax.add( lmt.argMax() );
 				nextListOffset += list.getSizeInBytes();
 			}
 		}
 
-		final byte[] bytes = new byte[ VolatileLabelMultisetArray.getRequiredNumberOfBytes( containedLabels.size(), argMax.size(), data, nextListOffset ) ];
+		final byte[] bytes = new byte[ VolatileLabelMultisetArray.getRequiredNumberOfBytes( argMax.size(), data, nextListOffset ) ];
 
 		final ByteBuffer bb = ByteBuffer.wrap( bytes );
-		bb.putInt( containedLabels.size() );
-		for ( final TLongIterator it = containedLabels.iterator(); it.hasNext(); )
-		{
-			bb.putLong( it.next() );
-		}
 
 		bb.putInt( argMax.size() );
 		for ( final TLongIterator it = argMax.iterator(); it.hasNext(); )
@@ -127,19 +120,12 @@ public class LabelUtils
 		final TLongHashSet containedLabels = new TLongHashSet();
 		containedLabels.add( Label.OUTSIDE );
 
-		return new LabelMultisetType( new VolatileLabelMultisetArray( data, listData, true, containedLabels, new long[] { Label.OUTSIDE } ) );
+		return new LabelMultisetType( new VolatileLabelMultisetArray( data, listData, true, new long[] { Label.OUTSIDE } ) );
 	}
 
 	public static VolatileLabelMultisetArray fromBytes( final byte[] bytes, final int numElements )
 	{
 		final ByteBuffer bb = ByteBuffer.wrap( bytes );
-
-		final int labelsInBlockListSize = bb.getInt();
-		final long[] labelsInBlockList = new long[ labelsInBlockListSize ];
-		for ( int i = 0; i < labelsInBlockListSize; ++i )
-		{
-			labelsInBlockList[ i ] = bb.getLong();
-		}
 
 		final int argMaxSize = bb.getInt();
 		final long[] argMax = new long[ argMaxSize ];
@@ -150,8 +136,7 @@ public class LabelUtils
 
 		final int[] data = new int[ numElements ];
 		final int listDataSize = bytes.length - ( AbstractLabelMultisetLoader.listOffsetsSizeInBytes( data.length )
-				+ AbstractLabelMultisetLoader.argMaxListSizeInBytes( argMax.length )
-				+ AbstractLabelMultisetLoader.labelsListSizeInBytes( labelsInBlockListSize ) );
+				+ AbstractLabelMultisetLoader.argMaxListSizeInBytes( argMax.length ) );
 		final LongMappedAccessData listData = LongMappedAccessData.factory.createStorage( listDataSize );
 
 		for ( int i = 0; i < data.length; ++i )
@@ -163,7 +148,7 @@ public class LabelUtils
 		{
 			ByteUtils.putByte( bb.get(), listData.data, i );
 		}
-		return new VolatileLabelMultisetArray( data, listData, true, new TLongHashSet( labelsInBlockList ), argMax );
+		return new VolatileLabelMultisetArray( data, listData, true, argMax );
 	}
 
 	public static CachedCellImg< LabelMultisetType, VolatileLabelMultisetArray > openVolatile(
