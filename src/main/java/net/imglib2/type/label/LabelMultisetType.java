@@ -122,7 +122,9 @@ public class LabelMultisetType extends AbstractNativeType< LabelMultisetType > i
 	@Override
 	public LabelMultisetType copy()
 	{
-		return new LabelMultisetType( img, access );
+		final LabelMultisetType that = new LabelMultisetType( img, access );
+		that.i = this.i;
+		return that;
 	}
 
 	@Override
