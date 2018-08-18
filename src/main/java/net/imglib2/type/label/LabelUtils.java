@@ -163,7 +163,7 @@ public class LabelUtils
 			final String dataset ) throws IOException
 	{
 		final DatasetAttributes attrs = n5.getDatasetAttributes( dataset );
-		return openVolatile( new N5CacheLoader( n5, dataset ), attrs.getDimensions(), attrs.getBlockSize() );
+		return openVolatile( new N5CacheLoader( n5, dataset, N5CacheLoader.constantNullReplacement( Label.BACKGROUND ) ), attrs.getDimensions(), attrs.getBlockSize() );
 	}
 
 	public static CachedCellImg< LabelMultisetType, VolatileLabelMultisetArray > openVolatile(
