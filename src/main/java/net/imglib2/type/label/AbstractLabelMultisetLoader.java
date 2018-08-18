@@ -1,9 +1,13 @@
 package net.imglib2.type.label;
 
+import java.lang.invoke.MethodHandles;
+
 import net.imglib2.cache.CacheLoader;
 import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
 import net.imglib2.util.Intervals;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A type of {@link CacheLoader} that loads a {@link Cell} of
@@ -18,6 +22,8 @@ import net.imglib2.util.Intervals;
 
 public abstract class AbstractLabelMultisetLoader implements CacheLoader< Long, Cell< VolatileLabelMultisetArray > >
 {
+
+	private static final Logger LOG = LoggerFactory.getLogger( MethodHandles.lookup().lookupClass() );
 
 	protected final CellGrid grid;
 
@@ -57,6 +63,7 @@ public abstract class AbstractLabelMultisetLoader implements CacheLoader< Long, 
 		}
 
 		final byte[] bytes = this.getData( gridPosition );
+		LOG.trace( "Got bytes {} from loader.", bytes );
 
 		final int n = ( int ) Intervals.numElements( cellSize );
 		return new Cell<>( cellSize, cellMin, bytes == null ? dummy( n, invalidLabel ) : LabelUtils.fromBytes( bytes, n ) );

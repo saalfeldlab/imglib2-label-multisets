@@ -1,6 +1,7 @@
 package net.imglib2.type.label;
 
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
 
 import org.janelia.saalfeldlab.n5.DatasetAttributes;
@@ -17,9 +18,13 @@ import net.imglib2.cache.util.LoaderCacheAsCacheAdapter;
 import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
 import net.imglib2.type.label.LabelMultisetType.Entry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LabelUtils
 {
+
+	private static final Logger LOG = LoggerFactory.getLogger( MethodHandles.lookup().lookupClass() );
 
 	public static byte[] serializeLabelMultisetTypes(
 			final Iterable< LabelMultisetType > lmts,
@@ -126,8 +131,10 @@ public class LabelUtils
 	public static VolatileLabelMultisetArray fromBytes( final byte[] bytes, final int numElements )
 	{
 		final ByteBuffer bb = ByteBuffer.wrap( bytes );
+		LOG.debug( "Creating VolatileLabelMultisetArray from {} bytes for {} elements", bytes.length, numElements );
 
 		final int argMaxSize = bb.getInt();
+		LOG.debug( "Data contains {} arg maxes", argMaxSize );
 		final long[] argMax = new long[ argMaxSize ];
 		for ( int i = 0; i < argMaxSize; ++i )
 		{
