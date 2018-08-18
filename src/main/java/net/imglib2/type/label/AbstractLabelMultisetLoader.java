@@ -1,6 +1,7 @@
 package net.imglib2.type.label;
 
 import java.lang.invoke.MethodHandles;
+import java.util.Objects;
 
 import net.imglib2.cache.CacheLoader;
 import net.imglib2.img.cell.Cell;
@@ -63,10 +64,12 @@ public abstract class AbstractLabelMultisetLoader implements CacheLoader< Long, 
 		}
 
 		final byte[] bytes = this.getData( gridPosition );
-		LOG.trace( "Got bytes {} from loader.", bytes );
+		Objects.requireNonNull( bytes, "Expecting non-null byte array" );
+		LOG.debug( "Got {} bytes from loader.", bytes.length );
+		LOG.trace( "Got bytes from loader: {}", bytes );
 
 		final int n = ( int ) Intervals.numElements( cellSize );
-		return new Cell<>( cellSize, cellMin, bytes == null ? dummy( n, invalidLabel ) : LabelUtils.fromBytes( bytes, n ) );
+		return new Cell<>( cellSize, cellMin, LabelUtils.fromBytes( bytes, n ) );
 	}
 
 	public static int argMaxListSizeInBytes( final int numEntries )
