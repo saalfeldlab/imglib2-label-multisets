@@ -1,15 +1,21 @@
 package net.imglib2.type.label;
 
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 
 import org.janelia.saalfeldlab.n5.DataBlock;
 import org.janelia.saalfeldlab.n5.DatasetAttributes;
 import org.janelia.saalfeldlab.n5.N5Reader;
 
 import net.imglib2.img.cell.CellGrid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class N5CacheLoader extends AbstractLabelMultisetLoader
 {
+
+	private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
 	private final N5Reader n5;
 
 	private final String dataset;
@@ -37,10 +43,13 @@ public class N5CacheLoader extends AbstractLabelMultisetLoader
 		final DataBlock< ? > block;
 		try
 		{
+			LOG.debug("Reading block for position {}", gridPosition);
 			block = n5.readBlock( dataset, n5.getDatasetAttributes( dataset ), gridPosition );
+			LOG.debug("Read block for position {} {}", gridPosition, block);
 		}
 		catch ( final IOException e )
 		{
+			LOG.debug("Caught exception while reading block", e);
 			throw new RuntimeException( e );
 		}
 		return block == null ? null : ( byte[] ) block.getData();
