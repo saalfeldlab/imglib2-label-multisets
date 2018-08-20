@@ -2,17 +2,57 @@ package net.imglib2.type.label;
 
 public interface Label
 {
-	static public long BACKGROUND = 0L;
+	long BACKGROUND = 0L;
 
-	static public long TRANSPARENT = 0xffffffffffffffffL; // -1L or uint64.MAX_VALUE
+	long TRANSPARENT = 0xffffffffffffffffL; // -1L or uint64.MAX_VALUE
 
-	static public long INVALID = 0xfffffffffffffffeL; // -2L or uint64.MAX_VALUE - 1
+	long INVALID = 0xfffffffffffffffeL; // -2L or uint64.MAX_VALUE - 1
 
-	static public long OUTSIDE = 0xfffffffffffffffdL; // -3L or uint64.MAX_VALUE - 2
+	long OUTSIDE = 0xfffffffffffffffdL; // -3L or uint64.MAX_VALUE - 2
 
-	static public long MAX_ID = 0xfffffffffffffffcL; // -4L or uint64.MAX_VALUE - 3
+	long MAX_ID = 0xfffffffffffffffcL; // -4L or uint64.MAX_VALUE - 3
 
-	static public boolean regular( final long id )
+	enum ReservedValue
+	{
+		BACKGROUND(Label.BACKGROUND),
+		TRANSPARENT(Label.TRANSPARENT),
+		INVALID(Label.INVALID),
+		OUTSIDE(Label.OUTSIDE),
+		MAX_ID(Label.MAX_ID);
+
+		private final long value;
+
+		ReservedValue(long value)
+		{
+			this.value = value;
+		}
+
+		public long id()
+		{
+			return value;
+		}
+
+		public ReservedValue fromString(String str)
+		{
+			try {
+				return ReservedValue.valueOf(str.toUpperCase());
+			}
+			catch (IllegalArgumentException | NullPointerException e)
+			{
+				return null;
+			}
+		}
+
+		public ReservedValue fromId(long id)
+		{
+			for (ReservedValue rv : ReservedValue.values())
+				if (rv.value == id)
+					return rv;
+			return null;
+		}
+	}
+
+	static boolean regular( final long id )
 	{
 		return max( id, Label.MAX_ID ) == Label.MAX_ID;
 	}
@@ -24,10 +64,10 @@ public interface Label
 	 * @param b
 	 * @return
 	 */
-	static public long max( final long a, final long b )
+	static long max( final long a, final long b )
 	{
 		return a + Long.MIN_VALUE > b + Long.MIN_VALUE ? a : b;
 	}
 
-	public long id();
+	long id();
 }
