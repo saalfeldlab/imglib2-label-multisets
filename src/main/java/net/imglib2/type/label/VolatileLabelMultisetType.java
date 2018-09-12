@@ -27,12 +27,12 @@ public class VolatileLabelMultisetType
 	// this is the constructor if you want it to be a variable
 	public VolatileLabelMultisetType()
 	{
-		super( new LabelMultisetType() );
+		super( new LabelMultisetType(), true );
 	}
 
 	protected VolatileLabelMultisetType( final LabelMultisetType t )
 	{
-		super( t );
+		super( t, true );
 	}
 
 	@Override
