@@ -18,9 +18,6 @@ import org.slf4j.LoggerFactory;
  * @author Neil Thistlethwaite
  */
 
-// TODO this currently only works because it resides in the same package as LongMappedAccessData (albeit in a different artifact).
-// This is very fragile!
-
 public abstract class AbstractLabelMultisetLoader implements CacheLoader< Long, Cell< VolatileLabelMultisetArray > >
 {
 
