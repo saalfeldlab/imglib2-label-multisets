@@ -89,7 +89,8 @@ public class LabelMultisetEntry
 		access.putLong( id, SUPERVOXEL_ID_OFFSET );
 	}
 
-	void setCount( final int count )
+	// TODO: should not be public
+	public void setCount( final int count )
 	{
 		access.putInt( count, COUNT_OFFSET );
 	}
