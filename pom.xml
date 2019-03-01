@@ -10,14 +10,14 @@
 	</parent>
 
 	<groupId>org.janelia.saalfeldlab</groupId>
-	<artifactId>n5-label-multisets</artifactId>
+	<artifactId>label-multisets</artifactId>
 	<version>0.4.2-SNAPSHOT</version>
 
-	<name>N5 Label Multisets</name>
+	<name>Label Multisets</name>
 
-	<description>N5 for label-multisets.</description>
+	<description>Implementation of label multisets as an ImgLib2 native type.</description>
 
-	<url>https://github.com/saalfeldlab/n5-label-multisets</url>
+	<url>https://github.com/saalfeldlab/label-multisets</url>
 
 	<inceptionYear>2018</inceptionYear>
 
@@ -33,10 +33,10 @@
 	<ciManagement><system>None</system></ciManagement>
 
 	<scm>
-		<connection>scm:git:git://github.com/saalfeldlab/n5-label-multisets</connection>
-		<developerConnection>scm:git:git@github.com:saalfeldlab/n5-label-multisets</developerConnection>
+		<connection>scm:git:git://github.com/saalfeldlab/label-multisets</connection>
+		<developerConnection>scm:git:git@github.com:saalfeldlab/label-multisets</developerConnection>
 		<tag>HEAD</tag>
-		<url>https://github.com/saalfeldlab/n5-label-multisets</url>
+		<url>https://github.com/saalfeldlab/label-multisets</url>
 	</scm>
 
 	<issueManagement>
