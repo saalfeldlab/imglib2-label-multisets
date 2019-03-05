@@ -18,7 +18,7 @@ public class Test
 		final long[] dims = { 2, 3, 4 };
 		final RandomAccessibleInterval< LongType > img = ArrayImgs.longs( dims );
 		Views.flatIterable( img ).forEach( p -> p.set( rng.nextInt( 3 ) ) );
-		final LabelMultisetType type = FromIntegerTypeConverter.geAppropriateType();
+		final LabelMultisetType type = FromIntegerTypeConverter.getAppropriateType();
 		final RandomAccessibleInterval< LabelMultisetType > converted = Converters.convert( img, new FromIntegerTypeConverter<>(), type );
 		for ( final LabelMultisetType c : Views.flatIterable( converted ) )
 		{
