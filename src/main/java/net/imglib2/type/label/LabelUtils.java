@@ -3,14 +3,16 @@ package net.imglib2.type.label;
 import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import gnu.trove.iterator.TIntIterator;
 import gnu.trove.iterator.TLongIterator;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.array.TLongArrayList;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.hash.TLongHashSet;
 import net.imglib2.type.label.LabelMultisetType.Entry;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class LabelUtils
 {
@@ -29,7 +31,7 @@ public class LabelUtils
 
 		final LabelMultisetEntryList list = new LabelMultisetEntryList( listData, 0 );
 		final LabelMultisetEntryList list2 = new LabelMultisetEntryList();
-		final TIntArrayList listHashesAndOffsets = new TIntArrayList();
+		final TIntObjectHashMap<TIntArrayList> listHashesAndOffsets = new TIntObjectHashMap<>();
 		final LabelMultisetEntry tentry = new LabelMultisetEntry( 0, 1 );
 		int nextListOffset = 0;
 		int o = 0;
@@ -48,24 +50,32 @@ public class LabelUtils
 
 			boolean makeNewList = true;
 			final int hash = list.hashCode();
-			for ( int i = 0; i < listHashesAndOffsets.size(); i += 2 )
+			TIntArrayList listOffsetsForHash = listHashesAndOffsets.get( hash );
+			if ( listOffsetsForHash != null )
 			{
-				if ( hash == listHashesAndOffsets.get( i ) )
+				for ( final TIntIterator it = listOffsetsForHash.iterator(); it.hasNext(); )
 				{
-					list2.referToDataAt( listData, listHashesAndOffsets.get( i + 1 ) );
+					final int listOffset = it.next();
+					list2.referToDataAt( listData, listOffset );
 					if ( list.equals( list2 ) )
 					{
 						makeNewList = false;
-						data[ o++ ] = listHashesAndOffsets.get( i + 1 );
+						data[ o++ ] = listOffset;
 						break;
 					}
 				}
 			}
 			if ( makeNewList )
 			{
+				final boolean insertNeeded = listOffsetsForHash == null;
+				if ( listOffsetsForHash == null )
+					listOffsetsForHash = new TIntArrayList();
+
+				listOffsetsForHash.add( nextListOffset );
+				if ( insertNeeded )
+					listHashesAndOffsets.put( hash, listOffsetsForHash );
+
 				data[ o++ ] = nextListOffset;
-				listHashesAndOffsets.add( hash );
-				listHashesAndOffsets.add( nextListOffset );
 				nextListOffset += list.getSizeInBytes();
 			}
 		}
