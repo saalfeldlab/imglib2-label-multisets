@@ -11,6 +11,8 @@ public class MappedObjectArrayList< O extends MappedObject< O, T >, T extends Ma
 		extends AbstractList< O >
 		implements RefList< O >
 {
+	private static final int DEFAULT_CAPACITY = 1;
+
 	private final O type;
 
 	private MappedAccessData< T > data;
@@ -23,27 +25,23 @@ public class MappedObjectArrayList< O extends MappedObject< O, T >, T extends Ma
 
 	private final ConcurrentLinkedQueue< O > tmpObjRefs = new ConcurrentLinkedQueue<>();
 
-	// TODO: fix confusing constructor overloads
+	public MappedObjectArrayList( final O type )
+	{
+		this( type, DEFAULT_CAPACITY );
+	}
 
-	// creates underlying data array
 	public MappedObjectArrayList( final O type, final int capacity )
 	{
 		this( type, type.storageFactory.createStorage( ByteUtils.INT_SIZE + capacity * type.getSizeInBytes() ), 0 );
 	}
 
-	// doesn't create underlying data array
 	protected MappedObjectArrayList( final O type, final MappedAccessData< T > data, final long baseOffset )
-	{
-		this( type );
-		referToDataAt( data, baseOffset );
-		ensureCapacity( 0 );
-	}
-
-	// doesn't create underlying data array
-	protected MappedObjectArrayList( final O type )
 	{
 		this.type = type;
 		this.access = type.storageFactory.createAccess();
+
+		referToDataAt( data, baseOffset );
+		ensureCapacity( 0 );
 	}
 
 	/**
