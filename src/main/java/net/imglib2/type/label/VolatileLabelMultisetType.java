@@ -30,6 +30,18 @@ public class VolatileLabelMultisetType
 		super( new LabelMultisetType(), true );
 	}
 
+	// this is the constructor if you want it to be a variable
+	public VolatileLabelMultisetType( final LabelMultisetEntry entry )
+	{
+		super( new LabelMultisetType( entry ), true );
+	}
+
+	// this is the constructor if you want it to be a variable
+	public VolatileLabelMultisetType( final LabelMultisetEntryList entries )
+	{
+		super( new LabelMultisetType( entries ), true );
+	}
+
 	protected VolatileLabelMultisetType( final LabelMultisetType t )
 	{
 		super( t, true );
