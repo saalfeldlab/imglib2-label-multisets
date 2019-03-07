@@ -50,6 +50,24 @@ public class LabelMultisetType extends AbstractNativeType< LabelMultisetType > i
 		this( null, new VolatileLabelMultisetArray( 1, true, new long[] { Label.INVALID } ) );
 	}
 
+	// this is the constructor if you want it to be a variable
+	public LabelMultisetType( final LabelMultisetEntry entry )
+	{
+		this();
+		access.getValue( i, this.entries );
+		this.entries.add( entry );
+		this.access.setArgMax( i, entry.getId() );
+	}
+
+	// this is the constructor if you want it to be a variable
+	public LabelMultisetType( final LabelMultisetEntryList entries )
+	{
+		this();
+		access.getValue( i, this.entries );
+		this.entries.addAll( entries );
+		updateArgMax();
+	}
+
 	private LabelMultisetType( final NativeImg< ?, VolatileLabelMultisetArray > img, final VolatileLabelMultisetArray access )
 	{
 		this.entries = new LabelMultisetEntryList();
