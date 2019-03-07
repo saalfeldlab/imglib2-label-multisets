@@ -32,7 +32,7 @@ public class LabelUtils
 		final LabelMultisetEntryList list = new LabelMultisetEntryList( listData, 0 );
 		final LabelMultisetEntryList list2 = new LabelMultisetEntryList();
 		final TIntObjectHashMap<TIntArrayList> listHashesAndOffsets = new TIntObjectHashMap<>();
-		final LabelMultisetEntry tentry = new LabelMultisetEntry( 0, 1 );
+		final LabelMultisetEntry tentry = new LabelMultisetEntry( 0, 1 ), ref = list.createRef();
 		int nextListOffset = 0;
 		int o = 0;
 		for ( final LabelMultisetType lmt : lmts )
@@ -44,7 +44,7 @@ public class LabelUtils
 				final long id = entry.getElement().id();
 				tentry.setId( id );
 				tentry.setCount( entry.getCount() );
-				list.add( tentry );
+				list.add( tentry, ref );
 			}
 			argMax.add( lmt.argMax() );
 
@@ -79,6 +79,7 @@ public class LabelUtils
 				nextListOffset += list.getSizeInBytes();
 			}
 		}
+		list.releaseRef( ref );
 
 		final byte[] bytes = new byte[ VolatileLabelMultisetArray.getRequiredNumberOfBytes( argMax.size(), data, nextListOffset ) ];
 

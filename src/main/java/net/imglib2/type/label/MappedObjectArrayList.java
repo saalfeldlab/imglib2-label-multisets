@@ -87,8 +87,13 @@ public class MappedObjectArrayList< O extends MappedObject< O, T >, T extends Ma
 	private O createRefAt( final int index )
 	{
 		final O ref = createRef();
-		data.updateAccess( ref.access, elementBaseOffset + index * elementSizeInBytes() );
+		setRefAt( ref, index );
 		return ref;
+	}
+
+	private void setRefAt( final O ref, final int index )
+	{
+		data.updateAccess( ref.access, elementBaseOffset + index * elementSizeInBytes() );
 	}
 
 	@Override
@@ -138,7 +143,7 @@ public class MappedObjectArrayList< O extends MappedObject< O, T >, T extends Ma
 	{
 		if ( index < 0 || index >= size() )
 			throw new IndexOutOfBoundsException();
-		data.updateAccess( ref.access, elementBaseOffset + index * elementSizeInBytes() );
+		setRefAt( ref, index );
 		return ref;
 	}
 
@@ -147,22 +152,39 @@ public class MappedObjectArrayList< O extends MappedObject< O, T >, T extends Ma
 	{
 		if ( index < 0 || index >= size() )
 			throw new IndexOutOfBoundsException();
-		final O ref = createRefAt( index );
-		ref.set( element );
+		final O ref = createRef();
+		set( index, element, ref );
 		releaseRef( ref );
+		return null;
+	}
+
+	public O set( final int index, final O element, final O ref )
+	{
+		if ( index < 0 || index >= size() )
+			throw new IndexOutOfBoundsException();
+		setRefAt( ref, index );
+		ref.set( element );
 		return null;
 	}
 
 	@Override
 	public boolean add( final O obj )
 	{
+		final O ref = createRef();
+		final boolean ret = add( obj, ref );
+		releaseRef( ref );
+
+		return ret;
+	}
+
+	public boolean add( final O obj, final O ref )
+	{
 		final int size = size();
 		ensureCapacity( size + 1 );
 		setSize( size + 1 );
 
-		final O ref = createRefAt( size );
+		setRefAt( ref, size );
 		ref.set( obj );
-		releaseRef( ref );
 
 		return true;
 	}
