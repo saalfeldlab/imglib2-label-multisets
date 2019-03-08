@@ -8,20 +8,14 @@ import net.imglib2.type.label.LabelMultisetType.Entry;
 public class LabelMultisetEntryList
 		extends MappedObjectArrayList< LabelMultisetEntry, LongMappedAccess >
 {
-	/**
-	 * creates underlying data array
-	 */
+	public LabelMultisetEntryList()
+	{
+		super( LabelMultisetEntry.type );
+	}
+
 	public LabelMultisetEntryList( final int capacity )
 	{
 		super( LabelMultisetEntry.type, capacity );
-	}
-
-	/**
-	 * doesn't create underlying data array
-	 */
-	protected LabelMultisetEntryList()
-	{
-		super( LabelMultisetEntry.type );
 	}
 
 	public LabelMultisetEntryList( final LongMappedAccessData data, final long baseOffset )

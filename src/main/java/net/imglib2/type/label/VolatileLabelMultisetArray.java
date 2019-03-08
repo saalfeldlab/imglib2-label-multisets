@@ -11,7 +11,7 @@ public class VolatileLabelMultisetArray implements VolatileAccess, VolatileArray
 
 	private final long[] argMax;
 
-	private final MappedAccessData< LongMappedAccess > listData;
+	private final LongMappedAccessData listData;
 
 	private final long listDataUsedSizeInBytes;
 
@@ -21,13 +21,13 @@ public class VolatileLabelMultisetArray implements VolatileAccess, VolatileArray
 		this.argMax = argMax;
 		listData = LongMappedAccessData.factory.createStorage( 16 );
 		listDataUsedSizeInBytes = 0;
-		new MappedObjectArrayList<>( LabelMultisetEntry.type, listData, 0 ).add( new LabelMultisetEntry() );
+		new MappedObjectArrayList<>( LabelMultisetEntry.type, listData, 0 );
 		this.isValid = isValid;
 	}
 
 	public VolatileLabelMultisetArray(
 			final int[] data,
-			final MappedAccessData< LongMappedAccess > listData,
+			final LongMappedAccessData listData,
 			final boolean isValid,
 			final long[] argMax )
 	{
@@ -36,7 +36,7 @@ public class VolatileLabelMultisetArray implements VolatileAccess, VolatileArray
 
 	public VolatileLabelMultisetArray(
 			final int[] data,
-			final MappedAccessData< LongMappedAccess > listData,
+			final LongMappedAccessData listData,
 			final long listDataUsedSizeInBytes,
 			final boolean isValid,
 			final long[] argMax )
@@ -71,7 +71,7 @@ public class VolatileLabelMultisetArray implements VolatileAccess, VolatileArray
 		return data;
 	}
 
-	public MappedAccessData< LongMappedAccess > getListData()
+	public LongMappedAccessData getListData()
 	{
 		return listData;
 	}
