@@ -41,7 +41,7 @@ public class FromIntegerTypeConverter< I extends IntegerType< I > > implements C
 		if ( ByteUtils.getLong( data, Integer.BYTES ) != newVal )
 		{
 			ByteUtils.putLong( newVal, data, Integer.BYTES );
-			output.updateArgMax();
+			output.getAccess().setArgMax( output.getIndex(), newVal );
 		}
 	}
 
