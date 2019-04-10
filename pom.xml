@@ -30,7 +30,10 @@
 		</mailingList>
 	</mailingLists>
 
-	<ciManagement><system>None</system></ciManagement>
+	<ciManagement>
+		<system>Travis CI</system>
+		<url>https://travis-ci.org/saalfeldlab/imglib2-label-multisets</url>
+	</ciManagement>
 
 	<scm>
 		<connection>scm:git:git://github.com/saalfeldlab/imglib2-label-multisets</connection>
