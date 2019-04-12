@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import net.imglib2.img.NativeImg;
 import net.imglib2.type.AbstractNativeType;
@@ -115,6 +116,18 @@ public class LabelMultisetType extends AbstractNativeType< LabelMultisetType > i
 			public int size()
 			{
 				return entries.size();
+			}
+
+			@Override
+			public Stream< Entry< Label > > stream()
+			{
+				throw new UnsupportedOperationException( "Streams are not compatible with " + getClass().getName() + " because its iterator reuses the same reference." );
+			}
+
+			@Override
+			public Stream< Entry< Label> > parallelStream()
+			{
+				throw new UnsupportedOperationException( "Streams are not compatible with " + getClass().getName() + " because its iterator reuses the same reference." );
 			}
 		};
 	}
@@ -485,13 +498,6 @@ public class LabelMultisetType extends AbstractNativeType< LabelMultisetType > i
 
 	public void updateArgMax()
 	{
-		this.access.setArgMax(
-				i,
-				this
-						.entrySet()
-						.stream()
-						.max( ( e1, e2 ) -> Integer.compare( e1.getCount(), e2.getCount() ) )
-						.map( e -> e.getElement().id() )
-						.orElse( Label.INVALID ) );
+		this.access.setArgMax( i, LabelUtils.getArgMax( entrySet() ) );
 	}
 }

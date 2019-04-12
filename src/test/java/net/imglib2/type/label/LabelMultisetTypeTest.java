@@ -48,4 +48,17 @@ public class LabelMultisetTypeTest
 			Assert.assertEquals( entryExpected.getCount(), entryActual.getCount() );
 		}
 	}
+
+	@Test
+	public void testArgMax()
+	{
+		final LabelMultisetEntryList entries = new LabelMultisetEntryList();
+		entries.add( new LabelMultisetEntry( 2, 13 ) );
+		entries.add( new LabelMultisetEntry( 3, 15 ) );
+		entries.add( new LabelMultisetEntry( 4, 11 ) );
+		entries.add( new LabelMultisetEntry( 1, 14 ) );
+		Assert.assertEquals( 3, LabelUtils.getArgMax( entries ) );
+		final LabelMultisetType lmt = new LabelMultisetType( entries );
+		Assert.assertEquals( 3, lmt.argMax() );
+	}
 }

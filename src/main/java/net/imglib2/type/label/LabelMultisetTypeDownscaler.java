@@ -122,7 +122,7 @@ public class LabelMultisetTypeDownscaler
 				list.limitSize( maxNumEntriesPerPixel );
 				list.sortById();
 			}
-			argMax.add( list.stream().max( ( e1, e2 ) -> Integer.compare( e1.getCount(), e2.getCount() ) ).map( LabelMultisetEntry::getId ).orElse( Label.INVALID ) );
+			argMax.add( LabelUtils.getArgMax( list ) );
 
 			boolean makeNewList = true;
 			final int hash = list.hashCode();
@@ -177,7 +177,7 @@ public class LabelMultisetTypeDownscaler
 	{
 
 		final int[] curStorage = array.getCurrentStorageArray();
-		final long[] data = ( ( LongMappedAccessData ) array.getListData() ).data;
+		final long[] data = array.getListData().data;
 
 		final ByteBuffer bb = ByteBuffer.wrap( bytes );
 
