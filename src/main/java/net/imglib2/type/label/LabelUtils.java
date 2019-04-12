@@ -2,6 +2,7 @@ package net.imglib2.type.label;
 
 import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
+import java.util.Collection;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -141,5 +142,20 @@ public class LabelUtils
 			ByteUtils.putByte( bb.get(), listData.data, i );
 		}
 		return new VolatileLabelMultisetArray( data, listData, true, argMax );
+	}
+
+	public static long getArgMax( final Collection< ? extends Entry< Label > > labelMultisetEntries )
+	{
+		int maxCount = 0;
+		long maxCountId = Label.INVALID;
+		for ( final Entry< Label > entry : labelMultisetEntries )
+		{
+			if ( maxCount < entry.getCount() )
+			{
+				maxCount = entry.getCount();
+				maxCountId = entry.getElement().id();
+			}
+		}
+		return maxCountId;
 	}
 }
