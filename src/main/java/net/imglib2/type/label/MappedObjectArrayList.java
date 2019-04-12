@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.stream.Stream;
 
 // TOOD: make unmodifiable version
 public class MappedObjectArrayList< O extends MappedObject< O, T >, T extends MappedAccess< T > >
@@ -356,5 +357,17 @@ public class MappedObjectArrayList< O extends MappedObject< O, T >, T extends Ma
 			quicksort( low, j, comparator, tmpRef1, tmpRef2, tmpRef3 );
 		if ( i < high )
 			quicksort( i, high, comparator, tmpRef1, tmpRef2, tmpRef3 );
+	}
+
+	@Override
+	public Stream< O > stream()
+	{
+		throw new UnsupportedOperationException( "Streams are not compatible with " + getClass().getName() + " because its iterator reuses the same reference." );
+	}
+
+	@Override
+	public Stream< O > parallelStream()
+	{
+		throw new UnsupportedOperationException( "Streams are not compatible with " + getClass().getName() + " because its iterator reuses the same reference." );
 	}
 }
