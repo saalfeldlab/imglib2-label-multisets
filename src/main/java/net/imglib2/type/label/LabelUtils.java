@@ -11,7 +11,6 @@ import gnu.trove.iterator.TLongIterator;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.array.TLongArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.set.hash.TLongHashSet;
 import net.imglib2.type.label.LabelMultisetType.Entry;
 
 public class LabelUtils
@@ -111,23 +110,7 @@ public class LabelUtils
 
 	public static LabelMultisetType getOutOfBounds( final int count )
 	{
-
-		final LongMappedAccessData listData = LongMappedAccessData.factory.createStorage( 32 );
-
-		final LabelMultisetEntryList list = new LabelMultisetEntryList( listData, 0 );
-		final LabelMultisetEntry entry = new LabelMultisetEntry( 0, 1 );
-
-		list.createListAt( listData, 0 );
-		entry.setId( Label.OUTSIDE );
-		entry.setCount( count );
-		list.add( entry );
-
-		final int[] data = new int[] { 0 };
-
-		final TLongHashSet containedLabels = new TLongHashSet();
-		containedLabels.add( Label.OUTSIDE );
-
-		return new LabelMultisetType( new VolatileLabelMultisetArray( data, listData, true, new long[] { Label.OUTSIDE } ) );
+		return new LabelMultisetType( new LabelMultisetEntry( Label.OUTSIDE, count ) );
 	}
 
 	public static VolatileLabelMultisetArray fromBytes( final byte[] bytes, final int numElements )
