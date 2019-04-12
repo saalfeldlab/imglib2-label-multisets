@@ -6,31 +6,21 @@ import net.imglib2.type.numeric.IntegerType;
 // not thread safe!
 public class FromIntegerTypeConverter< I extends IntegerType< I > > implements Converter< I, LabelMultisetType >
 {
-
 	public static LongMappedAccessData getListData( final LabelMultisetType l )
 	{
-
 		final VolatileLabelMultisetArray access = l.getAccess();
-		final LongMappedAccessData listData = ( LongMappedAccessData ) access.getListData();
+		final LongMappedAccessData listData = access.getListData();
 		return listData;
 	}
 
 	public static LabelMultisetType getAppropriateType()
 	{
-		final LabelMultisetType type = new LabelMultisetType( new VolatileLabelMultisetArray( 1, true, new long[] { Label.INVALID } ) );
-		final LongMappedAccessData listData = getListData( type );
-		final LongMappedAccess access = listData.createAccess();
-		access.putInt( 1, Long.BYTES + Integer.BYTES );
-		return type;
+		return new LabelMultisetType( new LabelMultisetEntry( Label.INVALID, 1 ) );
 	}
 
 	public static VolatileLabelMultisetType getAppropriateVolatileType()
 	{
-		final VolatileLabelMultisetType type = new VolatileLabelMultisetType( new VolatileLabelMultisetArray( 1, true, new long[] { Label.INVALID } ), true );
-		final LongMappedAccessData listData = getListData( type.get() );
-		final LongMappedAccess access = listData.createAccess();
-		access.putInt( 1, Long.BYTES + Integer.BYTES );
-		return type;
+		return new VolatileLabelMultisetType( new LabelMultisetEntry( Label.INVALID, 1 ) );
 	}
 
 	@Override
@@ -44,5 +34,4 @@ public class FromIntegerTypeConverter< I extends IntegerType< I > > implements C
 			output.getAccess().setArgMax( output.getIndex(), newVal );
 		}
 	}
-
 }
