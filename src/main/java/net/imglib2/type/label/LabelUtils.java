@@ -12,7 +12,10 @@ import gnu.trove.iterator.TLongIterator;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.array.TLongArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.converter.Converters;
 import net.imglib2.type.label.LabelMultisetType.Entry;
+import net.imglib2.type.numeric.integer.UnsignedLongType;
 
 public class LabelUtils
 {
@@ -157,5 +160,10 @@ public class LabelUtils
 			}
 		}
 		return maxCountId;
+	}
+
+	public static RandomAccessibleInterval< UnsignedLongType > convertToUnsignedLong( final RandomAccessibleInterval< LabelMultisetType > labelMultisets )
+	{
+		return Converters.convert( labelMultisets, new LabelMultisetToUnsignedLongConverter(), new UnsignedLongType() );
 	}
 }
