@@ -57,6 +57,11 @@ public interface Label
 		return max( id, Label.MAX_ID ) == Label.MAX_ID;
 	}
 
+	static boolean isForeground( final long id )
+	{
+		return regular( id ) && id != BACKGROUND;
+	}
+
 	/**
 	 * Max of two uint64 passed as long.
 	 *
