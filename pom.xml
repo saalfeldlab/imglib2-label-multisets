@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<version>25.0.0</version>
+		<version>27.0.1</version>
 		<groupId>org.scijava</groupId>
 		<artifactId>pom-scijava</artifactId>
 	</parent>
@@ -60,6 +60,7 @@
 	</organization>
 
 	<properties>
+		<package-name>net.imglib2</package-name>
 		<scijava.jvm.version>1.8</scijava.jvm.version>
 		<license.licenseName>bsd_2</license.licenseName>
 		<license.copyrightOwners>Stephan Saalfeld</license.copyrightOwners>
