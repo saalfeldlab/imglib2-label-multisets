@@ -190,10 +190,9 @@ public class LabelMultisetType extends AbstractNativeType< LabelMultisetType > i
 		return entries.isEmpty();
 	}
 
-	public boolean contains( final Object o )
+	public boolean contains( final Label l )
 	{
-		access.getValue( i, entries );
-		return o instanceof Label && entries.binarySearch( ( ( Label ) o ).id() ) >= 0;
+		return contains( l.id() );
 	}
 
 	public boolean contains( final long id )
@@ -212,22 +211,25 @@ public class LabelMultisetType extends AbstractNativeType< LabelMultisetType > i
 		return true;
 	}
 
-	public boolean containsAll( final Collection< ? > c )
+	public boolean containsAll( final Collection< ? extends Label > c )
 	{
 		access.getValue( i, entries );
-		for ( final Object o : c )
+		for ( final Label l : c )
 		{
-			if ( !( o instanceof Label && entries.binarySearch( ( ( Label ) o ).id() ) >= 0 ) ) { return false; }
+			if ( entries.binarySearch( l.id() ) < 0 ) { return false; }
 		}
 		return true;
 	}
 
-	public int count( final Object o )
+	public int count( final Label l )
+	{
+		return count( l.id() );
+	}
+
+	public int count( final long id )
 	{
 		access.getValue( i, entries );
-		if ( !( o instanceof Label ) ) { return 0; }
-
-		final int pos = entries.binarySearch( ( ( Label ) o ).id() );
+		final int pos = entries.binarySearch( id );
 		if ( pos < 0 ) { return 0; }
 
 		return entries.get( pos ).getCount();

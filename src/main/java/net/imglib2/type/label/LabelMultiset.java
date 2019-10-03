@@ -104,11 +104,9 @@ public class LabelMultiset implements Multiset< Label >
 	}
 
 	@Override
-	public int count( final Object o )
+	public int count( final Label l )
 	{
-		if ( !( o instanceof Label ) ) { return 0; }
-
-		final int pos = entries.binarySearch( ( ( Label ) o ).id() );
+		final int pos = entries.binarySearch( l.id() );
 		if ( pos < 0 ) { return 0; }
 
 		return entries.get( pos ).getCount();

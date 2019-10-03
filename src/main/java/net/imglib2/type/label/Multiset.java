@@ -8,7 +8,7 @@ import java.util.Set;
  */
 public interface Multiset< E > extends Collection< E >
 {
-	public int count( Object element );
+	public int count( E element );
 
 //	public Set< E > elementSet();
 
