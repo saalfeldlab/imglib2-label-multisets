@@ -15,12 +15,22 @@ public class FromIntegerTypeConverter< I extends IntegerType< I > > implements C
 
 	public static LabelMultisetType getAppropriateType()
 	{
-		return new LabelMultisetType( new LabelMultisetEntry( Label.INVALID, 1 ) );
+		return getAppropriateType( 1 );
+	}
+
+	public static LabelMultisetType getAppropriateType( final int numOccurrences )
+	{
+		return new LabelMultisetType( new LabelMultisetEntry( Label.INVALID, numOccurrences ) );
 	}
 
 	public static VolatileLabelMultisetType getAppropriateVolatileType()
 	{
-		return new VolatileLabelMultisetType( new LabelMultisetEntry( Label.INVALID, 1 ) );
+		return getAppropriateVolatileType( 1 );
+	}
+
+	public static VolatileLabelMultisetType getAppropriateVolatileType( final int numOccurrences )
+	{
+		return new VolatileLabelMultisetType( new LabelMultisetEntry( Label.INVALID, numOccurrences ) );
 	}
 
 	@Override
