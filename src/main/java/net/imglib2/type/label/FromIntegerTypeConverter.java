@@ -13,24 +13,16 @@ public class FromIntegerTypeConverter< I extends IntegerType< I > > implements C
 		return listData;
 	}
 
+	@Deprecated
 	public static LabelMultisetType getAppropriateType()
 	{
-		return getAppropriateType( 1 );
+		return LabelMultisetType.singleEntryWithSingleOccurrence();
 	}
 
-	public static LabelMultisetType getAppropriateType( final int numOccurrences )
-	{
-		return new LabelMultisetType( new LabelMultisetEntry( Label.INVALID, numOccurrences ) );
-	}
-
+	@Deprecated
 	public static VolatileLabelMultisetType getAppropriateVolatileType()
 	{
-		return getAppropriateVolatileType( 1 );
-	}
-
-	public static VolatileLabelMultisetType getAppropriateVolatileType( final int numOccurrences )
-	{
-		return new VolatileLabelMultisetType( new LabelMultisetEntry( Label.INVALID, numOccurrences ) );
+		return VolatileLabelMultisetType.singleEntryWithSingleOccurrence();
 	}
 
 	@Override
