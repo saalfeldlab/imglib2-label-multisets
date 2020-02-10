@@ -502,4 +502,14 @@ public class LabelMultisetType extends AbstractNativeType< LabelMultisetType > i
 	{
 		this.access.setArgMax( i, LabelUtils.getArgMax( entrySet() ) );
 	}
+
+	public static LabelMultisetType singleEntryWithSingleOccurrence()
+	{
+		return singleEntryWithNumOccurrences( 1 );
+	}
+
+	public static LabelMultisetType singleEntryWithNumOccurrences( final int numOccurrences )
+	{
+		return new LabelMultisetType( new LabelMultisetEntry( Label.INVALID, numOccurrences ) );
+	}
 }

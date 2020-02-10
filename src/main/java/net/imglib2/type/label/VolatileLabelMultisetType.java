@@ -131,4 +131,14 @@ public class VolatileLabelMultisetType
 	{
 		return isValid() && other.isValid() && t.valueEquals( other.t );
 	}
+
+	public static VolatileLabelMultisetType singleEntryWithSingleOccurrence()
+	{
+		return singleEntryWithNumOccurrences( 1 );
+	}
+
+	public static VolatileLabelMultisetType singleEntryWithNumOccurrences( final int numOccurrences )
+	{
+		return new VolatileLabelMultisetType( new LabelMultisetEntry( Label.INVALID, numOccurrences ) );
+	}
 }
