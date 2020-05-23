@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<version>27.0.1</version>
 		<groupId>org.scijava</groupId>
 		<artifactId>pom-scijava</artifactId>
+		<version>27.0.1</version>
 	</parent>
 
 	<groupId>net.imglib2</groupId>
@@ -14,39 +13,13 @@
 	<version>0.9.1-SNAPSHOT</version>
 
 	<name>ImgLib2 Label Multisets</name>
-
 	<description>Implementation of label multisets as an ImgLib2 native type.</description>
-
 	<url>https://github.com/saalfeldlab/imglib2-label-multisets</url>
-
 	<inceptionYear>2018</inceptionYear>
-
-	<contributors><contributor><name>None</name></contributor></contributors>
-
-	<mailingLists>
-		<mailingList>
-			<name>Image.sc Forum</name>
-			<archive>https://forum.image.sc/</archive>
-		</mailingList>
-	</mailingLists>
-
-	<ciManagement>
-		<system>Travis CI</system>
-		<url>https://travis-ci.org/saalfeldlab/imglib2-label-multisets</url>
-	</ciManagement>
-
-	<scm>
-		<connection>scm:git:git://github.com/saalfeldlab/imglib2-label-multisets</connection>
-		<developerConnection>scm:git:git@github.com:saalfeldlab/imglib2-label-multisets</developerConnection>
-		<tag>HEAD</tag>
-		<url>https://github.com/saalfeldlab/imglib2-label-multisets</url>
-	</scm>
-
-	<issueManagement>
-		<system>GitHub</system>
-		<url>https://github.com/saalfeldlab/imglib2-label-multisets/issues</url>
-	</issueManagement>
-
+	<organization>
+		<name>HHMI Janelia</name>
+		<url>https://janelia.org</url>
+	</organization>
 	<licenses>
 		<license>
 			<name>Simplified BSD License</name>
@@ -54,46 +27,6 @@
 		</license>
 	</licenses>
 
-	<organization>
-		<name>HHMI Janelia</name>
-		<url>https://janelia.org</url>
-	</organization>
-
-	<properties>
-		<package-name>net.imglib2</package-name>
-		<scijava.jvm.version>1.8</scijava.jvm.version>
-		<license.licenseName>bsd_2</license.licenseName>
-		<license.copyrightOwners>Stephan Saalfeld</license.copyrightOwners>
-
-		<!-- NB: Deploy releases to the SciJava Maven repository. -->
-		<releaseProfiles>deploy-to-scijava</releaseProfiles>
-	</properties>
-
-	<dependencies>
-		<dependency>
-			<groupId>net.imglib2</groupId>
-			<artifactId>imglib2</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.imglib2</groupId>
-			<artifactId>imglib2-cache</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.trove4j</groupId>
-			<artifactId>trove4j</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-		</dependency>
-
-		<!-- Test dependencies -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
 	<developers>
 		<developer>
 			<id>tpietzsch</id>
@@ -132,6 +65,65 @@
 			<timezone>-5</timezone>
 		</developer>
 	</developers>
+	<contributors><contributor><name>None</name></contributor></contributors>
+
+	<mailingLists>
+		<mailingList>
+			<name>Image.sc Forum</name>
+			<archive>https://forum.image.sc/</archive>
+		</mailingList>
+	</mailingLists>
+
+	<scm>
+		<connection>scm:git:git://github.com/saalfeldlab/imglib2-label-multisets</connection>
+		<developerConnection>scm:git:git@github.com:saalfeldlab/imglib2-label-multisets</developerConnection>
+		<tag>HEAD</tag>
+		<url>https://github.com/saalfeldlab/imglib2-label-multisets</url>
+	</scm>
+	<issueManagement>
+		<system>GitHub</system>
+		<url>https://github.com/saalfeldlab/imglib2-label-multisets/issues</url>
+	</issueManagement>
+	<ciManagement>
+		<system>Travis CI</system>
+		<url>https://travis-ci.org/saalfeldlab/imglib2-label-multisets</url>
+	</ciManagement>
+
+	<properties>
+		<package-name>net.imglib2</package-name>
+		<scijava.jvm.version>1.8</scijava.jvm.version>
+		<license.licenseName>bsd_2</license.licenseName>
+		<license.copyrightOwners>Stephan Saalfeld</license.copyrightOwners>
+
+		<!-- NB: Deploy releases to the SciJava Maven repository. -->
+		<releaseProfiles>deploy-to-scijava</releaseProfiles>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>net.imglib2</groupId>
+			<artifactId>imglib2</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.imglib2</groupId>
+			<artifactId>imglib2-cache</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.trove4j</groupId>
+			<artifactId>trove4j</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+
+		<!-- Test dependencies -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
 
 	<repositories>
 		<repository>
@@ -139,5 +131,4 @@
 			<url>https://maven.scijava.org/content/groups/public</url>
 		</repository>
 	</repositories>
-
 </project>
