@@ -265,7 +265,7 @@ public class LabelMultisetType extends AbstractNativeType< LabelMultisetType > i
 		while ( ai.hasNext() )
 		{
 			final LabelMultisetEntry a = ai.next();
-			final LabelMultisetEntry b = ai.next();
+			final LabelMultisetEntry b = bi.next();
 			if ( !( a.getId() == b.getId() && a.getCount() == b.getCount() ) ) { return false; }
 		}
 		return true;
