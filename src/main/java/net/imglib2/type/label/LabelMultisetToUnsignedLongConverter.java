@@ -8,6 +8,7 @@ public class LabelMultisetToUnsignedLongConverter implements Converter< LabelMul
 	@Override
 	public void convert( final LabelMultisetType input, final UnsignedLongType output )
 	{
+		//output.set( input.entrySet().iterator().next().getElement().id() );
 		output.set( input.argMax() );
 	}
 }

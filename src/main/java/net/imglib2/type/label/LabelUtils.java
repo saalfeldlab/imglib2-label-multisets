@@ -162,8 +162,12 @@ public class LabelUtils
 		return maxCountId;
 	}
 
-	public static RandomAccessibleInterval< UnsignedLongType > convertToUnsignedLong( final RandomAccessibleInterval< LabelMultisetType > labelMultisets )
+	public static RandomAccessibleInterval< UnsignedLongType > convertToUnsignedLong(
+			final RandomAccessibleInterval< LabelMultisetType > labelMultisets )
 	{
-		return Converters.convert( labelMultisets, new LabelMultisetToUnsignedLongConverter(), new UnsignedLongType() );
+		return Converters.convert(
+				labelMultisets,
+				new LabelMultisetToUnsignedLongConverter(),
+				new UnsignedLongType() );
 	}
 }

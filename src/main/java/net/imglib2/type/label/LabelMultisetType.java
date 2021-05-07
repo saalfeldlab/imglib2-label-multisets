@@ -55,16 +55,16 @@ public class LabelMultisetType extends AbstractNativeType< LabelMultisetType > i
 	public LabelMultisetType( final LabelMultisetEntry entry )
 	{
 		this();
-		access.getValue( i, this.entries );
+		access.getValue( i.get(), this.entries );
 		this.entries.add( entry );
-		this.access.setArgMax( i, entry.getId() );
+		this.access.setArgMax( i.get(), entry.getId() );
 	}
 
 	// this is the constructor if you want it to be a variable
 	public LabelMultisetType( final LabelMultisetEntryList entries )
 	{
 		this();
-		access.getValue( i, this.entries );
+		access.getValue( i.get(), this.entries );
 		this.entries.addAll( entries );
 		updateArgMax();
 	}
@@ -154,7 +154,7 @@ public class LabelMultisetType extends AbstractNativeType< LabelMultisetType > i
 	public LabelMultisetType copy()
 	{
 		final LabelMultisetType that = new LabelMultisetType( img, access );
-		that.i = this.i;
+		that.i.set(this.i.get());
 		return that;
 	}
 
@@ -180,13 +180,13 @@ public class LabelMultisetType extends AbstractNativeType< LabelMultisetType > i
 
 	public int size()
 	{
-		access.getValue( i, entries );
+		access.getValue( i.get(), entries );
 		return entries.multisetSize();
 	}
 
 	public boolean isEmpty()
 	{
-		access.getValue( i, entries );
+		access.getValue( i.get(), entries );
 		return entries.isEmpty();
 	}
 
@@ -197,13 +197,13 @@ public class LabelMultisetType extends AbstractNativeType< LabelMultisetType > i
 
 	public boolean contains( final long id )
 	{
-		access.getValue( i, entries );
+		access.getValue( i.get(), entries );
 		return entries.binarySearch( id ) >= 0;
 	}
 
 	public boolean containsAll( final long[] ids )
 	{
-		access.getValue( i, entries );
+		access.getValue( i.get(), entries );
 		for ( final long id : ids )
 		{
 			if ( entries.binarySearch( id ) < 0 ) { return false; }
@@ -213,7 +213,7 @@ public class LabelMultisetType extends AbstractNativeType< LabelMultisetType > i
 
 	public boolean containsAll( final Collection< ? extends Label > c )
 	{
-		access.getValue( i, entries );
+		access.getValue( i.get(), entries );
 		for ( final Label l : c )
 		{
 			if ( entries.binarySearch( l.id() ) < 0 ) { return false; }
@@ -228,7 +228,7 @@ public class LabelMultisetType extends AbstractNativeType< LabelMultisetType > i
 
 	public int count( final long id )
 	{
-		access.getValue( i, entries );
+		access.getValue( i.get(), entries );
 		final int pos = entries.binarySearch( id );
 		if ( pos < 0 ) { return 0; }
 
@@ -237,14 +237,14 @@ public class LabelMultisetType extends AbstractNativeType< LabelMultisetType > i
 
 	public Set< Entry< Label > > entrySet()
 	{
-		access.getValue( i, entries );
+		access.getValue( i.get(), entries );
 		return entrySet;
 	}
 
 	@Override
 	public String toString()
 	{
-		access.getValue( i, entries );
+		access.getValue( i.get(), entries );
 		return entries.toString();
 	}
 
@@ -495,12 +495,12 @@ public class LabelMultisetType extends AbstractNativeType< LabelMultisetType > i
 
 	public long argMax()
 	{
-		return this.access.argMax( i );
+		return this.access.argMax( i.get() );
 	}
 
 	public void updateArgMax()
 	{
-		this.access.setArgMax( i, LabelUtils.getArgMax( entrySet() ) );
+		this.access.setArgMax( i.get(), LabelUtils.getArgMax( entrySet() ) );
 	}
 
 	public static LabelMultisetType singleEntryWithSingleOccurrence()
@@ -511,5 +511,17 @@ public class LabelMultisetType extends AbstractNativeType< LabelMultisetType > i
 	public static LabelMultisetType singleEntryWithNumOccurrences( final int numOccurrences )
 	{
 		return new LabelMultisetType( new LabelMultisetEntry( Label.INVALID, numOccurrences ) );
+	}
+
+	@Override
+	public void pow(final LabelMultisetType c) {
+
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void pow(final double d) {
+
+		throw new UnsupportedOperationException();
 	}
 }

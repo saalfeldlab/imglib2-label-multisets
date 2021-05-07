@@ -2,6 +2,7 @@ package net.imglib2.type.label;
 
 import net.imglib2.Volatile;
 import net.imglib2.img.NativeImg;
+import net.imglib2.type.Index;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.NativeTypeFactory;
 import net.imglib2.util.Fraction;
@@ -51,6 +52,12 @@ public class VolatileLabelMultisetType
 	public Fraction getEntitiesPerPixel()
 	{
 		return t.getEntitiesPerPixel();
+	}
+
+	@Override
+	public Index index()
+	{
+		return t.index();
 	}
 
 	@Override
