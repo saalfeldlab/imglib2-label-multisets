@@ -7,8 +7,6 @@ package net.imglib2.type.label;
  * grow, see {@link #resize(long)}, which involves reallocating and copying the
  * underlying primitive array.
  *
- * @param <A>
- *            recursive type of this container type.
  * @param <T>
  *            the {@link MappedAccess} used to access the container.
  *

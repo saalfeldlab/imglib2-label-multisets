@@ -2,7 +2,7 @@ package net.imglib2.type.label;
 
 /**
  * Maps into region of underlying memory area (a primitive array or similar). By
- * {@link MappedElementArray#updateAccess(MappedAccess, long)}, the base offset
+ * {@link MappedAccessData#updateAccess(MappedAccess, long)}, the base offset
  * of this {@link MappedAccess} in the memory area can be set. Values of
  * different types can be read or written at (byte) offsets relative to the
  * current base offset. For example {@code putLong( 42l, 2 )} would put write
@@ -15,9 +15,9 @@ package net.imglib2.type.label;
  *
  * <p>
  * Note: The method for updating the base offset
- * {@link MappedElementArray#updateAccess(MappedAccess, int)} needs to be in
- * the {@link MappedElementArray}, not here. This is because data might be split
- * up into several {@link MappedElementArray MappedElementArrays}, in which case
+ * {@link MappedAccessData#updateAccess(MappedAccess, long)}} needs to be in
+ * the {@link MappedAccessData}, not here. This is because data might be split
+ * up into several {@link MappedAccessData MappedElementArrays}, in which case
  * the reference to the memory area must be updated in addition to the base
  * offset.
  *
