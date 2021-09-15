@@ -2,17 +2,18 @@ package net.imglib2.type.label;
 
 
 /**
- * A {@link MappedElementArray} that stores {@link DoubleMappedElement
- * DoubleMappedElements} in a {@code double[]} array.
+ * A {@link MappedAccessData} that stores {@link LongMappedAccess
+ * LongMappedElements} in a {@code long[]} array.
  *
- * @author Tobias Pietzsch <tobias.pietzsch@gmail.com>
+ * @author Tobias Pietzsch  &lt;tobias.pietzsch@gmail.com&gt;
  */
 public class LongMappedAccessData implements MappedAccessData< LongMappedAccess >
 {
-	/**
-	 * The current data storage. This is changed when the array is
-	 * {@link #resize(int) resized}.
-	 */
+
+  /**
+   * The current data storage. This is changed when the array is
+   * {@link #resize(long) resized}.
+   */
 	protected long[] data;
 
 	private long size;

@@ -11,7 +11,7 @@ import sun.misc.Unsafe;
  * ({@code long, double} etc.) from bytes at an offset in a {@code long[]}
  * array.
  *
- * @author Tobias Pietzsch <tobias.pietzsch@gmail.com>
+ * @author Tobias Pietzsch &lt;tobias.pietzsch@gmail.com&gt;
  */
 //@SuppressWarnings( "restriction" )
 public class ByteUtils
