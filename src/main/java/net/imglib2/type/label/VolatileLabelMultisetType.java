@@ -8,144 +8,144 @@ import net.imglib2.type.NativeTypeFactory;
 import net.imglib2.util.Fraction;
 
 public class VolatileLabelMultisetType
-		extends Volatile< LabelMultisetType >
-		implements NativeType< VolatileLabelMultisetType >
-{
-	public static final VolatileLabelMultisetType type = new VolatileLabelMultisetType();
+		extends Volatile<LabelMultisetType>
+		implements NativeType<VolatileLabelMultisetType> {
 
-	// this is the constructor if you want it to read from an array
-	public VolatileLabelMultisetType( final NativeImg< ?, VolatileLabelMultisetArray > img )
-	{
-		super( new LabelMultisetType( img ) );
-	}
+  public static final VolatileLabelMultisetType type = new VolatileLabelMultisetType();
 
-	// this is the constructor if you want to specify the dataAccess
-	public VolatileLabelMultisetType( final VolatileLabelMultisetArray access, final boolean isValid )
-	{
-		super( new LabelMultisetType( access ), isValid );
-	}
+  // this is the constructor if you want it to read from an array
+  public VolatileLabelMultisetType(final NativeImg<?, VolatileLabelMultisetArray> img) {
 
-	// this is the constructor if you want it to be a variable
-	public VolatileLabelMultisetType()
-	{
-		super( new LabelMultisetType(), true );
-	}
+	super(new LabelMultisetType(img));
+  }
 
-	// this is the constructor if you want it to be a variable
-	public VolatileLabelMultisetType( final LabelMultisetEntry entry )
-	{
-		super( new LabelMultisetType( entry ), true );
-	}
+  // this is the constructor if you want to specify the dataAccess
+  public VolatileLabelMultisetType(final VolatileLabelMultisetArray access, final boolean isValid) {
 
-	// this is the constructor if you want it to be a variable
-	public VolatileLabelMultisetType( final LabelMultisetEntryList entries )
-	{
-		super( new LabelMultisetType( entries ), true );
-	}
+	super(new LabelMultisetType(access), isValid);
+  }
 
-	protected VolatileLabelMultisetType( final LabelMultisetType t )
-	{
-		super( t, true );
-	}
+  // this is the constructor if you want it to be a variable
+  public VolatileLabelMultisetType() {
 
-	@Override
-	public Fraction getEntitiesPerPixel()
-	{
-		return t.getEntitiesPerPixel();
-	}
+	super(new LabelMultisetType(), true);
+  }
 
-	@Override
-	public Index index()
-	{
-		return t.index();
-	}
+  // this is the constructor if you want it to be a variable
+  public VolatileLabelMultisetType(final LabelMultisetEntry entry) {
 
-	@Override
-	public void updateIndex( final int i )
-	{
-		t.updateIndex( i );
-	}
+	super(new LabelMultisetType(entry), true);
+  }
 
-	@Override
-	public int getIndex()
-	{
-		return t.getIndex();
-	}
+  // this is the constructor if you want it to be a variable
+  public VolatileLabelMultisetType(final LabelMultisetEntryList entries) {
 
-	@Override
-	public void incIndex()
-	{
-		t.incIndex();
-	}
+	super(new LabelMultisetType(entries), true);
+  }
 
-	@Override
-	public void incIndex( final int increment )
-	{
-		t.incIndex( increment );
-	}
+  protected VolatileLabelMultisetType(final LabelMultisetType t) {
 
-	@Override
-	public void decIndex()
-	{
-		t.decIndex();
-	}
+	super(t, true);
+  }
 
-	@Override
-	public void decIndex( final int decrement )
-	{
-		t.decIndex( decrement );
-	}
+  @Override
+  public Fraction getEntitiesPerPixel() {
 
-	@Override
-	public VolatileLabelMultisetType createVariable()
-	{
-		return new VolatileLabelMultisetType();
-	}
+	return t.getEntitiesPerPixel();
+  }
 
-	@Override
-	public VolatileLabelMultisetType copy()
-	{
-		return new VolatileLabelMultisetType( t.copy() );
-	}
+  @Override
+  public Index index() {
 
-	@Override
-	public void set( final VolatileLabelMultisetType c )
-	{
-		throw new UnsupportedOperationException();
-	}
+	return t.index();
+  }
 
-	@Override
-	public NativeTypeFactory< VolatileLabelMultisetType, ? > getNativeTypeFactory()
-	{
-		throw new UnsupportedOperationException();
-	}
+  @Override
+  public void updateIndex(final int i) {
 
-	@Override
-	public VolatileLabelMultisetType duplicateTypeOnSameNativeImg()
-	{
-		return new VolatileLabelMultisetType( t.duplicateTypeOnSameNativeImg() );
-	}
+	t.updateIndex(i);
+  }
 
-	@Override
-	public void updateContainer( final Object c )
-	{
-		t.updateContainer( c );
-		setValid( t.isValid() );
-	}
+  @Override
+  public int getIndex() {
 
-	@Override
-	public boolean valueEquals( final VolatileLabelMultisetType other )
-	{
-		return isValid() && other.isValid() && t.valueEquals( other.t );
-	}
+	return t.getIndex();
+  }
 
-	public static VolatileLabelMultisetType singleEntryWithSingleOccurrence()
-	{
-		return singleEntryWithNumOccurrences( 1 );
-	}
+  @Override
+  public void incIndex() {
 
-	public static VolatileLabelMultisetType singleEntryWithNumOccurrences( final int numOccurrences )
-	{
-		return new VolatileLabelMultisetType( new LabelMultisetEntry( Label.INVALID, numOccurrences ) );
-	}
+	t.incIndex();
+  }
+
+  @Override
+  public void incIndex(final int increment) {
+
+	t.incIndex(increment);
+  }
+
+  @Override
+  public void decIndex() {
+
+	t.decIndex();
+  }
+
+  @Override
+  public void decIndex(final int decrement) {
+
+	t.decIndex(decrement);
+  }
+
+  @Override
+  public VolatileLabelMultisetType createVariable() {
+
+	return new VolatileLabelMultisetType();
+  }
+
+  @Override
+  public VolatileLabelMultisetType copy() {
+
+	return new VolatileLabelMultisetType(t.copy());
+  }
+
+  @Override
+  public void set(final VolatileLabelMultisetType c) {
+
+	throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public NativeTypeFactory<VolatileLabelMultisetType, ?> getNativeTypeFactory() {
+
+	throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public VolatileLabelMultisetType duplicateTypeOnSameNativeImg() {
+
+	return new VolatileLabelMultisetType(t.duplicateTypeOnSameNativeImg());
+  }
+
+  @Override
+  public void updateContainer(final Object c) {
+
+	t.updateContainer(c);
+	setValid(t.isValid());
+  }
+
+  @Override
+  public boolean valueEquals(final VolatileLabelMultisetType other) {
+
+	return isValid() && other.isValid() && t.valueEquals(other.t);
+  }
+
+  public static VolatileLabelMultisetType singleEntryWithSingleOccurrence() {
+
+	return singleEntryWithNumOccurrences(1);
+  }
+
+  public static VolatileLabelMultisetType singleEntryWithNumOccurrences(final int numOccurrences) {
+
+	return new VolatileLabelMultisetType(new LabelMultisetEntry(Label.INVALID, numOccurrences));
+  }
 }

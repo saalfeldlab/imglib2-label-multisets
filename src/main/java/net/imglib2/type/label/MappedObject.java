@@ -1,38 +1,38 @@
 package net.imglib2.type.label;
 
-public abstract class MappedObject< O extends MappedObject< O, T >, T extends MappedAccess< T > >
-{
-	protected final T access;
+public abstract class MappedObject<O extends MappedObject<O, T>, T extends MappedAccess<T>> {
 
-	protected final MappedAccessData.Factory< ? extends MappedAccessData< T >, T > storageFactory;
+  protected final T access;
 
-	@Override
-	public boolean equals( final Object obj )
-	{
-		return obj instanceof MappedObject< ?, ? > &&
-				access.equals( ( ( MappedObject< ?, ? > ) obj ).access );
-	}
+  protected final MappedAccessData.Factory<? extends MappedAccessData<T>, T> storageFactory;
 
-	@Override
-	public int hashCode()
-	{
-		return access.hashCode();
-	}
+  @Override
+  public boolean equals(final Object obj) {
 
-	public abstract int getSizeInBytes();
+	return obj instanceof MappedObject<?, ?> &&
+			access.equals(((MappedObject<?, ?>)obj).access);
+  }
 
-	protected MappedObject(
-			final T access,
-			final MappedAccessData.Factory< ? extends MappedAccessData< T >, T > storageFactory )
-	{
-		this.access = access;
-		this.storageFactory = storageFactory;
-	}
+  @Override
+  public int hashCode() {
 
-	protected void set( final O obj )
-	{
-		access.copyFrom( obj.access, getSizeInBytes() );
-	}
+	return access.hashCode();
+  }
 
-	protected abstract O createRef();
+  public abstract int getSizeInBytes();
+
+  protected MappedObject(
+		  final T access,
+		  final MappedAccessData.Factory<? extends MappedAccessData<T>, T> storageFactory) {
+
+	this.access = access;
+	this.storageFactory = storageFactory;
+  }
+
+  protected void set(final O obj) {
+
+	access.copyFrom(obj.access, getSizeInBytes());
+  }
+
+  protected abstract O createRef();
 }

@@ -6,11 +6,11 @@ import java.util.Set;
 /**
  * minimal subset of Guava Multiset interface.
  */
-public interface Multiset< E > extends Collection< E >
-{
-	public int count( E element );
+public interface Multiset<E> extends Collection<E> {
 
-//	public Set< E > elementSet();
+  int count(E element);
 
-	public Set< LabelMultisetType.Entry< E > > entrySet();
+  //	public Set< E > elementSet();
+
+  Set<LabelMultisetType.Entry<E>> entrySet();
 }
