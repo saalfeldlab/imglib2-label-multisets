@@ -73,16 +73,14 @@ public class LabelUtils {
 		nextListOffset += list.getSizeInBytes();
 	  }
 	}
-	list.releaseRef(ref);
 
-	final byte[] bytes = new byte[VolatileLabelMultisetArray.getRequiredNumberOfBytes(argMax.size(), data, nextListOffset)];
+	final byte[] bytes = new byte[VolatileLabelMultisetArray.getRequiredNumberOfBytes(0, listEntryOffsets, nextListOffset)];
 
 	final ByteBuffer bb = ByteBuffer.wrap(bytes);
 
-	bb.putInt(argMax.size());
-	for (final TLongIterator it = argMax.iterator(); it.hasNext(); ) {
-	  bb.putLong(it.next());
-	}
+	/* No longer serialized out ArgMax; we do this by specifying the ArgMax size as 0;
+	 * It's now calculated during deserializtaion instead.*/
+	bb.putInt(0);
 
 	for (final int d : data) {
 	  bb.putInt(d);
@@ -112,7 +110,7 @@ public class LabelUtils {
 
 	final int argMaxSize = bb.getInt();
 	LOG.debug("Data contains {} arg maxes", argMaxSize);
-	final long[] argMax = new long[argMaxSize];
+	long[] argMax = new long[argMaxSize];
 	for (int i = 0; i < argMaxSize; ++i) {
 	  argMax[i] = bb.getLong();
 	}
@@ -129,7 +127,18 @@ public class LabelUtils {
 	for (int i = 0; i < listDataSize; ++i) {
 	  ByteUtils.putByte(bb.get(), listData.data, i);
 	}
-	return new VolatileLabelMultisetArray(data, listData, true, argMax);
+
+	if (argMaxSize == 0) {
+	  argMax = new long[data.length];
+	  for (int i = 0; i < data.length; i++) {
+		final int listDataIdx = data[i];
+		final LabelMultisetEntryList lmel = new LabelMultisetEntryList();
+		lmel.referToDataAt(listData, listDataIdx);
+		argMax[i] = LabelUtils.getArgMax(lmel);
+	  }
+	}
+
+	return new VolatileLabelMultisetArray(data, listData, listDataSize, true, argMax);
   }
 
   public static long getArgMax(final Collection<? extends Entry<Label>> labelMultisetEntries) {

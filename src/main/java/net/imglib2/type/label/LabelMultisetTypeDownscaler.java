@@ -146,7 +146,7 @@ public class LabelMultisetTypeDownscaler {
 
   public static int getSerializedVolatileLabelMultisetArraySize(final VolatileLabelMultisetArray array) {
 
-	return VolatileLabelMultisetArray.getRequiredNumberOfBytes(array);
+	return VolatileLabelMultisetArray.getRequiredNumberOfBytes(0, array.getCurrentStorageArray(), (int)array.getListDataUsedSizeInBytes());
   }
 
   public static void serializeVolatileLabelMultisetArray(final VolatileLabelMultisetArray array, final byte[] bytes) {
@@ -156,9 +156,10 @@ public class LabelMultisetTypeDownscaler {
 
 	final ByteBuffer bb = ByteBuffer.wrap(bytes);
 
-	final long[] argMax = array.argMaxCopy();
-	bb.putInt(argMax.length);
-	Arrays.stream(argMax).forEach(bb::putLong);
+	/* NOTE: We don't want to serialize the argMax, so indicate a `0` for it's size.
+	 * 	This is necessary for backwards compatibility.
+	 * 	The argMax is calulated during deserialization (check LabelUtils.fromBytes) */
+	bb.putInt(0);
 
 	for (final int d : curStorage) {
 	  bb.putInt(d);
