@@ -7,7 +7,7 @@ public class LabelMultisetToUnsignedLongConverter implements Converter<LabelMult
 
   @Override
   public void convert(final LabelMultisetType input, final UnsignedLongType output) {
-	//output.set( input.entrySet().iterator().next().getElement().id() );
+
 	output.set(input.argMax());
   }
 }

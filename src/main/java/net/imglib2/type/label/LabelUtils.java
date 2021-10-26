@@ -1,9 +1,7 @@
 package net.imglib2.type.label;
 
 import gnu.trove.iterator.TIntIterator;
-import gnu.trove.iterator.TLongIterator;
 import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.list.array.TLongArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.converter.Converters;
@@ -24,52 +22,54 @@ public class LabelUtils {
 		  final Iterable<LabelMultisetType> lmts,
 		  final int numElements) {
 
-	final int[] data = new int[numElements];
-	final TLongArrayList argMax = new TLongArrayList();
+	final int[] listEntryOffsets = new int[numElements];
 
 	final LongMappedAccessData listData = LongMappedAccessData.factory.createStorage(32);
 
 	final LabelMultisetEntryList list = new LabelMultisetEntryList(listData, 0);
 	final LabelMultisetEntryList list2 = new LabelMultisetEntryList();
-	final TIntObjectHashMap<TIntArrayList> listHashesAndOffsets = new TIntObjectHashMap<>();
-	final LabelMultisetEntry tentry = new LabelMultisetEntry(0, 1), ref = list.createRef();
+	final TIntObjectHashMap<TIntArrayList> offsetsForHashes = new TIntObjectHashMap<>();
+	final LabelMultisetEntry iteratorEntry = new LabelMultisetEntry(0, 1);
+	final LabelMultisetEntry addEntry = new LabelMultisetEntry(0, 1);
+	final LabelMultisetEntry tmpAddEntry = new LabelMultisetEntry(0, 1);
+
 	int nextListOffset = 0;
 	int o = 0;
+
 	for (final LabelMultisetType lmt : lmts) {
 	  list.createListAt(listData, nextListOffset);
 
-	  for (final Entry<Label> entry : lmt.entrySet()) {
+	  for (final LabelMultisetEntry entry : lmt.entrySetWithRef(iteratorEntry)) {
 		final long id = entry.getElement().id();
-		tentry.setId(id);
-		tentry.setCount(entry.getCount());
-		list.add(tentry, ref);
+		addEntry.setId(id);
+		addEntry.setCount(entry.getCount());
+		list.add(addEntry, tmpAddEntry);
 	  }
-	  argMax.add(lmt.argMax());
 
 	  boolean makeNewList = true;
 	  final int hash = list.hashCode();
-	  TIntArrayList listOffsetsForHash = listHashesAndOffsets.get(hash);
-	  if (listOffsetsForHash != null) {
-		for (final TIntIterator it = listOffsetsForHash.iterator(); it.hasNext(); ) {
-		  final int listOffset = it.next();
-		  list2.referToDataAt(listData, listOffset);
+	  TIntArrayList offsetsForHash = offsetsForHashes.get(hash);
+	  if (offsetsForHash != null) {
+		for (final TIntIterator it = offsetsForHash.iterator(); it.hasNext(); ) {
+		  final int offset = it.next();
+		  list2.referToDataAt(listData, offset);
 		  if (list.equals(list2)) {
 			makeNewList = false;
-			data[o++] = listOffset;
+			listEntryOffsets[o++] = offset;
 			break;
 		  }
 		}
 	  }
 	  if (makeNewList) {
-		final boolean insertNeeded = listOffsetsForHash == null;
-		if (listOffsetsForHash == null)
-		  listOffsetsForHash = new TIntArrayList();
+		final boolean insertNeeded = offsetsForHash == null;
+		if (offsetsForHash == null)
+		  offsetsForHash = new TIntArrayList();
 
-		listOffsetsForHash.add(nextListOffset);
+		offsetsForHash.add(nextListOffset);
 		if (insertNeeded)
-		  listHashesAndOffsets.put(hash, listOffsetsForHash);
+		  offsetsForHashes.put(hash, offsetsForHash);
 
-		data[o++] = nextListOffset;
+		listEntryOffsets[o++] = nextListOffset;
 		nextListOffset += list.getSizeInBytes();
 	  }
 	}
@@ -82,7 +82,7 @@ public class LabelUtils {
 	 * It's now calculated during deserializtaion instead.*/
 	bb.putInt(0);
 
-	for (final int d : data) {
+	for (final int d : listEntryOffsets) {
 	  bb.putInt(d);
 	}
 

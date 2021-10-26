@@ -1,9 +1,5 @@
 /**
  * @author Philipp Hanslovsky
- * @author Philipp Hanslovsky
- */
-/**
- * @author Philipp Hanslovsky
  *
  *
  *
