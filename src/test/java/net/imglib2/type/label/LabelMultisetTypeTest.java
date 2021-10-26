@@ -1,6 +1,5 @@
 package net.imglib2.type.label;
 
-import net.imglib2.type.label.LabelMultisetType.Entry;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -37,11 +36,11 @@ public class LabelMultisetTypeTest {
 	  multipleEntries.add(new LabelMultisetEntry(rnd.nextInt(1000), rnd.nextInt(10)));
 	final LabelMultisetType lmtMultipleEntries = new LabelMultisetType(multipleEntries);
 	Assert.assertEquals(numEntries, lmtMultipleEntries.entrySet().size());
-	final Iterator<? extends Entry<Label>> itExpected = multipleEntries.iterator();
-	final Iterator<Entry<Label>> itActual = lmtMultipleEntries.entrySet().iterator();
+	final Iterator<? extends LabelMultisetEntry> itExpected = multipleEntries.iterator();
+	final Iterator<LabelMultisetType.Entry<Label>> itActual = lmtMultipleEntries.entrySet().iterator();
 	while (itExpected.hasNext() || itActual.hasNext()) {
-	  final Entry<Label> entryExpected = itExpected.next();
-	  final Entry<Label> entryActual = itActual.next();
+	  final LabelMultisetEntry entryExpected = itExpected.next();
+	  final LabelMultisetType.Entry<Label> entryActual = itActual.next();
 	  Assert.assertEquals(entryExpected.getElement().id(), entryActual.getElement().id());
 	  Assert.assertEquals(entryExpected.getCount(), entryActual.getCount());
 	}
