@@ -1,17 +1,17 @@
 package net.imglib2.type.label;
 
+import gnu.trove.impl.Constants;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.array.TLongArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.map.hash.TLongIntHashMap;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.type.label.LabelMultisetType.Entry;
 import net.imglib2.view.Views;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 public class LabelMultisetTypeDownscaler {
 
@@ -26,71 +26,73 @@ public class LabelMultisetTypeDownscaler {
 
   public static VolatileLabelMultisetArray createDownscaledCell(
 		  final RandomAccessibleInterval<LabelMultisetType> source,
-		  final int[] factor,
+		  final int[] downscaleFactor,
 		  final int maxNumEntriesPerPixel) {
 
 	final RandomAccess<LabelMultisetType> randomAccess = source.randomAccess();
 
 	final int numDim = source.numDimensions();
-	final long[] maxOffset = new long[numDim];
+	final long[] sourceShape = new long[numDim];
 	final long[] cellOffset = new long[numDim]; // not in units of cells
-	final long[] totalOffset = new long[numDim]; // absolute, inside of
-	// cell
+	final long[] totalOffset = new long[numDim]; // absolute, inside of cell
 
 	for (int i = 0; i < numDim; i++) {
-	  maxOffset[i] = source.max(i) + 1; // interval is inclusive
+	  sourceShape[i] = source.max(i) + 1; // interval is inclusive
 	}
 
 	int numDownscaledLists = 1;
 	for (int i = 0; i < numDim; i++) {
-	  numDownscaledLists *= (long)Math.ceil((double)maxOffset[i] / factor[i]);
+	  long cellDimLength = (long)Math.ceil((double)sourceShape[i] / downscaleFactor[i]);
+	  numDownscaledLists *= cellDimLength;
 	}
-	final int[] data = new int[numDownscaledLists];
 
-	final LongMappedAccessData listData = LongMappedAccessData.factory.createStorage(32);
+	final int[] listEntryOffsets = new int[numDownscaledLists];
+
+	final LongMappedAccessData listEntryData = LongMappedAccessData.factory.createStorage(32);
 
 	// list: create new list
 	// list2: compare with other lists
-	final LabelMultisetEntryList list = new LabelMultisetEntryList(listData, 0);
+	final LabelMultisetEntryList list = new LabelMultisetEntryList(listEntryData, 0);
 	final LabelMultisetEntryList list2 = new LabelMultisetEntryList();
-	final LabelMultisetEntry entry = new LabelMultisetEntry(0, 1);
+
+	final LabelMultisetEntry iteratorEntry = new LabelMultisetEntry(0, 1);
+
+	final LabelMultisetEntry addEntry = new LabelMultisetEntry(0, 1);
+	final LabelMultisetEntry tmpAddEntry = new LabelMultisetEntry(0, 1);
+
 	int nextListOffset = 0;
 	int o = 0;
 
 	final TIntObjectHashMap<TIntArrayList> offsetsForHashes = new TIntObjectHashMap<>();
 
 	final TLongArrayList argMax = new TLongArrayList();
+	final TLongIntHashMap cellEntryMap = new TLongIntHashMap(Constants.DEFAULT_CAPACITY, Constants.DEFAULT_LOAD_FACTOR, -1, -1);
 
 	for (int d = 0; d < numDim; ) {
 
-	  list.createListAt(listData, nextListOffset);
+	  list.createListAt(listEntryData, nextListOffset);
 
-	  for (int i = 0; i < numDim; i++) {
-		totalOffset[i] = cellOffset[i];
-	  }
+	  System.arraycopy(cellOffset, 0, totalOffset, 0, numDim);
 
 	  // populate list with all entries
 	  for (int g = 0; g < numDim; ) {
 
 		randomAccess.setPosition(totalOffset);
-		for (final Entry<Label> sourceEntry : randomAccess.get().entrySet()) {
+
+		for (LabelMultisetEntry sourceEntry : randomAccess.get().entrySetWithRef(iteratorEntry)) {
 		  final long id = sourceEntry.getElement().id();
-		  //					labelsInBlock.add( id );
-		  final int searchIndex = list.binarySearch(id);
-		  if (list.size() > 0 && searchIndex >= 0) {
-			// just add 1 to the count of existing label
-			list.get(searchIndex).setCount(list.get(searchIndex).getCount() + sourceEntry.getCount());
+		  final int count = sourceEntry.getCount();
+		  if (cellEntryMap.containsKey(id)) {
+			cellEntryMap.put(id, cellEntryMap.get(id) + count);
 		  } else {
-			entry.setId(sourceEntry.getElement().id());
-			entry.setCount(sourceEntry.getCount());
-			list.add(entry);
-			list.sortById();
+			cellEntryMap.put(id, count);
 		  }
 		}
 
+		/* This controls movement within the cell*/
 		for (g = 0; g < numDim; g++) {
 		  totalOffset[g] += 1;
-		  if (totalOffset[g] < cellOffset[g] + factor[g] && totalOffset[g] < maxOffset[g]) {
+		  if (totalOffset[g] < cellOffset[g] + downscaleFactor[g] && totalOffset[g] < sourceShape[g]) {
 			break;
 		  } else {
 			totalOffset[g] = cellOffset[g];
@@ -98,10 +100,20 @@ public class LabelMultisetTypeDownscaler {
 		}
 	  }
 
+	  cellEntryMap.forEachEntry((id, count) -> {
+		addEntry.setId(id);
+		addEntry.setCount(count);
+		list.add(addEntry, tmpAddEntry);
+		return true;
+	  });
+
+	  cellEntryMap.clear();
+	  list.sortById();
+
 	  // sort by count and restrict to maxNumEntriesPerPixel (if
 	  // applicable)
 	  if (maxNumEntriesPerPixel > 0 && list.size() > maxNumEntriesPerPixel) {
-		// change order of e2, e1 for decreasing sort
+		// change order of e2, e1 for decreasing sort by count
 		list.sort((e1, e2) -> Long.compare(e2.getCount(), e1.getCount()));
 		list.limitSize(maxNumEntriesPerPixel);
 		list.sortById();
@@ -117,31 +129,32 @@ public class LabelMultisetTypeDownscaler {
 	  }
 	  for (int i = 0; i < offsetsForHash.size(); ++i) {
 		final int offset = offsetsForHash.get(i);
-		list2.referToDataAt(listData, offset);
+		list2.referToDataAt(listEntryData, offset);
 		if (list.equals(list2)) {
 		  makeNewList = false;
-		  data[o++] = offset;
+		  listEntryOffsets[o++] = offset;
 		  break;
 		}
 	  }
 	  if (makeNewList) {
-		data[o++] = nextListOffset;
+		listEntryOffsets[o++] = nextListOffset;
 		offsetsForHash.add(nextListOffset);
 		nextListOffset += list.getSizeInBytes();
 
 		// add entry with max count
 	  }
 
+	  /* this controls movement between cells */
 	  for (d = 0; d < numDim; d++) {
-		cellOffset[d] += factor[d];
-		if (cellOffset[d] < maxOffset[d]) {
+		cellOffset[d] += downscaleFactor[d];
+		if (cellOffset[d] < sourceShape[d]) {
 		  break;
 		} else {
 		  cellOffset[d] = 0;
 		}
 	  }
 	}
-	return new VolatileLabelMultisetArray(data, listData, nextListOffset, true, argMax.toArray());
+	return new VolatileLabelMultisetArray(listEntryOffsets, listEntryData, nextListOffset, true, argMax.toArray());
   }
 
   public static int getSerializedVolatileLabelMultisetArraySize(final VolatileLabelMultisetArray array) {
@@ -172,3 +185,4 @@ public class LabelMultisetTypeDownscaler {
   }
 
 }
+
