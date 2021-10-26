@@ -10,6 +10,7 @@ import net.imglib2.util.Fraction;
 import java.math.BigInteger;
 import java.util.AbstractSet;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -242,6 +243,36 @@ public class LabelMultisetType extends AbstractNativeType<LabelMultisetType> imp
 
 	access.getValue(i.get(), entries);
 	return entrySet;
+  }
+
+  public Set<LabelMultisetEntry> entrySetWithRef(LabelMultisetEntry ref) {
+
+	access.getValue(i.get(), entries);
+	return new AbstractSet<LabelMultisetEntry>() {
+
+	  @Override public Iterator<LabelMultisetEntry> iterator() {
+
+		return new Iterator<LabelMultisetEntry>() {
+
+		  int idx = 0;
+
+		  @Override public boolean hasNext() {
+
+			return idx < size();
+		  }
+
+		  @Override public LabelMultisetEntry next() {
+
+			return entries.get(idx++, ref);
+		  }
+		};
+	  }
+
+	  @Override public int size() {
+
+		return entries.size();
+	  }
+	};
   }
 
   @Override
