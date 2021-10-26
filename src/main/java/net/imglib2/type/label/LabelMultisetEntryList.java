@@ -49,6 +49,22 @@ public class LabelMultisetEntryList
 
   /**
    * Performs a binary search for entry with
+   * {@link LabelMultisetEntry#getId()} <tt>id</tt> in the entire list. Note
+   * that you <b>must</b> {@link #sortById sort} the list before doing a
+   * search.
+   *
+   * @param id  the value to search for
+   * @param ref the reference used to store the intermediate values while comparing
+   * @return the absolute offset in the list of the value, or its negative
+   * insertion point into the sorted list.
+   */
+  public int binarySearch(final long id, LabelMultisetEntry ref) {
+
+	return binarySearch(id, 0, size(), ref);
+  }
+
+  /**
+   * Performs a binary search for entry with
    * {@link LabelMultisetEntry#getId()} <tt>id</tt> in the specified range.
    * Note that you <b>must</b> {@link #sortById sort} the list or the range
    * before doing a search.
@@ -68,10 +84,37 @@ public class LabelMultisetEntryList
 	  throw new ArrayIndexOutOfBoundsException(toIndex);
 	}
 
+	final LabelMultisetEntry ref = createRef();
+	final int idx = binarySearch(id, fromIndex, toIndex, ref);
+	releaseRef(ref);
+	return idx;
+  }
+
+  /**
+   * Performs a binary search for entry with
+   * {@link LabelMultisetEntry#getId()} <tt>id</tt> in the specified range.
+   * Note that you <b>must</b> {@link #sortById sort} the list or the range
+   * before doing a search.
+   *
+   * @param id        the value to search for
+   * @param fromIndex the lower boundary of the range (inclusive)
+   * @param toIndex   the upper boundary of the range (exclusive)
+   * @param ref       the reference used to store the intermediate values while comparing
+   * @return the absolute offset in the list of the value, or its negative
+   * insertion point into the sorted list.
+   */
+  public int binarySearch(final long id, final int fromIndex, final int toIndex, LabelMultisetEntry ref) {
+
+	if (fromIndex < 0) {
+	  throw new ArrayIndexOutOfBoundsException(fromIndex);
+	}
+	if (toIndex > size()) {
+	  throw new ArrayIndexOutOfBoundsException(toIndex);
+	}
+
 	int low = fromIndex;
 	int high = toIndex - 1;
 
-	final LabelMultisetEntry ref = createRef();
 	while (low <= high) {
 	  final int mid = low + high >>> 1;
 	  final long midVal = get(mid, ref).getId();
@@ -80,11 +123,9 @@ public class LabelMultisetEntryList
 	  } else if (midVal > id) {
 		high = mid - 1;
 	  } else {
-		releaseRef(ref);
 		return mid; // value found
 	  }
 	}
-	releaseRef(ref);
 	return -(low + 1); // value not found.
   }
 
@@ -97,11 +138,7 @@ public class LabelMultisetEntryList
 	sort((o1, o2) -> {
 	  final long i1 = o1.getId();
 	  final long i2 = o2.getId();
-	  return i1 < i2
-			  ? -1
-			  : i2 < i1
-			  ? 1
-			  : 0;
+	  return Long.compare(i1, i2);
 	});
   }
 
