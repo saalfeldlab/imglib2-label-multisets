@@ -23,33 +23,33 @@ package net.imglib2.type.label;
  *
  * @author Tobias Pietzsch &gt;tobias.pietzsch@gmail.com&lt;
  */
-public interface MappedAccess< T extends MappedAccess< T > >
-{
-	public void putByte( final byte value, final int offset );
+public interface MappedAccess<T extends MappedAccess<T>> {
 
-	public byte getByte( final int offset );
+  void putByte(final byte value, final int offset);
 
-	public void putBoolean( final boolean value, final int offset );
+  byte getByte(final int offset);
 
-	public boolean getBoolean( final int offset );
+  void putBoolean(final boolean value, final int offset);
 
-	public void putInt( final int value, final int offset );
+  boolean getBoolean(final int offset);
 
-	public int getInt( final int offset );
+  void putInt(final int value, final int offset);
 
-	public void putLong( final long value, final int offset );
+  int getInt(final int offset);
 
-	public long getLong( final int offset );
+  void putLong(final long value, final int offset);
 
-	public void putFloat( final float value, final int offset );
+  long getLong(final int offset);
 
-	public float getFloat( final int offset );
+  void putFloat(final float value, final int offset);
 
-	public void putDouble( final double value, final int offset );
+  float getFloat(final int offset);
 
-	public double getDouble( final int offset );
+  void putDouble(final double value, final int offset);
 
-	public void copyFrom( final T fromAccess, final int numBytes );
+  double getDouble(final int offset);
 
-	public void swapWith( final T access, final int numBytes );
+  void copyFrom(final T fromAccess, final int numBytes);
+
+  void swapWith(final T access, final int numBytes);
 }

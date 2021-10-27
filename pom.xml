@@ -122,6 +122,17 @@
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.janelia.saalfeldlab</groupId>
+			<artifactId>n5-imglib2</artifactId>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>net.imglib2</groupId>
+					<artifactId>imglib2-label-multisets</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 	</dependencies>
 
 	<repositories>

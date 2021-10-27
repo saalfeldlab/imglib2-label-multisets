@@ -3,21 +3,20 @@ package net.imglib2.type.label;
 import java.util.Iterator;
 import java.util.List;
 
-public interface RefList< O > extends List< O >
-{
-	public static interface RefIterator< O > extends Iterator< O >
-	{
-		public void release();
+public interface RefList<O> extends List<O> {
 
-		public void reset();
-	}
+  interface RefIterator<O> extends Iterator<O> {
 
-	public O createRef();
+	void release();
 
-	public void releaseRef( final O ref );
+	void reset();
+  }
 
-	public O get( final int index, final O ref );
+  O createRef();
 
-	@Override
-	public RefIterator< O > iterator();
+  void releaseRef(final O ref);
+
+  O get(final int index, final O ref);
+
+  @Override RefIterator<O> iterator();
 }
