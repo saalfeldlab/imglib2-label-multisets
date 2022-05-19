@@ -10,7 +10,7 @@
 
 	<groupId>net.imglib2</groupId>
 	<artifactId>imglib2-label-multisets</artifactId>
-	<version>0.11.4-SNAPSHOT</version>
+	<version>0.11.5-SNAPSHOT</version>
 
 	<name>ImgLib2 Label Multisets</name>
 	<description>Implementation of label multisets as an ImgLib2 native type.</description>
