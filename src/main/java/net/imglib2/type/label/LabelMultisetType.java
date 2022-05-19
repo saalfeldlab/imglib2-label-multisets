@@ -239,6 +239,17 @@ public class LabelMultisetType extends AbstractNativeType<LabelMultisetType> imp
 	return entries.get(pos).getCount();
   }
 
+  public int countWithRef(final long id, LabelMultisetEntry ref) {
+
+	access.getValue(i.get(), entries);
+	final int pos = entries.binarySearch(id, ref);
+	if (pos < 0) {
+	  return 0;
+	}
+
+	return entries.get(pos).getCount();
+  }
+
   public Set<Entry<Label>> entrySet() {
 
 	access.getValue(i.get(), entries);
