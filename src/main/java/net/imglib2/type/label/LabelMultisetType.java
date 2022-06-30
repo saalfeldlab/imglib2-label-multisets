@@ -190,9 +190,20 @@ public class LabelMultisetType extends AbstractNativeType<LabelMultisetType> imp
 	return entries.isEmpty();
   }
 
+  public boolean contains(final Label l, LabelMultisetEntry ref) {
+
+	return contains(l.id(), ref);
+  }
+
   public boolean contains(final Label l) {
 
 	return contains(l.id());
+  }
+
+  public boolean contains(final long id, LabelMultisetEntry ref) {
+
+	access.getValue(i.get(), entries);
+	return entries.binarySearch(id, ref) >= 0;
   }
 
   public boolean contains(final long id) {
@@ -212,11 +223,33 @@ public class LabelMultisetType extends AbstractNativeType<LabelMultisetType> imp
 	return true;
   }
 
+  public boolean containsAll(final long[] ids, LabelMultisetEntry ref) {
+
+	access.getValue(i.get(), entries);
+	for (final long id : ids) {
+	  if (entries.binarySearch(id, ref) < 0) {
+		return false;
+	  }
+	}
+	return true;
+  }
+
   public boolean containsAll(final Collection<? extends Label> c) {
 
 	access.getValue(i.get(), entries);
 	for (final Label l : c) {
 	  if (entries.binarySearch(l.id()) < 0) {
+		return false;
+	  }
+	}
+	return true;
+  }
+
+  public boolean containsAll(final Collection<? extends Label> c, LabelMultisetEntry ref) {
+
+	access.getValue(i.get(), entries);
+	for (final Label l : c) {
+	  if (entries.binarySearch(l.id(), ref) < 0) {
 		return false;
 	  }
 	}
