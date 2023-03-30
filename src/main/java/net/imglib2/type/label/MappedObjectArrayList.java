@@ -1,6 +1,7 @@
 package net.imglib2.type.label;
 
 import java.util.AbstractList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.ListIterator;
@@ -23,6 +24,8 @@ public class MappedObjectArrayList<O extends MappedObject<O, T>, T extends Mappe
   private long elementBaseOffset;
 
   private final T access;
+
+  private int size;
 
   private final ConcurrentLinkedQueue<O> tmpObjRefs = new ConcurrentLinkedQueue<>();
 
@@ -54,6 +57,7 @@ public class MappedObjectArrayList<O extends MappedObject<O, T>, T extends Mappe
 	this.baseOffset = baseOffset;
 	this.elementBaseOffset = baseOffset + ByteUtils.INT_SIZE;
 	data.updateAccess(access, baseOffset);
+	size = access.getInt(0);
   }
 
   public void createListAt(final MappedAccessData<T> data, final long baseOffset) {
@@ -75,6 +79,7 @@ public class MappedObjectArrayList<O extends MappedObject<O, T>, T extends Mappe
   protected void setSize(final int size) {
 
 	access.putInt(size, 0);
+	this.size = size;
   }
 
   @Override
@@ -127,7 +132,7 @@ public class MappedObjectArrayList<O extends MappedObject<O, T>, T extends Mappe
   @Override
   public int size() {
 
-	return access.getInt(0);
+	return size; //access.getInt(0);
   }
 
   @Override
@@ -167,7 +172,35 @@ public class MappedObjectArrayList<O extends MappedObject<O, T>, T extends Mappe
 	return null;
   }
 
-  @Override
+	@Override public boolean addAll(Collection<? extends O> c) {
+
+	  return addAll(size(), c);
+	}
+
+	public boolean addAll(Collection<? extends O> c, O ref) {
+
+		return addAll(size(), c, ref);
+	}
+
+	@Override public boolean addAll(int index, Collection<? extends O> c) {
+
+	  	final O ref = createRef();
+		final boolean modified = addAll(index, c, ref);
+		releaseRef(ref);
+		return modified;
+	}
+
+	public boolean addAll(int index, Collection<? extends O> c, O ref) {
+
+		boolean modified = false;
+		for (O e : c) {
+			add(index++, e, ref);
+			modified = true;
+		}
+		return modified;
+	}
+
+	@Override
   public boolean add(final O obj) {
 
 	final O ref = createRef();
@@ -192,18 +225,23 @@ public class MappedObjectArrayList<O extends MappedObject<O, T>, T extends Mappe
   @Override
   public void add(final int index, final O obj) {
 
-	final int size = size();
-	ensureCapacity(size + 1);
-	setSize(size + 1);
 	final O ref = createRefAt(index);
-	if (index < size) {
-	  final O shift = createRefAt(index + 1);
-	  shift.access.copyFrom(ref.access, elementSizeInBytes() * (size - index));
-	  releaseRef(shift);
-	}
-	ref.set(obj);
+    add(index, obj ,ref);
 	releaseRef(ref);
   }
+
+	public void add(final int index, final O obj, final O ref) {
+		final int size = size();
+		ensureCapacity(size + 1);
+		setSize(size + 1);
+		if (index < size) {
+			final O shift = createRefAt(index + 1);
+			shift.access.copyFrom(ref.access, elementSizeInBytes() * (size - index));
+			releaseRef(shift);
+		}
+		setRefAt(ref, index);
+		ref.set(obj);
+	}
 
   @Override
   public RefIterator<O> iterator() {
@@ -307,7 +345,7 @@ public class MappedObjectArrayList<O extends MappedObject<O, T>, T extends Mappe
   public void limitSize(final int sizeLimit) {
 
 	if (size() > sizeLimit)
-	  access.putInt( /* value */ sizeLimit, /* offset */ 0);
+		setSize(sizeLimit);
   }
 
   private void quicksort(final int low, final int high, final Comparator<? super O> comparator, final O tmpRef1, final O tmpRef2, final O tmpRef3) {
