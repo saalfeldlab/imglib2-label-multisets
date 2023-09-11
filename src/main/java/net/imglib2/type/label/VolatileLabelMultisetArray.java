@@ -5,132 +5,128 @@ import net.imglib2.img.basictypeaccess.volatiles.VolatileArrayDataAccess;
 
 public class VolatileLabelMultisetArray implements VolatileAccess, VolatileArrayDataAccess<VolatileLabelMultisetArray> {
 
-	private boolean isValid = false;
+  private boolean isValid = false;
 
-	private final int[] data;
+  private final int[] data;
 
-	private final long[] argMax;
+  private final long[] argMax;
 
-	private final LongMappedAccessData listData;
+  private final LongMappedAccessData listData;
 
-	private final long listDataUsedSizeInBytes;
+  private final long listDataUsedSizeInBytes;
 
-	public VolatileLabelMultisetArray(final int numEntities, final boolean isValid, final long[] argMax) {
+  public VolatileLabelMultisetArray(final int numEntities, final boolean isValid, final long[] argMax) {
 
-		this.data = new int[numEntities];
-		this.argMax = argMax;
-		listData = LongMappedAccessData.factory.createStorage(16);
-		listDataUsedSizeInBytes = 0;
-		new MappedObjectArrayList<>(LabelMultisetEntry.type, listData, 0);
-		this.isValid = isValid;
-	}
+	this.data = new int[numEntities];
+	this.argMax = argMax;
+	listData = LongMappedAccessData.factory.createStorage(16);
+	listDataUsedSizeInBytes = 0;
+	this.isValid = isValid;
+  }
 
-	public VolatileLabelMultisetArray(
-			final int[] data,
-			final LongMappedAccessData listData,
-			final boolean isValid,
-			final long[] argMax) {
+  public VolatileLabelMultisetArray(
+		  final int[] data,
+		  final LongMappedAccessData listData,
+		  final boolean isValid,
+		  final long[] argMax) {
 
-		this(data, listData, -1, isValid, argMax);
-	}
+	this(data, listData, -1, isValid, argMax);
+  }
 
-	public VolatileLabelMultisetArray(
-			final int[] data,
-			final LongMappedAccessData listData,
-			final long listDataUsedSizeInBytes,
-			final boolean isValid,
-			final long[] argMax) {
+  public VolatileLabelMultisetArray(
+		  final int[] data,
+		  final LongMappedAccessData listData,
+		  final long listDataUsedSizeInBytes,
+		  final boolean isValid,
+		  final long[] argMax) {
 
-		this.data = data;
-		this.argMax = argMax;
-		this.listData = listData;
-		this.listDataUsedSizeInBytes = listDataUsedSizeInBytes;
-		this.isValid = isValid;
-	}
+	this.data = data;
+	this.argMax = argMax;
+	this.listData = listData;
+	this.listDataUsedSizeInBytes = listDataUsedSizeInBytes;
+	this.isValid = isValid;
+  }
 
-	public void getValue(final int index, final LabelMultisetEntryList ref) {
+  public void getValue(final int index, final LabelMultisetEntryList ref) {
 
-		ref.referToDataAt(listData, data[index]);
-	}
+	ref.referToDataAt(listData, data[index]);
+  }
 
-	@Override
-	public VolatileLabelMultisetArray createArray(final int numEntities) {
+  @Override
+  public VolatileLabelMultisetArray createArray(final int numEntities) {
 
-		return new VolatileLabelMultisetArray(numEntities, true, new long[]{Label.INVALID});
-	}
+	return new VolatileLabelMultisetArray(numEntities, true, new long[]{Label.INVALID});
+  }
 
-	@Override
-	public VolatileLabelMultisetArray createArray(final int numEntities, final boolean isValid) {
+  @Override
+  public VolatileLabelMultisetArray createArray(final int numEntities, final boolean isValid) {
 
-		return new VolatileLabelMultisetArray(numEntities, isValid, new long[]{Label.INVALID});
-	}
+	return new VolatileLabelMultisetArray(numEntities, isValid, new long[]{Label.INVALID});
+  }
 
-	@Override
-	public int[] getCurrentStorageArray() {
+  @Override
+  public int[] getCurrentStorageArray() {
 
-		return data;
-	}
+	return data;
+  }
 
-	public LongMappedAccessData getListData() {
+  public LongMappedAccessData getListData() {
 
-		return listData;
-	}
+	return listData;
+  }
 
-	public long getListDataUsedSizeInBytes() {
+  public long getListDataUsedSizeInBytes() {
 
-		return listDataUsedSizeInBytes;
-	}
+	return listDataUsedSizeInBytes;
+  }
 
-	@Override
-	public boolean isValid() {
+  @Override
+  public boolean isValid() {
 
-		return isValid;
-	}
+	return isValid;
+  }
 
-	public int getRequiredNumberOfBytes() {
+  public int getRequiredNumberOfBytes() {
 
-		return getRequiredNumberOfBytes(this);
-	}
+	return getRequiredNumberOfBytes(this);
+  }
 
-	public static int getRequiredNumberOfBytes(final VolatileLabelMultisetArray array) {
+  public static int getRequiredNumberOfBytes(final VolatileLabelMultisetArray array) {
 
-		return getRequiredNumberOfBytes(array.argMax.length, array.data, (int) array.getListDataUsedSizeInBytes());
-	}
+	return getRequiredNumberOfBytes(array.argMax.length, array.data, (int)array.getListDataUsedSizeInBytes());
+  }
 
-	public static int getRequiredNumberOfBytes(final int numArgMax, final int[] listOffsets, final int listSizeInBytes) {
+  public static int getRequiredNumberOfBytes(final int numArgMax, final int[] listOffsets, final int listSizeInBytes) {
 
-		return 0
-				+ Integer.BYTES + Long.BYTES * numArgMax
-				+ Integer.BYTES * listOffsets.length
-				+ listSizeInBytes;
-	}
+	return 0
+			+ Integer.BYTES + Long.BYTES * numArgMax
+			+ Integer.BYTES * listOffsets.length
+			+ listSizeInBytes;
+  }
 
-	@Override
-	public int getArrayLength() {
+  @Override
+  public int getArrayLength() {
 
-		return this.data.length;
-	}
+	return this.data.length;
+  }
 
-	public long argMax(final int offset) {
+  public long argMax(final int offset) {
 
-		return this.argMax[offset];
-	}
+	return this.argMax[offset];
+  }
 
-	public void setArgMax(final int offset, final long val) {
+  public void setArgMax(final int offset, final long val) {
 
-		this.argMax[offset] = val;
-	}
+	this.argMax[offset] = val;
+  }
 
-	public long[] argMaxCopy() {
+  public long[] argMaxCopy() {
 
-		return this.argMax.clone();
-	}
+	return this.argMax.clone();
+  }
 
-	private int toIndex(final int offset) {
+  private int toIndex(final int offset) {
 
-		return data[offset];
-	}
-
-	// TODO do we need this? I do not think so but I am not 100% sure
-	//	public static DefaultEmptyArrayCreator< VolatileLabelMultisetArray > emptyArrayCreator = new DefaultEmptyArrayCreator<>( new VolatileLabelMultisetArray( 1, false ) );
+	return data[offset];
+  }
 }

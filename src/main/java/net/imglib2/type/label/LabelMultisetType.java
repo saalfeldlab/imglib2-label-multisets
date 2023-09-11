@@ -2,6 +2,7 @@ package net.imglib2.type.label;
 
 import net.imglib2.img.NativeImg;
 import net.imglib2.type.AbstractNativeType;
+import net.imglib2.type.Index;
 import net.imglib2.type.NativeTypeFactory;
 import net.imglib2.type.label.RefList.RefIterator;
 import net.imglib2.type.numeric.IntegerType;
@@ -55,7 +56,6 @@ public class LabelMultisetType extends AbstractNativeType<LabelMultisetType> imp
 	public LabelMultisetType(final LabelMultisetEntry entry) {
 
 		this();
-		access.getValue(i.get(), this.entries);
 		this.entries.add(entry);
 		this.access.setArgMax(i.get(), entry.getId());
 	}
@@ -64,16 +64,24 @@ public class LabelMultisetType extends AbstractNativeType<LabelMultisetType> imp
 	public LabelMultisetType(final LabelMultisetEntryList entries) {
 
 		this();
-		access.getValue(i.get(), this.entries);
 		this.entries.addAll(entries);
 		updateArgMax();
 	}
 
 	private LabelMultisetType(final NativeImg<?, VolatileLabelMultisetArray> img, final VolatileLabelMultisetArray access) {
+		this(img, access, 0);
+	}
+
+	private LabelMultisetType(final NativeImg<?, VolatileLabelMultisetArray> img, final VolatileLabelMultisetArray access, final int idx) {
 
 		this.entries = new LabelMultisetEntryList();
 		this.img = img;
 		this.access = access;
+		this.i.set(idx);
+
+		if (this.access != null) {
+			this.access.getValue(i.get(), this.entries);
+		}
 		this.entrySet = new AbstractSet<Entry<Label>>() {
 
 			private final RefIterator<Entry<Label>> iterator = new RefIterator<Entry<Label>>() {
@@ -121,6 +129,8 @@ public class LabelMultisetType extends AbstractNativeType<LabelMultisetType> imp
 			@Override
 			public Stream<Entry<Label>> stream() {
 
+
+
 				throw new UnsupportedOperationException("Streams are not compatible with " + getClass().getName() + " because its iterator reuses the same reference.");
 			}
 
@@ -153,9 +163,43 @@ public class LabelMultisetType extends AbstractNativeType<LabelMultisetType> imp
 	@Override
 	public LabelMultisetType copy() {
 
-		final LabelMultisetType that = new LabelMultisetType(img, access);
-		that.i.set(this.i.get());
-		return that;
+
+		if (img != null) {
+			/* If backed by an image, don't copy it, just reference the same access. */
+			final LabelMultisetType labelMultisetType = new LabelMultisetType();
+			entrySet();
+			labelMultisetType.entrySet();
+			labelMultisetType.entries.addAll(entries);
+			return labelMultisetType;
+		} else {
+			/* copy the listData */
+			final long byteSize = access.getListData().size();
+			final int longSize = access.getListData().data.length;
+			final LongMappedAccessData listDataCopy = LongMappedAccessData.factory.createStorage(byteSize);
+			System.arraycopy(access.getListData().data, 0, listDataCopy.data, 0, longSize);
+
+			/* copy the data */
+			final int[] data = access.getCurrentStorageArray();
+			final int[] dataCopy = new int[data.length];
+			System.arraycopy(data, 0, dataCopy, 0, data.length);
+
+			/* get a new access with all the copies */
+			final VolatileLabelMultisetArray accessCopy = new VolatileLabelMultisetArray(
+					dataCopy,
+					listDataCopy,
+					access.getListDataUsedSizeInBytes(),
+					access.isValid(),
+					access.argMaxCopy());
+			/* get a new type instance */
+			final LabelMultisetType that = new LabelMultisetType(img, accessCopy);
+			return that;
+		}
+
+
+	}
+
+	public int listHashCode() {
+		return entries.hashCode();
 	}
 
 	@Override
