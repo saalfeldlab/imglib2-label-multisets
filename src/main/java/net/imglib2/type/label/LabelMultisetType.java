@@ -165,7 +165,7 @@ public class LabelMultisetType extends AbstractNativeType<LabelMultisetType> imp
 
 
 		if (img != null) {
-			/* If backed by an image, don't copy it, just reference the same access. */
+			/* If backed by an image, copy the entries only, not the entire backing data. */
 			final LabelMultisetType labelMultisetType = new LabelMultisetType();
 			entrySet();
 			labelMultisetType.entrySet();
@@ -191,7 +191,7 @@ public class LabelMultisetType extends AbstractNativeType<LabelMultisetType> imp
 					access.isValid(),
 					access.argMaxCopy());
 			/* get a new type instance */
-			final LabelMultisetType that = new LabelMultisetType(img, accessCopy);
+			final LabelMultisetType that = new LabelMultisetType(null, accessCopy);
 			return that;
 		}
 
@@ -199,7 +199,7 @@ public class LabelMultisetType extends AbstractNativeType<LabelMultisetType> imp
 	}
 
 	public int listHashCode() {
-		return entries.hashCode();
+		return entrySet().hashCode();
 	}
 
 	@Override
