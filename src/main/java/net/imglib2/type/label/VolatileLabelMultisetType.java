@@ -11,141 +11,141 @@ public class VolatileLabelMultisetType
 		extends Volatile<LabelMultisetType>
 		implements NativeType<VolatileLabelMultisetType> {
 
-  public static final VolatileLabelMultisetType type = new VolatileLabelMultisetType();
+	public static final VolatileLabelMultisetType type = new VolatileLabelMultisetType();
 
-  // this is the constructor if you want it to read from an array
-  public VolatileLabelMultisetType(final NativeImg<?, VolatileLabelMultisetArray> img) {
+	// this is the constructor if you want it to read from an array
+	public VolatileLabelMultisetType(final NativeImg<?, VolatileLabelMultisetArray> img) {
 
-	super(new LabelMultisetType(img));
-  }
+		super(new LabelMultisetType(img));
+	}
 
-  // this is the constructor if you want to specify the dataAccess
-  public VolatileLabelMultisetType(final VolatileLabelMultisetArray access, final boolean isValid) {
+	// this is the constructor if you want to specify the dataAccess
+	public VolatileLabelMultisetType(final VolatileLabelMultisetArray access, final boolean isValid) {
 
-	super(new LabelMultisetType(access), isValid);
-  }
+		super(new LabelMultisetType(access), isValid);
+	}
 
-  // this is the constructor if you want it to be a variable
-  public VolatileLabelMultisetType() {
+	// this is the constructor if you want it to be a variable
+	public VolatileLabelMultisetType() {
 
-	super(new LabelMultisetType(), true);
-  }
+		super(new LabelMultisetType(), true);
+	}
 
-  // this is the constructor if you want it to be a variable
-  public VolatileLabelMultisetType(final LabelMultisetEntry entry) {
+	// this is the constructor if you want it to be a variable
+	public VolatileLabelMultisetType(final LabelMultisetEntry entry) {
 
-	super(new LabelMultisetType(entry), true);
-  }
+		super(new LabelMultisetType(entry), true);
+	}
 
-  // this is the constructor if you want it to be a variable
-  public VolatileLabelMultisetType(final LabelMultisetEntryList entries) {
+	// this is the constructor if you want it to be a variable
+	public VolatileLabelMultisetType(final LabelMultisetEntryList entries) {
 
-	super(new LabelMultisetType(entries), true);
-  }
+		super(new LabelMultisetType(entries), true);
+	}
 
-  protected VolatileLabelMultisetType(final LabelMultisetType t) {
+	protected VolatileLabelMultisetType(final LabelMultisetType t) {
 
-	super(t, true);
-  }
+		super(t, true);
+	}
 
-  @Override
-  public Fraction getEntitiesPerPixel() {
+	@Override
+	public Fraction getEntitiesPerPixel() {
 
-	return t.getEntitiesPerPixel();
-  }
+		return t.getEntitiesPerPixel();
+	}
 
-  @Override
-  public Index index() {
+	@Override
+	public Index index() {
 
-	return t.index();
-  }
+		return t.index();
+	}
 
-  @Override
-  public void updateIndex(final int i) {
+	@Override
+	public void updateIndex(final int i) {
 
-	t.updateIndex(i);
-  }
+		t.updateIndex(i);
+	}
 
-  @Override
-  public int getIndex() {
+	@Override
+	public int getIndex() {
 
-	return t.getIndex();
-  }
+		return t.getIndex();
+	}
 
-  @Override
-  public void incIndex() {
+	@Override
+	public void incIndex() {
 
-	t.incIndex();
-  }
+		t.incIndex();
+	}
 
-  @Override
-  public void incIndex(final int increment) {
+	@Override
+	public void incIndex(final int increment) {
 
-	t.incIndex(increment);
-  }
+		t.incIndex(increment);
+	}
 
-  @Override
-  public void decIndex() {
+	@Override
+	public void decIndex() {
 
-	t.decIndex();
-  }
+		t.decIndex();
+	}
 
-  @Override
-  public void decIndex(final int decrement) {
+	@Override
+	public void decIndex(final int decrement) {
 
-	t.decIndex(decrement);
-  }
+		t.decIndex(decrement);
+	}
 
-  @Override
-  public VolatileLabelMultisetType createVariable() {
+	@Override
+	public VolatileLabelMultisetType createVariable() {
 
-	return new VolatileLabelMultisetType();
-  }
+		return new VolatileLabelMultisetType();
+	}
 
-  @Override
-  public VolatileLabelMultisetType copy() {
+	@Override
+	public VolatileLabelMultisetType copy() {
 
-	return new VolatileLabelMultisetType(t.copy());
-  }
+		return new VolatileLabelMultisetType(t.copy());
+	}
 
-  @Override
-  public void set(final VolatileLabelMultisetType c) {
+	@Override
+	public void set(final VolatileLabelMultisetType c) {
 
-	throw new UnsupportedOperationException();
-  }
+		throw new UnsupportedOperationException();
+	}
 
-  @Override
-  public NativeTypeFactory<VolatileLabelMultisetType, ?> getNativeTypeFactory() {
+	@Override
+	public NativeTypeFactory<VolatileLabelMultisetType, ?> getNativeTypeFactory() {
 
-	throw new UnsupportedOperationException();
-  }
+		throw new UnsupportedOperationException();
+	}
 
-  @Override
-  public VolatileLabelMultisetType duplicateTypeOnSameNativeImg() {
+	@Override
+	public VolatileLabelMultisetType duplicateTypeOnSameNativeImg() {
 
-	return new VolatileLabelMultisetType(t.duplicateTypeOnSameNativeImg());
-  }
+		return new VolatileLabelMultisetType(t.duplicateTypeOnSameNativeImg());
+	}
 
-  @Override
-  public void updateContainer(final Object c) {
+	@Override
+	public void updateContainer(final Object c) {
 
-	t.updateContainer(c);
-	setValid(t.isValid());
-  }
+		t.updateContainer(c);
+		setValid(t.isValid());
+	}
 
-  @Override
-  public boolean valueEquals(final VolatileLabelMultisetType other) {
+	@Override
+	public boolean valueEquals(final VolatileLabelMultisetType other) {
 
-	return isValid() && other.isValid() && t.valueEquals(other.t);
-  }
+		return isValid() && other.isValid() && t.valueEquals(other.t);
+	}
 
-  public static VolatileLabelMultisetType singleEntryWithSingleOccurrence() {
+	public static VolatileLabelMultisetType singleEntryWithSingleOccurrence() {
 
-	return singleEntryWithNumOccurrences(1);
-  }
+		return singleEntryWithNumOccurrences(1);
+	}
 
-  public static VolatileLabelMultisetType singleEntryWithNumOccurrences(final int numOccurrences) {
+	public static VolatileLabelMultisetType singleEntryWithNumOccurrences(final int numOccurrences) {
 
-	return new VolatileLabelMultisetType(new LabelMultisetEntry(Label.INVALID, numOccurrences));
-  }
+		return new VolatileLabelMultisetType(new LabelMultisetEntry(Label.INVALID, numOccurrences));
+	}
 }

@@ -8,96 +8,96 @@ package net.imglib2.type.label;
  */
 public class LongMappedAccessData implements MappedAccessData<LongMappedAccess> {
 
-  /**
-   * The current data storage. This is changed when the array is
-   * {@link #resize(long) resized}.
-   */
-  protected long[] data;
+	/**
+	 * The current data storage. This is changed when the array is
+	 * {@link #resize(long) resized}.
+	 */
+	protected long[] data;
 
-  private long size;
+	private long size;
 
-  public long[] getData() {
+	public long[] getData() {
 
-	return data;
-  }
+		return data;
+	}
 
-  @Override
-  public LongMappedAccess createAccess() {
+	@Override
+	public LongMappedAccess createAccess() {
 
-	return new LongMappedAccess(this, 0);
-  }
+		return new LongMappedAccess(this, 0);
+	}
 
-  @Override
-  public void updateAccess(final LongMappedAccess access, final long baseOffset) {
+	@Override
+	public void updateAccess(final LongMappedAccess access, final long baseOffset) {
 
-	access.setDataArray(this);
-	access.setBaseOffset(baseOffset);
-  }
+		access.setDataArray(this);
+		access.setBaseOffset(baseOffset);
+	}
 
-  private long longSizeFromByteSize(final long byteSize) {
+	private long longSizeFromByteSize(final long byteSize) {
 
-	return (byteSize + ByteUtils.LONG_SIZE - 1) / ByteUtils.LONG_SIZE;
-  }
+		return (byteSize + ByteUtils.LONG_SIZE - 1) / ByteUtils.LONG_SIZE;
+	}
 
-  /**
-   * Create a new array containing {@code numElements} elements of
-   * {@code bytesPerElement} bytes each.
-   */
-  private LongMappedAccessData(final long size) {
+	/**
+	 * Create a new array containing {@code numElements} elements of
+	 * {@code bytesPerElement} bytes each.
+	 */
+	private LongMappedAccessData(final long size) {
 
-	final long longSize = longSizeFromByteSize(size);
-	if (longSize > Integer.MAX_VALUE)
-	  throw new IllegalArgumentException(
-			  "trying to create a " + getClass().getName() + " with more than " + ((long)ByteUtils.LONG_SIZE * Integer.MAX_VALUE) + " bytes.");
+		final long longSize = longSizeFromByteSize(size);
+		if (longSize > Integer.MAX_VALUE)
+			throw new IllegalArgumentException(
+					"trying to create a " + getClass().getName() + " with more than " + ((long) ByteUtils.LONG_SIZE * Integer.MAX_VALUE) + " bytes.");
 
-	this.size = size;
-	this.data = new long[(int)longSize];
-  }
+		this.size = size;
+		this.data = new long[(int) longSize];
+	}
 
-  @Override
-  public long size() {
+	@Override
+	public long size() {
 
-	return size;
-  }
+		return size;
+	}
 
-  /**
-   * {@inheritDoc} The storage array is reallocated and the old contents
-   * copied over.
-   */
-  @Override
-  public void resize(final long size) {
+	/**
+	 * {@inheritDoc} The storage array is reallocated and the old contents
+	 * copied over.
+	 */
+	@Override
+	public void resize(final long size) {
 
-	final long longSize = longSizeFromByteSize(size);
-	if (longSize == longSizeFromByteSize(this.size))
-	  return;
+		final long longSize = longSizeFromByteSize(size);
+		if (longSize == longSizeFromByteSize(this.size))
+			return;
 
-	if (longSize > Integer.MAX_VALUE)
-	  throw new IllegalArgumentException(
-			  "trying to resize a " + getClass().getName() + " with more than " + ((long)ByteUtils.LONG_SIZE * Integer.MAX_VALUE) + " bytes.");
+		if (longSize > Integer.MAX_VALUE)
+			throw new IllegalArgumentException(
+					"trying to resize a " + getClass().getName() + " with more than " + ((long) ByteUtils.LONG_SIZE * Integer.MAX_VALUE) + " bytes.");
 
-	final long[] datacopy = new long[(int)longSize];
-	final int copyLength = Math.min(data.length, datacopy.length);
-	System.arraycopy(data, 0, datacopy, 0, copyLength);
-	this.data = datacopy;
-	this.size = size;
-  }
+		final long[] datacopy = new long[(int) longSize];
+		final int copyLength = Math.min(data.length, datacopy.length);
+		System.arraycopy(data, 0, datacopy, 0, copyLength);
+		this.data = datacopy;
+		this.size = size;
+	}
 
-  /**
-   * A factory for {@link LongMappedAccessData}s.
-   */
-  public static final MappedAccessData.Factory<LongMappedAccessData, LongMappedAccess> factory =
-		  new MappedAccessData.Factory<LongMappedAccessData, LongMappedAccess>() {
+	/**
+	 * A factory for {@link LongMappedAccessData}s.
+	 */
+	public static final MappedAccessData.Factory<LongMappedAccessData, LongMappedAccess> factory =
+			new MappedAccessData.Factory<LongMappedAccessData, LongMappedAccess>() {
 
-			@Override
-			public LongMappedAccessData createStorage(final long size) {
+				@Override
+				public LongMappedAccessData createStorage(final long size) {
 
-			  return new LongMappedAccessData(size);
-			}
+					return new LongMappedAccessData(size);
+				}
 
-			@Override
-			public LongMappedAccess createAccess() {
+				@Override
+				public LongMappedAccess createAccess() {
 
-			  return new LongMappedAccess(null, 0);
-			}
-		  };
+					return new LongMappedAccess(null, 0);
+				}
+			};
 }

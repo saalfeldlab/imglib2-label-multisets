@@ -132,7 +132,7 @@ public class MappedObjectArrayList<O extends MappedObject<O, T>, T extends Mappe
   @Override
   public int size() {
 
-	return size; //access.getInt(0);
+	return size;
   }
 
   @Override

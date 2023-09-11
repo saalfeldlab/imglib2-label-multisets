@@ -2,6 +2,7 @@ package net.imglib2.type.label;
 
 import net.imglib2.img.NativeImg;
 import net.imglib2.type.AbstractNativeType;
+import net.imglib2.type.Index;
 import net.imglib2.type.NativeTypeFactory;
 import net.imglib2.type.label.RefList.RefIterator;
 import net.imglib2.type.numeric.IntegerType;
@@ -16,593 +17,640 @@ import java.util.stream.Stream;
 
 public class LabelMultisetType extends AbstractNativeType<LabelMultisetType> implements IntegerType<LabelMultisetType> {
 
-  public interface Entry<E> {
+	public interface Entry<E> {
 
-	E getElement();
+		E getElement();
 
-	int getCount();
-  }
+		int getCount();
+	}
 
-  public static final LabelMultisetType type = new LabelMultisetType();
+	public static final LabelMultisetType type = new LabelMultisetType();
 
-  private final NativeImg<?, VolatileLabelMultisetArray> img;
+	private final NativeImg<?, VolatileLabelMultisetArray> img;
 
-  private VolatileLabelMultisetArray access;
+	private VolatileLabelMultisetArray access;
 
-  private final LabelMultisetEntryList entries;
+	private final LabelMultisetEntryList entries;
 
-  private final Set<Entry<Label>> entrySet;
+	private final Set<Entry<Label>> entrySet;
 
-  // this is the constructor if you want it to read from an array
-  public LabelMultisetType(final NativeImg<?, VolatileLabelMultisetArray> img) {
+	// this is the constructor if you want it to read from an array
+	public LabelMultisetType(final NativeImg<?, VolatileLabelMultisetArray> img) {
 
-	this(img, null);
-  }
+		this(img, null);
+	}
 
-  // this is the constructor if you want to specify the dataAccess
-  public LabelMultisetType(final VolatileLabelMultisetArray access) {
+	// this is the constructor if you want to specify the dataAccess
+	public LabelMultisetType(final VolatileLabelMultisetArray access) {
 
-	this(null, access);
-  }
+		this(null, access);
+	}
 
-  // this is the constructor if you want it to be a variable
-  public LabelMultisetType() {
+	// this is the constructor if you want it to be a variable
+	public LabelMultisetType() {
 
-	this(null, new VolatileLabelMultisetArray(1, true, new long[]{Label.INVALID}));
-  }
+		this(null, new VolatileLabelMultisetArray(1, true, new long[]{Label.INVALID}));
+	}
 
-  // this is the constructor if you want it to be a variable
-  public LabelMultisetType(final LabelMultisetEntry entry) {
+	// this is the constructor if you want it to be a variable
+	public LabelMultisetType(final LabelMultisetEntry entry) {
 
-	this();
-	access.getValue(i.get(), this.entries);
-	this.entries.add(entry);
-	this.access.setArgMax(i.get(), entry.getId());
-  }
+		this();
+		this.entries.add(entry);
+		this.access.setArgMax(i.get(), entry.getId());
+	}
 
-  // this is the constructor if you want it to be a variable
-  public LabelMultisetType(final LabelMultisetEntryList entries) {
+	// this is the constructor if you want it to be a variable
+	public LabelMultisetType(final LabelMultisetEntryList entries) {
 
-	this();
-	access.getValue(i.get(), this.entries);
-	this.entries.addAll(entries);
-	updateArgMax();
-  }
+		this();
+		this.entries.addAll(entries);
+		updateArgMax();
+	}
 
-  private LabelMultisetType(final NativeImg<?, VolatileLabelMultisetArray> img, final VolatileLabelMultisetArray access) {
+	private LabelMultisetType(final NativeImg<?, VolatileLabelMultisetArray> img, final VolatileLabelMultisetArray access) {
+		this(img, access, 0);
+	}
 
-	this.entries = new LabelMultisetEntryList();
-	this.img = img;
-	this.access = access;
-	this.entrySet = new AbstractSet<Entry<Label>>() {
+	private LabelMultisetType(final NativeImg<?, VolatileLabelMultisetArray> img, final VolatileLabelMultisetArray access, final int idx) {
 
-	  private final RefIterator<Entry<Label>> iterator = new RefIterator<Entry<Label>>() {
+		this.entries = new LabelMultisetEntryList();
+		this.img = img;
+		this.access = access;
+		this.i.set(idx);
 
-		private final RefIterator<LabelMultisetEntry> it = entries.iterator();
-
-		@Override
-		public boolean hasNext() {
-
-		  return it.hasNext();
+		if (this.access != null) {
+			this.access.getValue(i.get(), this.entries);
 		}
+		this.entrySet = new AbstractSet<Entry<Label>>() {
 
-		@Override
-		public LabelMultisetEntry next() {
+			private final RefIterator<Entry<Label>> iterator = new RefIterator<Entry<Label>>() {
 
-		  return it.next();
-		}
+				private final RefIterator<LabelMultisetEntry> it = entries.iterator();
 
-		@Override
-		public void release() {
+				@Override
+				public boolean hasNext() {
 
-		  it.release();
-		}
+					return it.hasNext();
+				}
 
-		@Override
-		public void reset() {
+				@Override
+				public LabelMultisetEntry next() {
 
-		  it.reset();
-		}
-	  };
+					return it.next();
+				}
 
-	  @Override
-	  public RefIterator<Entry<Label>> iterator() {
+				@Override
+				public void release() {
 
-		iterator.reset();
-		return iterator;
-	  }
+					it.release();
+				}
 
-	  @Override
-	  public int size() {
+				@Override
+				public void reset() {
 
-		return entries.size();
-	  }
+					it.reset();
+				}
+			};
 
-	  @Override
-	  public Stream<Entry<Label>> stream() {
+			@Override
+			public RefIterator<Entry<Label>> iterator() {
 
-		throw new UnsupportedOperationException("Streams are not compatible with " + getClass().getName() + " because its iterator reuses the same reference.");
-	  }
+				iterator.reset();
+				return iterator;
+			}
 
-	  @Override
-	  public Stream<Entry<Label>> parallelStream() {
+			@Override
+			public int size() {
 
-		throw new UnsupportedOperationException("Streams are not compatible with " + getClass().getName() + " because its iterator reuses the same reference.");
-	  }
-	};
-  }
+				return entries.size();
+			}
 
-  @Override
-  public Fraction getEntitiesPerPixel() {
+			@Override
+			public Stream<Entry<Label>> stream() {
 
-	return new Fraction();
-  }
 
-  @Override
-  public void updateContainer(final Object c) {
 
-	access = img.update(c);
-  }
+				throw new UnsupportedOperationException("Streams are not compatible with " + getClass().getName() + " because its iterator reuses the same reference.");
+			}
 
-  @Override
-  public LabelMultisetType createVariable() {
+			@Override
+			public Stream<Entry<Label>> parallelStream() {
 
-	return new LabelMultisetType();
-  }
-
-  @Override
-  public LabelMultisetType copy() {
-
-	final LabelMultisetType that = new LabelMultisetType(img, access);
-	that.i.set(this.i.get());
-	return that;
-  }
-
-  @Override
-  public void set(final LabelMultisetType c) {
-
-	throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public NativeTypeFactory<LabelMultisetType, ?> getNativeTypeFactory() {
-
-	throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public LabelMultisetType duplicateTypeOnSameNativeImg() {
-
-	return new LabelMultisetType(img);
-  }
-
-  // ==== Multiset< SuperVoxel > =====
-
-  public int size() {
-
-	access.getValue(i.get(), entries);
-	return entries.multisetSize();
-  }
-
-  public boolean isEmpty() {
-
-	access.getValue(i.get(), entries);
-	return entries.isEmpty();
-  }
-
-  public boolean contains(final Label l, LabelMultisetEntry ref) {
-
-	return contains(l.id(), ref);
-  }
-
-  public boolean contains(final Label l) {
-
-	return contains(l.id());
-  }
-
-  public boolean contains(final long id, LabelMultisetEntry ref) {
-
-	access.getValue(i.get(), entries);
-	return entries.binarySearch(id, ref) >= 0;
-  }
-
-  public boolean contains(final long id) {
-
-	access.getValue(i.get(), entries);
-	return entries.binarySearch(id) >= 0;
-  }
-
-  public boolean containsAll(final long[] ids) {
-
-	access.getValue(i.get(), entries);
-	for (final long id : ids) {
-	  if (entries.binarySearch(id) < 0) {
-		return false;
-	  }
-	}
-	return true;
-  }
-
-  public boolean containsAll(final long[] ids, LabelMultisetEntry ref) {
-
-	access.getValue(i.get(), entries);
-	for (final long id : ids) {
-	  if (entries.binarySearch(id, ref) < 0) {
-		return false;
-	  }
-	}
-	return true;
-  }
-
-  public boolean containsAll(final Collection<? extends Label> c) {
-
-	access.getValue(i.get(), entries);
-	for (final Label l : c) {
-	  if (entries.binarySearch(l.id()) < 0) {
-		return false;
-	  }
-	}
-	return true;
-  }
-
-  public boolean containsAll(final Collection<? extends Label> c, LabelMultisetEntry ref) {
-
-	access.getValue(i.get(), entries);
-	for (final Label l : c) {
-	  if (entries.binarySearch(l.id(), ref) < 0) {
-		return false;
-	  }
-	}
-	return true;
-  }
-
-  public int count(final Label l) {
-
-	return count(l.id());
-  }
-
-  public int count(final long id) {
-
-	access.getValue(i.get(), entries);
-	final int pos = entries.binarySearch(id);
-	if (pos < 0) {
-	  return 0;
-	}
-
-	return entries.get(pos).getCount();
-  }
-
-  public int countWithRef(final long id, LabelMultisetEntry ref) {
-
-	access.getValue(i.get(), entries);
-	final int pos = entries.binarySearch(id, ref);
-	if (pos < 0) {
-	  return 0;
-	}
-
-	return entries.get(pos).getCount();
-  }
-
-  public Set<Entry<Label>> entrySet() {
-
-	access.getValue(i.get(), entries);
-	return entrySet;
-  }
-
-  public Set<LabelMultisetEntry> entrySetWithRef(LabelMultisetEntry ref) {
-
-	access.getValue(i.get(), entries);
-	return new AbstractSet<LabelMultisetEntry>() {
-
-	  @Override public Iterator<LabelMultisetEntry> iterator() {
-
-		return new Iterator<LabelMultisetEntry>() {
-
-		  int idx = 0;
-
-		  @Override public boolean hasNext() {
-
-			return idx < size();
-		  }
-
-		  @Override public LabelMultisetEntry next() {
-
-			return entries.get(idx++, ref);
-		  }
+				throw new UnsupportedOperationException("Streams are not compatible with " + getClass().getName() + " because its iterator reuses the same reference.");
+			}
 		};
-	  }
-
-	  @Override public int size() {
-
-		return entries.size();
-	  }
-	};
-  }
-
-  @Override
-  public String toString() {
-
-	access.getValue(i.get(), entries);
-	return entries.toString();
-  }
-
-  // for volatile type
-  boolean isValid() {
-
-	return access.isValid();
-  }
-
-  @Override
-  public boolean valueEquals(final LabelMultisetType other) {
-
-	if (entries.size() != other.entries.size()) {
-	  return false;
 	}
 
-	final RefIterator<LabelMultisetEntry> ai = entries.iterator();
-	final RefIterator<LabelMultisetEntry> bi = other.entries.iterator();
+	@Override
+	public Fraction getEntitiesPerPixel() {
 
-	while (ai.hasNext()) {
-	  final LabelMultisetEntry a = ai.next();
-	  final LabelMultisetEntry b = bi.next();
-	  if (!(a.getId() == b.getId() && a.getCount() == b.getCount())) {
-		return false;
-	  }
+		return new Fraction();
 	}
-	return true;
-  }
 
-  public VolatileLabelMultisetArray getAccess() {
+	@Override
+	public void updateContainer(final Object c) {
 
-	return this.access;
-  }
+		access = img.update(c);
+	}
 
-  @Override
-  public void inc() {
+	@Override
+	public LabelMultisetType createVariable() {
 
-	throw new UnsupportedOperationException();
-  }
+		return new LabelMultisetType();
+	}
 
-  @Override
-  public void dec() {
+	@Override
+	public LabelMultisetType copy() {
 
-	throw new UnsupportedOperationException();
-  }
 
-  @Override
-  public double getMaxValue() {
+		if (img != null) {
+			/* If backed by an image, copy the entries only, not the entire backing data. */
+			final LabelMultisetType labelMultisetType = new LabelMultisetType();
+			entrySet();
+			labelMultisetType.entrySet();
+			labelMultisetType.entries.addAll(entries);
+			return labelMultisetType;
+		} else {
+			/* copy the listData */
+			final long byteSize = access.getListData().size();
+			final int longSize = access.getListData().data.length;
+			final LongMappedAccessData listDataCopy = LongMappedAccessData.factory.createStorage(byteSize);
+			System.arraycopy(access.getListData().data, 0, listDataCopy.data, 0, longSize);
 
-	throw new UnsupportedOperationException();
-  }
+			/* copy the data */
+			final int[] data = access.getCurrentStorageArray();
+			final int[] dataCopy = new int[data.length];
+			System.arraycopy(data, 0, dataCopy, 0, data.length);
 
-  @Override
-  public double getMinValue() {
+			/* get a new access with all the copies */
+			final VolatileLabelMultisetArray accessCopy = new VolatileLabelMultisetArray(
+					dataCopy,
+					listDataCopy,
+					access.getListDataUsedSizeInBytes(),
+					access.isValid(),
+					access.argMaxCopy());
+			/* get a new type instance */
+			final LabelMultisetType that = new LabelMultisetType(null, accessCopy);
+			return that;
+		}
 
-	throw new UnsupportedOperationException();
-  }
 
-  @Override
-  public double getMinIncrement() {
+	}
 
-	throw new UnsupportedOperationException();
-  }
+	public int listHashCode() {
+		return entrySet().hashCode();
+	}
 
-  @Override
-  public int getBitsPerPixel() {
+	@Override
+	public void set(final LabelMultisetType c) {
 
-	throw new UnsupportedOperationException();
-  }
+		throw new UnsupportedOperationException();
+	}
 
-  @Override
-  public double getRealDouble() {
+	@Override
+	public NativeTypeFactory<LabelMultisetType, ?> getNativeTypeFactory() {
 
-	return getIntegerLong();
-  }
+		throw new UnsupportedOperationException();
+	}
 
-  @Override
-  public float getRealFloat() {
+	@Override
+	public LabelMultisetType duplicateTypeOnSameNativeImg() {
 
-	return getIntegerLong();
-  }
+		return new LabelMultisetType(img);
+	}
 
-  @Override
-  public double getImaginaryDouble() {
+	// ==== Multiset< SuperVoxel > =====
 
-	return 0;
-  }
+	public int size() {
 
-  @Override
-  public float getImaginaryFloat() {
+		access.getValue(i.get(), entries);
+		return entries.multisetSize();
+	}
 
-	return 0;
-  }
+	public boolean isEmpty() {
 
-  @Override
-  public void setReal(final float f) {
+		access.getValue(i.get(), entries);
+		return entries.isEmpty();
+	}
 
-	throw new UnsupportedOperationException();
-  }
+	public boolean contains(final Label l, LabelMultisetEntry ref) {
 
-  @Override
-  public void setReal(final double f) {
+		return contains(l.id(), ref);
+	}
 
-	throw new UnsupportedOperationException();
-  }
+	public boolean contains(final Label l) {
 
-  @Override
-  public void setImaginary(final float f) {
+		return contains(l.id());
+	}
 
-	throw new UnsupportedOperationException();
-  }
+	public boolean contains(final long id, LabelMultisetEntry ref) {
 
-  @Override
-  public void setImaginary(final double f) {
+		access.getValue(i.get(), entries);
+		return entries.binarySearch(id, ref) >= 0;
+	}
 
-	throw new UnsupportedOperationException();
-  }
+	public boolean contains(final long id) {
 
-  @Override
-  public void setComplexNumber(final float r, final float i) {
+		access.getValue(i.get(), entries);
+		return entries.binarySearch(id) >= 0;
+	}
 
-	throw new UnsupportedOperationException();
-  }
+	public boolean containsAll(final long[] ids) {
 
-  @Override
-  public void setComplexNumber(final double r, final double i) {
+		access.getValue(i.get(), entries);
+		for (final long id : ids) {
+			if (entries.binarySearch(id) < 0) {
+				return false;
+			}
+		}
+		return true;
+	}
 
-	throw new UnsupportedOperationException();
-  }
+	public boolean containsAll(final long[] ids, LabelMultisetEntry ref) {
 
-  @Override
-  public float getPowerFloat() {
+		access.getValue(i.get(), entries);
+		for (final long id : ids) {
+			if (entries.binarySearch(id, ref) < 0) {
+				return false;
+			}
+		}
+		return true;
+	}
 
-	return getRealFloat();
-  }
+	public boolean containsAll(final Collection<? extends Label> c) {
 
-  @Override
-  public double getPowerDouble() {
+		access.getValue(i.get(), entries);
+		for (final Label l : c) {
+			if (entries.binarySearch(l.id()) < 0) {
+				return false;
+			}
+		}
+		return true;
+	}
 
-	return getRealDouble();
-  }
+	public boolean containsAll(final Collection<? extends Label> c, LabelMultisetEntry ref) {
 
-  @Override
-  public float getPhaseFloat() {
+		access.getValue(i.get(), entries);
+		for (final Label l : c) {
+			if (entries.binarySearch(l.id(), ref) < 0) {
+				return false;
+			}
+		}
+		return true;
+	}
 
-	return 0;
-  }
+	public int count(final Label l) {
 
-  @Override
-  public double getPhaseDouble() {
+		return count(l.id());
+	}
 
-	return 0;
-  }
+	public int count(final long id) {
 
-  @Override
-  public void complexConjugate() {
+		access.getValue(i.get(), entries);
+		final int pos = entries.binarySearch(id);
+		if (pos < 0) {
+			return 0;
+		}
 
-	throw new UnsupportedOperationException();
-  }
+		return entries.get(pos).getCount();
+	}
 
-  @Override
-  public void add(final LabelMultisetType c) {
+	public int countWithRef(final long id, LabelMultisetEntry ref) {
 
-	throw new UnsupportedOperationException();
-  }
+		access.getValue(i.get(), entries);
+		final int pos = entries.binarySearch(id, ref);
+		if (pos < 0) {
+			return 0;
+		}
 
-  @Override
-  public void mul(final LabelMultisetType c) {
+		return entries.get(pos).getCount();
+	}
 
-	throw new UnsupportedOperationException();
-  }
+	public Set<Entry<Label>> entrySet() {
 
-  @Override
-  public void sub(final LabelMultisetType c) {
+		access.getValue(i.get(), entries);
+		return entrySet;
+	}
 
-	throw new UnsupportedOperationException();
-  }
+	public Set<LabelMultisetEntry> entrySetWithRef(LabelMultisetEntry ref) {
 
-  @Override
-  public void div(final LabelMultisetType c) {
+		access.getValue(i.get(), entries);
+		return new AbstractSet<LabelMultisetEntry>() {
 
-	throw new UnsupportedOperationException();
-  }
+			@Override
+			public Iterator<LabelMultisetEntry> iterator() {
 
-  @Override
-  public void setOne() {
+				return new Iterator<LabelMultisetEntry>() {
 
-	throw new UnsupportedOperationException();
-  }
+					int idx = 0;
 
-  @Override
-  public void setZero() {
+					@Override
+					public boolean hasNext() {
 
-	throw new UnsupportedOperationException();
-  }
+						return idx < size();
+					}
 
-  @Override
-  public void mul(final float c) {
+					@Override
+					public LabelMultisetEntry next() {
 
-	throw new UnsupportedOperationException();
-  }
+						return entries.get(idx++, ref);
+					}
+				};
+			}
 
-  @Override
-  public void mul(final double c) {
+			@Override
+			public int size() {
 
-	throw new UnsupportedOperationException();
-  }
+				return entries.size();
+			}
+		};
+	}
 
-  @Override
-  public int compareTo(final LabelMultisetType arg0) {
+	@Override
+	public String toString() {
 
-	throw new UnsupportedOperationException();
-  }
+		access.getValue(i.get(), entries);
+		return entries.toString();
+	}
 
-  @Override
-  public int getInteger() {
+	// for volatile type
+	boolean isValid() {
 
-	return (int)getIntegerLong();
-  }
+		return access.isValid();
+	}
 
-  @Override
-  public long getIntegerLong() {
+	@Override
+	public boolean valueEquals(final LabelMultisetType other) {
 
-	return argMax();
-  }
+		if (entries.size() != other.entries.size()) {
+			return false;
+		}
 
-  @Override
-  public BigInteger getBigInteger() {
+		final RefIterator<LabelMultisetEntry> ai = entries.iterator();
+		final RefIterator<LabelMultisetEntry> bi = other.entries.iterator();
 
-	final BigInteger mask = new BigInteger("FFFFFFFFFFFFFFFF", 16);
-	return BigInteger.valueOf(argMax()).and(mask);
-  }
+		while (ai.hasNext()) {
+			final LabelMultisetEntry a = ai.next();
+			final LabelMultisetEntry b = bi.next();
+			if (!(a.getId() == b.getId() && a.getCount() == b.getCount())) {
+				return false;
+			}
+		}
+		return true;
+	}
 
-  @Override
-  public void setInteger(final int f) {
+	public VolatileLabelMultisetArray getAccess() {
 
-	throw new UnsupportedOperationException();
-  }
+		return this.access;
+	}
 
-  @Override
-  public void setInteger(final long f) {
+	@Override
+	public void inc() {
 
-	throw new UnsupportedOperationException();
-  }
+		throw new UnsupportedOperationException();
+	}
 
-  @Override
-  public void setBigInteger(final BigInteger b) {
+	@Override
+	public void dec() {
 
-	throw new UnsupportedOperationException();
-  }
+		throw new UnsupportedOperationException();
+	}
 
-  public long argMax() {
+	@Override
+	public double getMaxValue() {
 
-	return this.access.argMax(i.get());
-  }
+		throw new UnsupportedOperationException();
+	}
 
-  public void updateArgMax() {
+	@Override
+	public double getMinValue() {
 
-	this.access.setArgMax(i.get(), LabelUtils.getArgMax(entrySet()));
-  }
+		throw new UnsupportedOperationException();
+	}
 
-  public static LabelMultisetType singleEntryWithSingleOccurrence() {
+	@Override
+	public double getMinIncrement() {
 
-	return singleEntryWithNumOccurrences(1);
-  }
+		throw new UnsupportedOperationException();
+	}
 
-  public static LabelMultisetType singleEntryWithNumOccurrences(final int numOccurrences) {
+	@Override
+	public int getBitsPerPixel() {
 
-	return new LabelMultisetType(new LabelMultisetEntry(Label.INVALID, numOccurrences));
-  }
+		throw new UnsupportedOperationException();
+	}
 
-  @Override
-  public void pow(final LabelMultisetType c) {
+	@Override
+	public double getRealDouble() {
 
-	throw new UnsupportedOperationException();
-  }
+		return getIntegerLong();
+	}
 
-  @Override
-  public void pow(final double d) {
+	@Override
+	public float getRealFloat() {
 
-	throw new UnsupportedOperationException();
-  }
+		return getIntegerLong();
+	}
+
+	@Override
+	public double getImaginaryDouble() {
+
+		return 0;
+	}
+
+	@Override
+	public float getImaginaryFloat() {
+
+		return 0;
+	}
+
+	@Override
+	public void setReal(final float f) {
+
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void setReal(final double f) {
+
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void setImaginary(final float f) {
+
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void setImaginary(final double f) {
+
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void setComplexNumber(final float r, final float i) {
+
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void setComplexNumber(final double r, final double i) {
+
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public float getPowerFloat() {
+
+		return getRealFloat();
+	}
+
+	@Override
+	public double getPowerDouble() {
+
+		return getRealDouble();
+	}
+
+	@Override
+	public float getPhaseFloat() {
+
+		return 0;
+	}
+
+	@Override
+	public double getPhaseDouble() {
+
+		return 0;
+	}
+
+	@Override
+	public void complexConjugate() {
+
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void add(final LabelMultisetType c) {
+
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void mul(final LabelMultisetType c) {
+
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void sub(final LabelMultisetType c) {
+
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void div(final LabelMultisetType c) {
+
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void setOne() {
+
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void setZero() {
+
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void mul(final float c) {
+
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void mul(final double c) {
+
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public int compareTo(final LabelMultisetType arg0) {
+
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public int getInteger() {
+
+		return (int) getIntegerLong();
+	}
+
+	@Override
+	public long getIntegerLong() {
+
+		return argMax();
+	}
+
+	@Override
+	public BigInteger getBigInteger() {
+
+		final BigInteger mask = new BigInteger("FFFFFFFFFFFFFFFF", 16);
+		return BigInteger.valueOf(argMax()).and(mask);
+	}
+
+	@Override
+	public void setInteger(final int f) {
+
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void setInteger(final long f) {
+
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void setBigInteger(final BigInteger b) {
+
+		throw new UnsupportedOperationException();
+	}
+
+	public long argMax() {
+
+		return this.access.argMax(i.get());
+	}
+
+	public void updateArgMax() {
+
+		this.access.setArgMax(i.get(), LabelUtils.getArgMax(entrySet()));
+	}
+
+	public static LabelMultisetType singleEntryWithSingleOccurrence() {
+
+		return singleEntryWithNumOccurrences(1);
+	}
+
+	public static LabelMultisetType singleEntryWithNumOccurrences(final int numOccurrences) {
+
+		return new LabelMultisetType(new LabelMultisetEntry(Label.INVALID, numOccurrences));
+	}
+
+	@Override
+	public void pow(final LabelMultisetType c) {
+
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void pow(final double d) {
+
+		throw new UnsupportedOperationException();
+	}
 }

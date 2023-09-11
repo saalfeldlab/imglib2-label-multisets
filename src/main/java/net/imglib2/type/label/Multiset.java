@@ -8,7 +8,7 @@ import java.util.Set;
  */
 public interface Multiset<E> extends Collection<E> {
 
-  int count(E element);
+	int count(E element);
 
-  Set<LabelMultisetType.Entry<E>> entrySet();
+	Set<LabelMultisetType.Entry<E>> entrySet();
 }

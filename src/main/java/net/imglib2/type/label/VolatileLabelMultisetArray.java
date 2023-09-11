@@ -21,7 +21,6 @@ public class VolatileLabelMultisetArray implements VolatileAccess, VolatileArray
 	this.argMax = argMax;
 	listData = LongMappedAccessData.factory.createStorage(16);
 	listDataUsedSizeInBytes = 0;
-	new MappedObjectArrayList<>(LabelMultisetEntry.type, listData, 0);
 	this.isValid = isValid;
   }
 
@@ -130,7 +129,4 @@ public class VolatileLabelMultisetArray implements VolatileAccess, VolatileArray
 
 	return data[offset];
   }
-
-  // TODO do we need this? I do not think so but I am not 100% sure
-  //	public static DefaultEmptyArrayCreator< VolatileLabelMultisetArray > emptyArrayCreator = new DefaultEmptyArrayCreator<>( new VolatileLabelMultisetArray( 1, false ) );
 }
