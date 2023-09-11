@@ -9,174 +9,174 @@ import java.util.Set;
 
 public class LabelMultiset implements Multiset<Label> {
 
-  private final LabelMultisetEntryList entries;
+	private final LabelMultisetEntryList entries;
 
-  private final int totalSize;
+	private final int totalSize;
 
-  private final Set<Entry<Label>> entrySet = new AbstractSet<Entry<Label>>() {
-
-	@Override
-	public Iterator<Entry<Label>> iterator() {
-
-	  return new Iterator<Entry<Label>>() {
-
-		private int i = 0;
+	private final Set<Entry<Label>> entrySet = new AbstractSet<Entry<Label>>() {
 
 		@Override
-		public boolean hasNext() {
+		public Iterator<Entry<Label>> iterator() {
 
-		  return i < size();
+			return new Iterator<Entry<Label>>() {
+
+				private int i = 0;
+
+				@Override
+				public boolean hasNext() {
+
+					return i < size();
+				}
+
+				@Override
+				public LabelMultisetEntry next() {
+
+					return entries.get(i++);
+				}
+			};
 		}
 
 		@Override
-		public LabelMultisetEntry next() {
+		public int size() {
 
-		  return entries.get(i++);
+			return entries.size();
 		}
-	  };
+	};
+
+	public LabelMultiset(final LabelMultisetEntryList entries) {
+
+		this.entries = entries;
+		int s = 0;
+		for (final LabelMultisetEntry entry : entries) {
+			s += entry.getCount();
+		}
+		this.totalSize = s;
+	}
+
+	public LabelMultiset(final LabelMultisetEntryList entries, final int size) {
+
+		this.entries = entries;
+		this.totalSize = size;
+	}
+
+	protected LabelMultiset(final int size) {
+
+		this.entries = new LabelMultisetEntryList();
+		this.totalSize = size;
+	}
+
+	/**
+	 * makes this object refer to a different multiset.
+	 */
+	protected void referToDataAt(final LongMappedAccessData data, final long baseOffset) {
+
+		entries.referToDataAt(data, baseOffset);
 	}
 
 	@Override
 	public int size() {
 
-	  return entries.size();
-	}
-  };
-
-  public LabelMultiset(final LabelMultisetEntryList entries) {
-
-	this.entries = entries;
-	int s = 0;
-	for (final LabelMultisetEntry entry : entries) {
-	  s += entry.getCount();
-	}
-	this.totalSize = s;
-  }
-
-  public LabelMultiset(final LabelMultisetEntryList entries, final int size) {
-
-	this.entries = entries;
-	this.totalSize = size;
-  }
-
-  protected LabelMultiset(final int size) {
-
-	this.entries = new LabelMultisetEntryList();
-	this.totalSize = size;
-  }
-
-  /**
-   * makes this object refer to a different multiset.
-   */
-  protected void referToDataAt(final LongMappedAccessData data, final long baseOffset) {
-
-	entries.referToDataAt(data, baseOffset);
-  }
-
-  @Override
-  public int size() {
-
-	return totalSize;
-  }
-
-  @Override
-  public boolean isEmpty() {
-
-	return entries.isEmpty();
-  }
-
-  @Override
-  public boolean contains(final Object o) {
-
-	return (o instanceof Label) &&
-			entries.binarySearch(((Label)o).id()) >= 0;
-  }
-
-  @Override
-  public boolean containsAll(final Collection<?> c) {
-
-	for (final Object e : c) {
-	  if (!contains(e)) {
-		return false;
-	  }
-	}
-	return true;
-  }
-
-  @Override
-  public int count(final Label l) {
-
-	final int pos = entries.binarySearch(l.id());
-	if (pos < 0) {
-	  return 0;
+		return totalSize;
 	}
 
-	return entries.get(pos).getCount();
-  }
+	@Override
+	public boolean isEmpty() {
 
-  @Override
-  public Set<Entry<Label>> entrySet() {
+		return entries.isEmpty();
+	}
 
-	return entrySet;
-  }
+	@Override
+	public boolean contains(final Object o) {
 
-  @Override
-  public String toString() {
+		return (o instanceof Label) &&
+				entries.binarySearch(((Label) o).id()) >= 0;
+	}
 
-	return entries.toString();
-  }
+	@Override
+	public boolean containsAll(final Collection<?> c) {
 
-  @Override
-  public Iterator<Label> iterator() {
+		for (final Object e : c) {
+			if (!contains(e)) {
+				return false;
+			}
+		}
+		return true;
+	}
 
-	throw new UnsupportedOperationException();
-  }
+	@Override
+	public int count(final Label l) {
 
-  @Override
-  public Object[] toArray() {
+		final int pos = entries.binarySearch(l.id());
+		if (pos < 0) {
+			return 0;
+		}
 
-	throw new UnsupportedOperationException();
-  }
+		return entries.get(pos).getCount();
+	}
 
-  @Override
-  public <T> T[] toArray(final T[] a) {
+	@Override
+	public Set<Entry<Label>> entrySet() {
 
-	throw new UnsupportedOperationException();
-  }
+		return entrySet;
+	}
 
-  @Override
-  public boolean add(final Label e) {
+	@Override
+	public String toString() {
 
-	throw new UnsupportedOperationException();
-  }
+		return entries.toString();
+	}
 
-  @Override
-  public boolean remove(final Object o) {
+	@Override
+	public Iterator<Label> iterator() {
 
-	throw new UnsupportedOperationException();
-  }
+		throw new UnsupportedOperationException();
+	}
 
-  @Override
-  public boolean addAll(final Collection<? extends Label> c) {
+	@Override
+	public Object[] toArray() {
 
-	throw new UnsupportedOperationException();
-  }
+		throw new UnsupportedOperationException();
+	}
 
-  @Override
-  public boolean removeAll(final Collection<?> c) {
+	@Override
+	public <T> T[] toArray(final T[] a) {
 
-	throw new UnsupportedOperationException();
-  }
+		throw new UnsupportedOperationException();
+	}
 
-  @Override
-  public boolean retainAll(final Collection<?> c) {
+	@Override
+	public boolean add(final Label e) {
 
-	throw new UnsupportedOperationException();
-  }
+		throw new UnsupportedOperationException();
+	}
 
-  @Override
-  public void clear() {
+	@Override
+	public boolean remove(final Object o) {
 
-	throw new UnsupportedOperationException();
-  }
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public boolean addAll(final Collection<? extends Label> c) {
+
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public boolean removeAll(final Collection<?> c) {
+
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public boolean retainAll(final Collection<?> c) {
+
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void clear() {
+
+		throw new UnsupportedOperationException();
+	}
 }

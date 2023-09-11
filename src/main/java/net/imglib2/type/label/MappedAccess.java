@@ -25,31 +25,31 @@ package net.imglib2.type.label;
  */
 public interface MappedAccess<T extends MappedAccess<T>> {
 
-  void putByte(final byte value, final int offset);
+	void putByte(final byte value, final int offset);
 
-  byte getByte(final int offset);
+	byte getByte(final int offset);
 
-  void putBoolean(final boolean value, final int offset);
+	void putBoolean(final boolean value, final int offset);
 
-  boolean getBoolean(final int offset);
+	boolean getBoolean(final int offset);
 
-  void putInt(final int value, final int offset);
+	void putInt(final int value, final int offset);
 
-  int getInt(final int offset);
+	int getInt(final int offset);
 
-  void putLong(final long value, final int offset);
+	void putLong(final long value, final int offset);
 
-  long getLong(final int offset);
+	long getLong(final int offset);
 
-  void putFloat(final float value, final int offset);
+	void putFloat(final float value, final int offset);
 
-  float getFloat(final int offset);
+	float getFloat(final int offset);
 
-  void putDouble(final double value, final int offset);
+	void putDouble(final double value, final int offset);
 
-  double getDouble(final int offset);
+	double getDouble(final int offset);
 
-  void copyFrom(final T fromAccess, final int numBytes);
+	void copyFrom(final T fromAccess, final int numBytes);
 
-  void swapWith(final T access, final int numBytes);
+	void swapWith(final T access, final int numBytes);
 }

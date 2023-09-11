@@ -20,71 +20,71 @@ import java.util.Objects;
 
 public abstract class AbstractLabelMultisetLoader implements CacheLoader<Long, Cell<VolatileLabelMultisetArray>> {
 
-  private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+	private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  protected final CellGrid grid;
+	protected final CellGrid grid;
 
-  private final long invalidLabel;
+	private final long invalidLabel;
 
-  public AbstractLabelMultisetLoader(final CellGrid grid) {
+	public AbstractLabelMultisetLoader(final CellGrid grid) {
 
-	this(grid, Label.INVALID);
-  }
-
-  public AbstractLabelMultisetLoader(final CellGrid grid, final long invalidLabel) {
-
-	this.grid = grid;
-	this.invalidLabel = invalidLabel;
-  }
-
-  protected abstract byte[] getData(long... gridPosition);
-
-  @Override
-  public Cell<VolatileLabelMultisetArray> get(final Long key) {
-
-	final int numDimensions = grid.numDimensions();
-
-	final long[] cellMin = new long[numDimensions];
-	final int[] cellSize = new int[numDimensions];
-	final long[] gridPosition = new long[numDimensions];
-	final int[] cellDimensions = new int[numDimensions];
-
-	grid.cellDimensions(cellDimensions);
-
-	grid.getCellDimensions(key, cellMin, cellSize);
-
-	for (int i = 0; i < numDimensions; ++i) {
-	  gridPosition[i] = cellMin[i] / cellDimensions[i];
+		this(grid, Label.INVALID);
 	}
 
-	final byte[] bytes = this.getData(gridPosition);
-	Objects.requireNonNull(bytes, "Expecting non-null byte array");
-	LOG.debug("Got {} bytes from loader.", bytes.length);
-	LOG.trace("Got bytes from loader: {}", bytes);
+	public AbstractLabelMultisetLoader(final CellGrid grid, final long invalidLabel) {
 
-	final int n = (int)Intervals.numElements(cellSize);
-	return new Cell<>(cellSize, cellMin, LabelUtils.fromBytes(bytes, n));
-  }
+		this.grid = grid;
+		this.invalidLabel = invalidLabel;
+	}
 
-  public static int argMaxListSizeInBytes(final int numEntries) {
+	protected abstract byte[] getData(long... gridPosition);
 
-	return Long.BYTES * numEntries + Integer.BYTES;
-  }
+	@Override
+	public Cell<VolatileLabelMultisetArray> get(final Long key) {
 
-  public static int listOffsetsSizeInBytes(final int numOffsets) {
+		final int numDimensions = grid.numDimensions();
 
-	return Integer.BYTES * numOffsets;
-  }
+		final long[] cellMin = new long[numDimensions];
+		final int[] cellSize = new int[numDimensions];
+		final long[] gridPosition = new long[numDimensions];
+		final int[] cellDimensions = new int[numDimensions];
 
-  public static VolatileLabelMultisetArray dummy(final int numElements, final long label) {
+		grid.cellDimensions(cellDimensions);
 
-	final LongMappedAccessData store = LongMappedAccessData.factory.createStorage(16);
-	final LongMappedAccess access = store.createAccess();
-	access.putInt(1, 0);
-	access.putLong(label, Integer.BYTES);
-	access.putInt(1, Integer.BYTES + Long.BYTES);
-	final int[] data = new int[numElements];
-	final long[] argMax = {label};
-	return new VolatileLabelMultisetArray(data, store, true, argMax);
-  }
+		grid.getCellDimensions(key, cellMin, cellSize);
+
+		for (int i = 0; i < numDimensions; ++i) {
+			gridPosition[i] = cellMin[i] / cellDimensions[i];
+		}
+
+		final byte[] bytes = this.getData(gridPosition);
+		Objects.requireNonNull(bytes, "Expecting non-null byte array");
+		LOG.debug("Got {} bytes from loader.", bytes.length);
+		LOG.trace("Got bytes from loader: {}", bytes);
+
+		final int n = (int) Intervals.numElements(cellSize);
+		return new Cell<>(cellSize, cellMin, LabelUtils.fromBytes(bytes, n));
+	}
+
+	public static int argMaxListSizeInBytes(final int numEntries) {
+
+		return Long.BYTES * numEntries + Integer.BYTES;
+	}
+
+	public static int listOffsetsSizeInBytes(final int numOffsets) {
+
+		return Integer.BYTES * numOffsets;
+	}
+
+	public static VolatileLabelMultisetArray dummy(final int numElements, final long label) {
+
+		final LongMappedAccessData store = LongMappedAccessData.factory.createStorage(16);
+		final LongMappedAccess access = store.createAccess();
+		access.putInt(1, 0);
+		access.putLong(label, Integer.BYTES);
+		access.putInt(1, Integer.BYTES + Long.BYTES);
+		final int[] data = new int[numElements];
+		final long[] argMax = {label};
+		return new VolatileLabelMultisetArray(data, store, true, argMax);
+	}
 }
