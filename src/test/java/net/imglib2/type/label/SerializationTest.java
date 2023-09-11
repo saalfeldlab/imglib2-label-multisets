@@ -30,14 +30,7 @@ public class SerializationTest {
 				Views.flatIterable(converted),
 				numElements);
 
-		final byte[] serializedOutOld = LabelUtils.serializeLabelMultisetTypesOld(
-				Views.flatIterable(converted),
-				numElements);
-
-		System.out.println(serializedOut.length + "\t" + serializedOutOld.length);
-
 		final VolatileLabelMultisetArray arr = LabelUtils.fromBytes(serializedOut, numElements);
-		final VolatileLabelMultisetArray arrOld = LabelUtils.fromBytes(serializedOutOld, numElements);
 		final byte[] serializedOutAfterDeserialication = new byte[LabelMultisetTypeDownscaler.getSerializedVolatileLabelMultisetArraySize(arr)];
 		LabelMultisetTypeDownscaler.serializeVolatileLabelMultisetArray(arr, serializedOutAfterDeserialication);
 

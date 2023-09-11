@@ -1,10 +1,8 @@
 package net.imglib2.type.label;
 
 import gnu.trove.impl.Constants;
-import gnu.trove.iterator.TIntIterator;
-import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.map.hash.TIntLongHashMap;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.converter.Converters;
 import net.imglib2.type.label.LabelMultisetType.Entry;
@@ -18,13 +16,36 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Collection;
 
+import static gnu.trove.impl.Constants.DEFAULT_CAPACITY;
+import static gnu.trove.impl.Constants.DEFAULT_LOAD_FACTOR;
+import static net.imglib2.type.label.AbstractLabelMultisetLoader.argMaxListSizeInBytes;
+import static net.imglib2.type.label.AbstractLabelMultisetLoader.listOffsetsSizeInBytes;
 import static net.imglib2.type.label.ByteUtils.INT_SIZE;
 
 public class LabelUtils {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
+	public static LabelMultisetType collapse(
+			final Iterable<LabelMultisetType> lmts,
+			final int numElements
+	) {
+		final LabelMultisetType result = new LabelMultisetType();
+		collapse(lmts, numElements, result);
+		return result;
+	}
 
+	public static void collapse(
+			final Iterable<LabelMultisetType> lmts,
+			final int numElements,
+			final LabelMultisetType result
+	) {
+		result.entrySet().clear();
+		final LabelMultisetEntry ref = new LabelMultisetEntry(0, 1);
+		for (LabelMultisetType lmt : lmts) {
+			result.entrySet().addAll(lmt.entrySetWithRef(ref));
+		}
+	}
 	public static byte[] serializeLabelMultisetTypes(
 			final Iterable<LabelMultisetType> lmts,
 			final int numElements) {
@@ -36,14 +57,14 @@ public class LabelUtils {
 		final int argMaxSize = INT_SIZE; // in reality, the int value is always `0`, with size of 4 bytes
 		final int offsetListSize = INT_SIZE * numElements;
 		final int legacyListSize = INT_SIZE; //See NOTE below
-		final int estimateEntryListSize = ((int)(1 + (5*Math.log(numElements))) * (legacyListSize + entrySizeInBytes));
+		final int estimateEntryListSize = ((int) (1 + (5 * Math.log(numElements))) * (legacyListSize + entrySizeInBytes));
 		final int initialSize = argMaxSize + offsetListSize + estimateEntryListSize;
 		final ByteArrayOutputStream dataBuffer = new ByteArrayOutputStream(initialSize);
 		/* No longer serialized out ArgMax; we do this by specifying the ArgMax size as 0;
 		 * It's now calculated during deserializtaion instead.*/
 		writeInt(dataBuffer, 0, ByteOrder.BIG_ENDIAN);
 
-		final TIntIntHashMap listOffsets = new TIntIntHashMap(Constants.DEFAULT_CAPACITY, Constants.DEFAULT_LOAD_FACTOR, -1, -1);
+		final TIntIntHashMap listOffsets = new TIntIntHashMap(DEFAULT_CAPACITY, Constants.DEFAULT_LOAD_FACTOR, -1, -1);
 
 		int nextListOffset = 0;
 
@@ -83,84 +104,6 @@ public class LabelUtils {
 		dataBuffer.write(ByteBuffer.allocate(4).order(byteOrder).putInt(value).array(), 0, 4);
 	}
 
-
-	public static byte[] serializeLabelMultisetTypesOld(
-			final Iterable<LabelMultisetType> lmts,
-			final int numElements) {
-
-		final int[] listEntryOffsets = new int[numElements];
-
-		final LongMappedAccessData listData = LongMappedAccessData.factory.createStorage(32);
-
-		final LabelMultisetEntryList list = new LabelMultisetEntryList(listData, 0);
-		final LabelMultisetEntryList list2 = new LabelMultisetEntryList();
-		final TIntObjectHashMap<TIntArrayList> offsetsForHashes = new TIntObjectHashMap<>();
-		final LabelMultisetEntry iteratorEntry = new LabelMultisetEntry(0, 1);
-		final LabelMultisetEntry addEntry = new LabelMultisetEntry(0, 1);
-		final LabelMultisetEntry tmpAddEntry = new LabelMultisetEntry(0, 1);
-
-		int nextListOffset = 0;
-		int o = 0;
-
-		for (final LabelMultisetType lmt : lmts) {
-			list.createListAt(listData, nextListOffset);
-
-			for (final LabelMultisetEntry entry : lmt.entrySetWithRef(iteratorEntry)) {
-				final long id = entry.getElement().id();
-				addEntry.setId(id);
-				addEntry.setCount(entry.getCount());
-				list.add(addEntry, tmpAddEntry);
-			}
-
-			boolean makeNewList = true;
-			final int hash = list.hashCode();
-			TIntArrayList offsetsForHash = offsetsForHashes.get(hash);
-			if (offsetsForHash != null) {
-				for (final TIntIterator it = offsetsForHash.iterator(); it.hasNext(); ) {
-					final int offset = it.next();
-					list2.referToDataAt(listData, offset);
-					if (list.equals(list2)) {
-						makeNewList = false;
-						listEntryOffsets[o++] = offset;
-						break;
-					}
-				}
-			}
-			if (makeNewList) {
-				final boolean insertNeeded = offsetsForHash == null;
-				if (offsetsForHash == null)
-					offsetsForHash = new TIntArrayList();
-
-				offsetsForHash.add(nextListOffset);
-				if (insertNeeded)
-					offsetsForHashes.put(hash, offsetsForHash);
-
-				listEntryOffsets[o++] = nextListOffset;
-				nextListOffset += list.getSizeInBytes();
-			}
-		}
-
-		final byte[] bytes = new byte[VolatileLabelMultisetArray.getRequiredNumberOfBytes(0, listEntryOffsets, nextListOffset)];
-
-		final ByteBuffer bb = ByteBuffer.wrap(bytes);
-
-		/* No longer serialized out ArgMax; we do this by specifying the ArgMax size as 0;
-		 * It's now calculated during deserializtaion instead.*/
-		bb.putInt(0);
-
-		for (final int d : listEntryOffsets) {
-			bb.putInt(d);
-		}
-
-		final byte[] test = new byte[nextListOffset];
-		for (int i = 0; i < nextListOffset; ++i) {
-			test[i] = ByteUtils.getByte(listData.data, i);
-			bb.put(ByteUtils.getByte(listData.data, i));
-		}
-
-		return bytes;
-	}
-
 	public static LabelMultisetType getOutOfBounds() {
 
 		return getOutOfBounds(1);
@@ -184,8 +127,9 @@ public class LabelUtils {
 		}
 
 		final int[] listEntryOffsets = new int[numElements];
-		final int listDataSize = bytes.length - (AbstractLabelMultisetLoader.listOffsetsSizeInBytes(listEntryOffsets.length)
-				+ AbstractLabelMultisetLoader.argMaxListSizeInBytes(argMax.length));
+		final int listOffsetsSize = listOffsetsSizeInBytes(listEntryOffsets.length);
+		final int argMaxListSize = argMaxListSizeInBytes(argMax.length);
+		final int listDataSize = bytes.length - (listOffsetsSize + argMaxListSize);
 		final LongMappedAccessData listData = LongMappedAccessData.factory.createStorage(listDataSize);
 
 		for (int i = 0; i < listEntryOffsets.length; ++i) {
@@ -198,11 +142,18 @@ public class LabelUtils {
 
 		if (argMaxSize == 0) {
 			argMax = new long[listEntryOffsets.length];
+			final TIntLongHashMap entryOffsetToArgMax = new TIntLongHashMap(DEFAULT_CAPACITY, DEFAULT_LOAD_FACTOR, -1, -1);
 			for (int i = 0; i < listEntryOffsets.length; i++) {
 				final int listDataIdx = listEntryOffsets[i];
-				final LabelMultisetEntryList lmel = new LabelMultisetEntryList();
-				lmel.referToDataAt(listData, listDataIdx);
-				argMax[i] = LabelUtils.getArgMax(lmel);
+				final Long cachedArgMax = entryOffsetToArgMax.get(listDataIdx);
+				if (cachedArgMax != entryOffsetToArgMax.getNoEntryValue()) {
+					argMax[i] = cachedArgMax;
+				} else {
+					final LabelMultisetEntryList lmel = new LabelMultisetEntryList();
+					lmel.referToDataAt(listData, listDataIdx);
+					argMax[i] = LabelUtils.getArgMax(lmel);
+					entryOffsetToArgMax.put(listDataIdx, argMax[i]);
+				}
 			}
 		}
 
