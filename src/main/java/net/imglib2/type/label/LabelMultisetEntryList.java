@@ -2,6 +2,7 @@ package net.imglib2.type.label;
 
 import net.imglib2.type.label.LabelMultisetType.Entry;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -11,6 +12,14 @@ public class LabelMultisetEntryList
 	public LabelMultisetEntryList() {
 
 		super(LabelMultisetEntry.type);
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (!(o instanceof LabelMultisetEntryList)) return false;
+		final long[] thisData = ((LongMappedAccessData) data).getData();
+		final long[] otherData = ((LongMappedAccessData) ((LabelMultisetEntryList) o).data).getData();
+		return Arrays.equals(thisData, otherData);
 	}
 
 	public LabelMultisetEntryList(final int capacity) {
