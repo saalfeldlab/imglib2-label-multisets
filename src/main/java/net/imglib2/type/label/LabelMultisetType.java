@@ -72,9 +72,26 @@ public class LabelMultisetType extends AbstractNativeType<LabelMultisetType> imp
 		this(img, access, 0);
 	}
 
+	private LabelMultisetEntry reference = null;
+
 	private LabelMultisetType(final NativeImg<?, VolatileLabelMultisetArray> img, final VolatileLabelMultisetArray access, final int idx) {
 
-		this.entries = new LabelMultisetEntryList();
+		this.entries = new LabelMultisetEntryList() {
+			@Override
+			public LabelMultisetEntry createRef() {
+				if (reference == null) {
+					return super.createRef();
+				} else return reference;
+			}
+
+			@Override
+			public void releaseRef(LabelMultisetEntry ref) {
+				if (reference != ref) {
+					super.releaseRef(ref);
+				}
+			}
+		};
+
 		this.img = img;
 		this.access = access;
 		this.i.set(idx);
@@ -100,10 +117,14 @@ public class LabelMultisetType extends AbstractNativeType<LabelMultisetType> imp
 					return it.next();
 				}
 
+
+
 				@Override
 				public void release() {
+					if (reference == null) {
+						it.release();
+					}
 
-					it.release();
 				}
 
 				@Override
@@ -333,38 +354,9 @@ public class LabelMultisetType extends AbstractNativeType<LabelMultisetType> imp
 		return entrySet;
 	}
 
-	public Set<LabelMultisetEntry> entrySetWithRef(LabelMultisetEntry ref) {
-
-		access.getValue(i.get(), entries);
-		return new AbstractSet<LabelMultisetEntry>() {
-
-			@Override
-			public Iterator<LabelMultisetEntry> iterator() {
-
-				return new Iterator<LabelMultisetEntry>() {
-
-					int idx = 0;
-
-					@Override
-					public boolean hasNext() {
-
-						return idx < size();
-					}
-
-					@Override
-					public LabelMultisetEntry next() {
-
-						return entries.get(idx++, ref);
-					}
-				};
-			}
-
-			@Override
-			public int size() {
-
-				return entries.size();
-			}
-		};
+	public Set<Entry<Label>> entrySetWithRef(LabelMultisetEntry ref) {
+		reference = ref;
+		return entrySet();
 	}
 
 	@Override

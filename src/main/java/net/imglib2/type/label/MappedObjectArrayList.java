@@ -17,7 +17,7 @@ public class MappedObjectArrayList<O extends MappedObject<O, T>, T extends Mappe
 
   private final O type;
 
-  private MappedAccessData<T> data;
+  protected MappedAccessData<T> data;
 
   private long baseOffset;
 
