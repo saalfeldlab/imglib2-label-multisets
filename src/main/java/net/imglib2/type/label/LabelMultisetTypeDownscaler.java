@@ -77,9 +77,9 @@ public class LabelMultisetTypeDownscaler {
 			// populate list with all entries
 			for (int g = 0; g < numDim; ) {
 
-				randomAccess.setPosition(totalOffset);
+				final LabelMultisetType labelMultisetType = randomAccess.setPositionAndGet(totalOffset);
 
-				for (LabelMultisetEntry sourceEntry : randomAccess.get().entrySetWithRef(iteratorEntry)) {
+				for (LabelMultisetType.Entry<Label> sourceEntry : labelMultisetType.entrySetWithRef(iteratorEntry)) {
 					final long id = sourceEntry.getElement().id();
 					final int count = sourceEntry.getCount();
 					if (cellEntryMap.containsKey(id)) {

@@ -52,7 +52,7 @@ public class LabelUtils {
 
 		final LabelMultisetEntry entryReference = new LabelMultisetEntry(0, 1);
 
-		final int entrySizeInBytes = entryReference.getSizeInBytes();
+		final int entrySizeInBytes = entryReference.getSizeInBytes(); // One Long for the element ID, and one int for the count ( 8 + 4 = 12)
 
 		final int argMaxSize = INT_SIZE; // in reality, the int value is always `0`, with size of 4 bytes
 		final int offsetListSize = INT_SIZE * numElements;
@@ -76,7 +76,7 @@ public class LabelUtils {
 			if (offsetsForHash != listOffsets.getNoEntryValue()) {
 				writeInt(dataBuffer, offsetsForHash, ByteOrder.BIG_ENDIAN);
 			} else {
-				for (final LabelMultisetEntry entry : lmt.entrySetWithRef(entryReference)) {
+				for (final Entry<Label> entry : lmt.entrySetWithRef(entryReference)) {
 					/* NOTE: This is unnecessary data, but an artifact of prior serialization strategy.
 					 * It used to be that the entry we iterator from here was added to a temporary LabelMultisetEntryList
 					 * and then that list was serialized. However, the way this logic was written, the list would alawys
@@ -84,9 +84,8 @@ public class LabelUtils {
 					 * We don't do this now, but unfortunately, this mean that we now how to serialize an unnecessary `1`
 					 * integer to mock the size of the list that is expected during deserialization. */
 					writeInt(entryList, 1, ByteOrder.nativeOrder()); //the old list was always only 1 element in size, stored as the first 4 bytes of a long
-					for (int i = 0; i < entrySizeInBytes; i++) {
-						entryList.write(entry.access.getByte(i));
-					}
+					writeLong(entryList, entry.getElement().id(), ByteOrder.LITTLE_ENDIAN);
+					writeInt(entryList, entry.getCount(), ByteOrder.LITTLE_ENDIAN);
 				}
 				listOffsets.put(listHash, nextListOffset);
 				writeInt(dataBuffer, nextListOffset, ByteOrder.BIG_ENDIAN);
@@ -102,6 +101,10 @@ public class LabelUtils {
 
 	private static void writeInt(ByteArrayOutputStream dataBuffer, int value, ByteOrder byteOrder) {
 		dataBuffer.write(ByteBuffer.allocate(4).order(byteOrder).putInt(value).array(), 0, 4);
+	}
+
+	private static void writeLong(ByteArrayOutputStream dataBuffer, long value, ByteOrder byteOrder) {
+		dataBuffer.write(ByteBuffer.allocate(8).order(byteOrder).putLong(value).array(), 0, 8);
 	}
 
 	public static LabelMultisetType getOutOfBounds() {
@@ -143,13 +146,14 @@ public class LabelUtils {
 		if (argMaxSize == 0) {
 			argMax = new long[listEntryOffsets.length];
 			final TIntLongHashMap entryOffsetToArgMax = new TIntLongHashMap(DEFAULT_CAPACITY, DEFAULT_LOAD_FACTOR, -1, -1);
+			LabelMultisetEntryList lmel = null;
 			for (int i = 0; i < listEntryOffsets.length; i++) {
 				final int listDataIdx = listEntryOffsets[i];
-				final Long cachedArgMax = entryOffsetToArgMax.get(listDataIdx);
+				final long cachedArgMax = entryOffsetToArgMax.get(listDataIdx);
 				if (cachedArgMax != entryOffsetToArgMax.getNoEntryValue()) {
 					argMax[i] = cachedArgMax;
 				} else {
-					final LabelMultisetEntryList lmel = new LabelMultisetEntryList();
+					if (lmel == null) lmel = new LabelMultisetEntryList();
 					lmel.referToDataAt(listData, listDataIdx);
 					argMax[i] = LabelUtils.getArgMax(lmel);
 					entryOffsetToArgMax.put(listDataIdx, argMax[i]);
