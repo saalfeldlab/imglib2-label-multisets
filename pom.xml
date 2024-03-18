@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.scijava</groupId>
 		<artifactId>pom-scijava</artifactId>
-		<version>36.0.0</version>
+		<version>37.0.0</version>
 	</parent>
 
 	<groupId>net.imglib2</groupId>
@@ -28,6 +28,19 @@
 	</licenses>
 
 	<developers>
+		<developer>
+			<id>cmhulbert</id>
+			<name>Caleb Hulbert</name>
+			<email>hulbertc@janelia.hhmi.org</email>
+			<url />
+			<organization>HHMI Janelia</organization>
+			<organizationUrl>http://janelia.org/</organizationUrl>
+			<roles>
+				<role>developer</role>
+				<role>maintainer </role>
+			</roles>
+			<timezone>-5</timezone>
+		</developer>
 		<developer>
 			<id>tpietzsch</id>
 			<name>Tobias Pietzsch</name>
