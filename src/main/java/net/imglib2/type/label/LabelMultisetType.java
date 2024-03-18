@@ -220,7 +220,9 @@ public class LabelMultisetType extends AbstractNativeType<LabelMultisetType> imp
 	}
 
 	public int listHashCode() {
-		return entrySet().hashCode();
+
+		entrySet();
+		return entries.hashCode();
 	}
 
 	@Override
