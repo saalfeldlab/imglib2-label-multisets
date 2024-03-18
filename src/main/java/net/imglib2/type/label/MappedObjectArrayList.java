@@ -234,12 +234,12 @@ public class MappedObjectArrayList<O extends MappedObject<O, T>, T extends Mappe
 		final int size = size();
 		ensureCapacity(size + 1);
 		setSize(size + 1);
+		setRefAt(ref, index);
 		if (index < size) {
 			final O shift = createRefAt(index + 1);
 			shift.access.copyFrom(ref.access, elementSizeInBytes() * (size - index));
 			releaseRef(shift);
 		}
-		setRefAt(ref, index);
 		ref.set(obj);
 	}
 
