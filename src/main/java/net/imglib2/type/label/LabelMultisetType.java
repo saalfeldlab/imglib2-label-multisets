@@ -220,7 +220,9 @@ public class LabelMultisetType extends AbstractNativeType<LabelMultisetType> imp
 	}
 
 	public int listHashCode() {
-		return entrySet().hashCode();
+
+		entrySet();
+		return entries.hashCode();
 	}
 
 	@Override
@@ -390,6 +392,14 @@ public class LabelMultisetType extends AbstractNativeType<LabelMultisetType> imp
 			}
 		}
 		return true;
+	}
+
+	@Override public boolean equals(Object obj) {
+
+		if (obj instanceof LabelMultisetType) {
+			return valueEquals((LabelMultisetType)obj);
+		}
+		return false;
 	}
 
 	public VolatileLabelMultisetArray getAccess() {
