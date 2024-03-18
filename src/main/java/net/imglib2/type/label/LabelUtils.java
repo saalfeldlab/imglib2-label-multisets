@@ -52,14 +52,9 @@ public class LabelUtils {
 
 		final LabelMultisetEntry entryReference = new LabelMultisetEntry(0, 1);
 
-		final int entrySizeInBytes = entryReference.getSizeInBytes(); // One Long for the element ID, and one int for the count ( 8 + 4 = 12)
-
 		final int argMaxSize = INT_SIZE; // in reality, the int value is always `0`, with size of 4 bytes
 		final int offsetListSize = INT_SIZE * numElements;
-		final int legacyListSize = INT_SIZE; //See NOTE below
-		final int estimateEntryListSize = ((int) (1 + (5 * Math.log(numElements))) * (legacyListSize + entrySizeInBytes));
-		final int initialSize = argMaxSize + offsetListSize + estimateEntryListSize;
-		final ByteArrayOutputStream dataBuffer = new ByteArrayOutputStream(initialSize);
+		final ByteArrayOutputStream dataBuffer = new ByteArrayOutputStream();
 		/* No longer serialized out ArgMax; we do this by specifying the ArgMax size as 0;
 		 * It's now calculated during deserializtaion instead.*/
 		writeInt(dataBuffer, 0, ByteOrder.BIG_ENDIAN);
@@ -68,29 +63,21 @@ public class LabelUtils {
 
 		int nextListOffset = 0;
 
-		int entriesInList = 0;
-		final ByteArrayOutputStream entryList = new ByteArrayOutputStream(entrySizeInBytes);
+		final ByteArrayOutputStream entryList = new ByteArrayOutputStream();
 		for (final LabelMultisetType lmt : lmts) {
 			final int listHash = lmt.listHashCode();
-			int offsetsForHash = listOffsets.get(listHash);
-			if (offsetsForHash != listOffsets.getNoEntryValue()) {
-				writeInt(dataBuffer, offsetsForHash, ByteOrder.BIG_ENDIAN);
+			int listOffset = listOffsets.get(listHash);
+			if (listOffset != listOffsets.getNoEntryValue()) {
+				writeInt(dataBuffer, listOffset, ByteOrder.BIG_ENDIAN);
 			} else {
+				writeInt(entryList, lmt.entrySet().size(), ByteOrder.LITTLE_ENDIAN);
 				for (final Entry<Label> entry : lmt.entrySetWithRef(entryReference)) {
-					/* NOTE: This is unnecessary data, but an artifact of prior serialization strategy.
-					 * It used to be that the entry we iterator from here was added to a temporary LabelMultisetEntryList
-					 * and then that list was serialized. However, the way this logic was written, the list would alawys
-					 * only contain 1 element.
-					 * We don't do this now, but unfortunately, this mean that we now how to serialize an unnecessary `1`
-					 * integer to mock the size of the list that is expected during deserialization. */
-					writeInt(entryList, 1, ByteOrder.nativeOrder()); //the old list was always only 1 element in size, stored as the first 4 bytes of a long
 					writeLong(entryList, entry.getElement().id(), ByteOrder.LITTLE_ENDIAN);
 					writeInt(entryList, entry.getCount(), ByteOrder.LITTLE_ENDIAN);
 				}
 				listOffsets.put(listHash, nextListOffset);
 				writeInt(dataBuffer, nextListOffset, ByteOrder.BIG_ENDIAN);
-				nextListOffset += 4 + entrySizeInBytes; //Another quirk to maintain size compatibility, see list NOTE above.
-				entriesInList++;
+				nextListOffset = entryList.size(); //Another quirk to maintain size compatibility, see list NOTE above.
 			}
 		}
 
@@ -99,11 +86,11 @@ public class LabelUtils {
 		return dataBuffer.toByteArray();
 	}
 
-	private static void writeInt(ByteArrayOutputStream dataBuffer, int value, ByteOrder byteOrder) {
+	public static void writeInt(ByteArrayOutputStream dataBuffer, int value, ByteOrder byteOrder) {
 		dataBuffer.write(ByteBuffer.allocate(4).order(byteOrder).putInt(value).array(), 0, 4);
 	}
 
-	private static void writeLong(ByteArrayOutputStream dataBuffer, long value, ByteOrder byteOrder) {
+	public static void writeLong(ByteArrayOutputStream dataBuffer, long value, ByteOrder byteOrder) {
 		dataBuffer.write(ByteBuffer.allocate(8).order(byteOrder).putLong(value).array(), 0, 8);
 	}
 
