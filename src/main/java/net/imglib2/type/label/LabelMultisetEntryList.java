@@ -1,6 +1,7 @@
 package net.imglib2.type.label;
 
 import net.imglib2.type.label.LabelMultisetType.Entry;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -14,11 +15,31 @@ public class LabelMultisetEntryList
 		super(LabelMultisetEntry.type);
 	}
 
+	@Override public int hashCode() {
+
+		HashCodeBuilder builder = new HashCodeBuilder();
+		int hash1 = 13;
+		int hash2 = 31;
+		int hash = hash1;
+		for (final LabelMultisetEntry e  : this) {
+			builder.append(hash).append(e).append(e.getCount() * hash);
+			/* swap hash1 <==> hash2 */
+			hash = hash1;
+			hash1 = hash2;
+			hash2 = hash;
+			/* set hash to hash1 */
+			hash = hash1;
+    	}
+		return builder.toHashCode();
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (!(o instanceof LabelMultisetEntryList)) return false;
+		final LabelMultisetEntryList other = (LabelMultisetEntryList)o;
+		if (other.size() != size()) return false;
 		final long[] thisData = ((LongMappedAccessData) data).getData();
-		final long[] otherData = ((LongMappedAccessData) ((LabelMultisetEntryList) o).data).getData();
+		final long[] otherData = ((LongMappedAccessData) other.data).getData();
 		return Arrays.equals(thisData, otherData);
 	}
 
