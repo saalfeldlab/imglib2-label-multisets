@@ -330,21 +330,18 @@ public class LabelMultisetType extends AbstractNativeType<LabelMultisetType> imp
 	public boolean contains(final long id, LabelMultisetEntry ref) {
 
 		updateEntriesLocation();
-		entries.sortById();
 		return entries.binarySearch(id, ref) >= 0;
 	}
 
 	public boolean contains(final long id) {
 
 		updateEntriesLocation();
-		entries.sortById();
 		return entries.binarySearch(id) >= 0;
 	}
 
 	public boolean containsAll(final long[] ids) {
 
 		updateEntriesLocation();
-		entries.sortById();
 		for (final long id : ids) {
 			if (entries.binarySearch(id) < 0) {
 				return false;
@@ -356,7 +353,6 @@ public class LabelMultisetType extends AbstractNativeType<LabelMultisetType> imp
 	public boolean containsAll(final long[] ids, LabelMultisetEntry ref) {
 
 		updateEntriesLocation();
-		entries.sortById();
 		for (final long id : ids) {
 			if (entries.binarySearch(id, ref) < 0) {
 				return false;
@@ -368,7 +364,6 @@ public class LabelMultisetType extends AbstractNativeType<LabelMultisetType> imp
 	public boolean containsAll(final Collection<? extends Label> c) {
 
 		updateEntriesLocation();
-		entries.sortById();
 		for (final Label l : c) {
 			if (entries.binarySearch(l.id()) < 0) {
 				return false;
@@ -380,7 +375,6 @@ public class LabelMultisetType extends AbstractNativeType<LabelMultisetType> imp
 	public boolean containsAll(final Collection<? extends Label> c, LabelMultisetEntry ref) {
 
 		updateEntriesLocation();
-		entries.sortById();
 		for (final Label l : c) {
 			if (entries.binarySearch(l.id(), ref) < 0) {
 				return false;
@@ -397,7 +391,6 @@ public class LabelMultisetType extends AbstractNativeType<LabelMultisetType> imp
 	public int count(final long id) {
 
 		updateEntriesLocation();
-		entries.sortById();
 		final int pos = entries.binarySearch(id);
 		if (pos < 0) {
 			return 0;
@@ -409,7 +402,6 @@ public class LabelMultisetType extends AbstractNativeType<LabelMultisetType> imp
 	public int countWithRef(final long id, LabelMultisetEntry ref) {
 
 		updateEntriesLocation();
-		entries.sortById();
 		final int pos = entries.binarySearch(id, ref);
 		if (pos < 0) {
 			return 0;

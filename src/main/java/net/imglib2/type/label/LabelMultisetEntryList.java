@@ -8,6 +8,11 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
 
+/**
+ * List of LabelMultisetEntries backed by a LongArray. Should ALWAYS remain sorted by ID. It is sorted after construction, and
+ * all add operations should insert appropriately to remain sorted. If `sortByCount` is ever called (or the order is manually changed)
+ * it is the developers responsiblity to `sortById()` prior to any additional calls.
+ */
 public class LabelMultisetEntryList extends MappedObjectArrayList<LabelMultisetEntry, LongMappedAccess> {
 
 	public LabelMultisetEntryList() {
@@ -51,6 +56,7 @@ public class LabelMultisetEntryList extends MappedObjectArrayList<LabelMultisetE
 	public LabelMultisetEntryList(final LongMappedAccessData data, final long baseOffset) {
 
 		super(LabelMultisetEntry.type, data, baseOffset);
+		sortById();
 	}
 
 	protected int multisetSize() {
@@ -72,13 +78,6 @@ public class LabelMultisetEntryList extends MappedObjectArrayList<LabelMultisetE
 
 	@Override public boolean add(LabelMultisetEntry obj, LabelMultisetEntry ref) {
 
-		sortById();
-		addAfterSort(obj, ref);
-		return true;
-	}
-
-	private void addAfterSort(LabelMultisetEntry obj, LabelMultisetEntry ref) {
-
 		final int idx = binarySearch(obj.getId(), ref);
 		if (idx >= 0) {
 			final LabelMultisetEntry entry = get(idx, ref);
@@ -86,14 +85,14 @@ public class LabelMultisetEntryList extends MappedObjectArrayList<LabelMultisetE
 		} else {
 			add(-(idx + 1), obj, ref);
 		}
+		return true;
 	}
 
 	@Override public boolean addAll(Collection<? extends LabelMultisetEntry> c) {
 
-		sortById();
 		final LabelMultisetEntry ref = createRef();
 		for (LabelMultisetEntry entry : c) {
-			addAfterSort(entry, ref);
+			add(entry, ref);
 		}
 		return true;
 	}
@@ -102,9 +101,8 @@ public class LabelMultisetEntryList extends MappedObjectArrayList<LabelMultisetE
 
 	@Override public boolean addAll(Collection<? extends LabelMultisetEntry> c, LabelMultisetEntry ref) {
 
-		sortById();
 		for (LabelMultisetEntry entry : c) {
-			addAfterSort(entry, ref);
+			add(entry, ref);
 		}
 		return true;
 	}
