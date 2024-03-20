@@ -4,11 +4,11 @@ import net.imglib2.type.label.LabelMultisetType.Entry;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
 
-public class LabelMultisetEntryList
-		extends MappedObjectArrayList<LabelMultisetEntry, LongMappedAccess> {
+public class LabelMultisetEntryList extends MappedObjectArrayList<LabelMultisetEntry, LongMappedAccess> {
 
 	public LabelMultisetEntryList() {
 
@@ -60,6 +60,53 @@ public class LabelMultisetEntryList
 			size += e.getCount();
 		}
 		return size;
+	}
+
+	@Override public boolean add(LabelMultisetEntry obj) {
+
+		final LabelMultisetEntry ref = createRef();
+		add(obj ,ref);
+		releaseRef(ref);
+		return true;
+	}
+
+	@Override public boolean add(LabelMultisetEntry obj, LabelMultisetEntry ref) {
+
+		sortById();
+		addAfterSort(obj, ref);
+		return true;
+	}
+
+	private void addAfterSort(LabelMultisetEntry obj, LabelMultisetEntry ref) {
+
+		final int idx = binarySearch(obj.getId(), ref);
+		if (idx >= 0) {
+			final LabelMultisetEntry entry = get(idx, ref);
+			entry.setCount(entry.getCount() + obj.getCount());
+		} else {
+			add(-(idx + 1), obj, ref);
+		}
+	}
+
+	@Override public boolean addAll(Collection<? extends LabelMultisetEntry> c) {
+
+		sortById();
+		final LabelMultisetEntry ref = createRef();
+		for (LabelMultisetEntry entry : c) {
+			addAfterSort(entry, ref);
+		}
+		return true;
+	}
+
+
+
+	@Override public boolean addAll(Collection<? extends LabelMultisetEntry> c, LabelMultisetEntry ref) {
+
+		sortById();
+		for (LabelMultisetEntry entry : c) {
+			addAfterSort(entry, ref);
+		}
+		return true;
 	}
 
 	/**
@@ -162,13 +209,24 @@ public class LabelMultisetEntryList
 	/**
 	 * Sort the list by {@link LabelMultisetEntry#getId()}.
 	 */
-	// TODO: should this be protected / package private?
 	public void sortById() {
 
 		sort((o1, o2) -> {
 			final long i1 = o1.getId();
 			final long i2 = o2.getId();
 			return Long.compare(i1, i2);
+		});
+	}
+
+	/**
+	 * Sort the list by {@link LabelMultisetEntry#getId()}.
+	 */
+	public void sortByCount() {
+
+		sort((o1, o2) -> {
+			final int i1 = o1.getCount();
+			final int i2 = o2.getCount();
+			return Integer.compare(i1, i2);
 		});
 	}
 
