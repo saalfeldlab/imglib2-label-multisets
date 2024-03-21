@@ -64,7 +64,7 @@ public class LabelMultisetTypeDownscalerTest {
 
 	private static RandomAccessibleInterval<LabelMultisetType> generateRandomLabelMultisetImg() {
 
-		final Random rnd = new Random();
+		final Random rnd = new Random(10);
 
 		final int numElements = (int) Intervals.numElements(DIMENSIONS);
 		final List<LabelMultisetType> typeElements = new ArrayList<>();

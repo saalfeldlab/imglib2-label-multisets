@@ -151,13 +151,21 @@ public class LabelUtils {
 		return new VolatileLabelMultisetArray(listEntryOffsets, listData, listDataSize, true, argMax);
 	}
 
+	/**
+	 * find the entry whose id has the highest count. If multiple entries has the same count, the
+	 * lowest id is considered the argmax.
+	 *
+	 * @param labelMultisetEntries to search for the argmax in
+	 * @return the id with the highest count
+	 */
 	public static long getArgMax(final Collection<? extends Entry<Label>> labelMultisetEntries) {
 
 		int maxCount = 0;
 		long maxCountId = Label.INVALID;
 		for (final Entry<Label> entry : labelMultisetEntries) {
-			if (maxCount < entry.getCount()) {
-				maxCount = entry.getCount();
+			final int count = entry.getCount();
+			if (maxCount < count || maxCount == count && entry.getElement().id() < maxCountId) {
+				maxCount = count;
 				maxCountId = entry.getElement().id();
 			}
 		}

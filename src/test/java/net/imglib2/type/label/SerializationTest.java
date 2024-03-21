@@ -17,8 +17,6 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -32,7 +30,7 @@ public class SerializationTest {
 	@Test
 	public void randomSingleEntryImageSerializationTest() {
 
-		final Random rng = new Random();
+		final Random rng = new Random(10);
 		final int dim = 32;
 		final long[] dims = {dim, dim, dim};
 		final RandomAccessibleInterval<LongType> img = ArrayImgs.longs(dims);
@@ -80,7 +78,7 @@ public class SerializationTest {
 		N5Writer n5 = new N5FSWriter(Files.createTempDirectory("n5-test").toString());
 		try {
 			final long[] dims = {10, 20, 30};
-			final Random rand = new Random();
+			final Random rand = new Random(10);
 
 			final int numElements = (int)Intervals.numElements(dims);
 			final List<LabelMultisetType> typeElements = new ArrayList<>();
@@ -136,9 +134,8 @@ public class SerializationTest {
 		N5Writer n5 = new N5FSWriter(Files.createTempDirectory("n5-test").toString());
 		try {
 			final long[] dims = {1};
-			final int[] blockSize = {1};
 
-			final Random rand = new Random();
+			final Random rand = new Random(10);
 
 			final int numElements = (int)Intervals.numElements(dims);
 			final List<LabelMultisetType> typeElements = new ArrayList<>();
