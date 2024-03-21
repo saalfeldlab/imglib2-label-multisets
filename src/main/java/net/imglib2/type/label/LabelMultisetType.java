@@ -155,7 +155,6 @@ public class LabelMultisetType extends AbstractNativeType<LabelMultisetType> imp
 		};
 		if (this.access != null) {
 			updateEntriesLocation();
-			updateArgMax();
 		}
 	}
 
@@ -166,8 +165,11 @@ public class LabelMultisetType extends AbstractNativeType<LabelMultisetType> imp
 
 	public void add(LabelMultisetEntry entry) {
 
-		labelMultisetEntries().add(entry);
-		updateArgMax();
+		final Label id = entry.id;
+		final LabelMultisetEntryList lmel = labelMultisetEntries();
+		lmel.add(entry);
+		if (count(id) > count(argMax()))
+			updateArgMax(id.id());
 	}
 
 	public void addAll(Collection<? extends LabelMultisetEntry> entries) {
@@ -204,9 +206,6 @@ public class LabelMultisetType extends AbstractNativeType<LabelMultisetType> imp
 	public void updateContainer(final Object c) {
 
 		access = img.update(c);
-		if (index().get() >= 0) {
-			updateArgMax();
-		}
 	}
 
 	@Override
@@ -708,7 +707,12 @@ public class LabelMultisetType extends AbstractNativeType<LabelMultisetType> imp
 
 	public void updateArgMax() {
 
-		this.access.setArgMax(i.get(), LabelUtils.getArgMax(labelMultisetEntries()));
+		updateArgMax(LabelUtils.getArgMax(labelMultisetEntries()));
+	}
+
+	public void updateArgMax(long id) {
+
+		this.access.setArgMax(i.get(), id);
 	}
 
 	public static LabelMultisetType singleEntryWithSingleOccurrence() {
