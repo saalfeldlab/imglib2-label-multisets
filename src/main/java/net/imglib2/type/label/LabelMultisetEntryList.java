@@ -4,11 +4,16 @@ import net.imglib2.type.label.LabelMultisetType.Entry;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
 
-public class LabelMultisetEntryList
-		extends MappedObjectArrayList<LabelMultisetEntry, LongMappedAccess> {
+/**
+ * List of LabelMultisetEntries backed by a LongArray. Should ALWAYS remain sorted by ID. It is sorted after construction, and
+ * all add operations should insert appropriately to remain sorted. If `sortByCount` is ever called (or the order is manually changed)
+ * it is the developers responsiblity to `sortById()` prior to any additional calls.
+ */
+public class LabelMultisetEntryList extends MappedObjectArrayList<LabelMultisetEntry, LongMappedAccess> {
 
 	public LabelMultisetEntryList() {
 
@@ -51,6 +56,7 @@ public class LabelMultisetEntryList
 	public LabelMultisetEntryList(final LongMappedAccessData data, final long baseOffset) {
 
 		super(LabelMultisetEntry.type, data, baseOffset);
+		sortById();
 	}
 
 	protected int multisetSize() {
@@ -60,6 +66,45 @@ public class LabelMultisetEntryList
 			size += e.getCount();
 		}
 		return size;
+	}
+
+	@Override public boolean add(LabelMultisetEntry obj) {
+
+		final LabelMultisetEntry ref = createRef();
+		add(obj ,ref);
+		releaseRef(ref);
+		return true;
+	}
+
+	@Override public boolean add(LabelMultisetEntry obj, LabelMultisetEntry ref) {
+
+		final int idx = binarySearch(obj.getId(), ref);
+		if (idx >= 0) {
+			final LabelMultisetEntry entry = get(idx, ref);
+			entry.setCount(entry.getCount() + obj.getCount());
+		} else {
+			add(-(idx + 1), obj, ref);
+		}
+		return true;
+	}
+
+	@Override public boolean addAll(Collection<? extends LabelMultisetEntry> c) {
+
+		final LabelMultisetEntry ref = createRef();
+		for (LabelMultisetEntry entry : c) {
+			add(entry, ref);
+		}
+		return true;
+	}
+
+
+
+	@Override public boolean addAll(Collection<? extends LabelMultisetEntry> c, LabelMultisetEntry ref) {
+
+		for (LabelMultisetEntry entry : c) {
+			add(entry, ref);
+		}
+		return true;
 	}
 
 	/**
@@ -162,13 +207,24 @@ public class LabelMultisetEntryList
 	/**
 	 * Sort the list by {@link LabelMultisetEntry#getId()}.
 	 */
-	// TODO: should this be protected / package private?
 	public void sortById() {
 
 		sort((o1, o2) -> {
 			final long i1 = o1.getId();
 			final long i2 = o2.getId();
 			return Long.compare(i1, i2);
+		});
+	}
+
+	/**
+	 * Sort the list by {@link LabelMultisetEntry#getId()}.
+	 */
+	public void sortByCount() {
+
+		sort((o1, o2) -> {
+			final int i1 = o1.getCount();
+			final int i2 = o2.getCount();
+			return Integer.compare(i1, i2);
 		});
 	}
 
