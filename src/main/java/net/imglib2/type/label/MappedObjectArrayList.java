@@ -57,7 +57,10 @@ public class MappedObjectArrayList<O extends MappedObject<O, T>, T extends Mappe
 	this.baseOffset = baseOffset;
 	this.elementBaseOffset = baseOffset + ByteUtils.INT_SIZE;
 	data.updateAccess(access, baseOffset);
-	size = access.getInt(0);
+	if (baseOffset < data.size())
+		size = access.getInt(0);
+	else
+		size = 0;
   }
 
   public void createListAt(final MappedAccessData<T> data, final long baseOffset) {
