@@ -59,6 +59,7 @@ public class LabelMultisetTypeDownscaler {
 
 		final TLongArrayList argMax = new TLongArrayList();
 
+		final LabelMultisetEntry addAllRef = list.createRef();
 
 		for (int d = 0; d < numDim; ) {
 
@@ -71,7 +72,7 @@ public class LabelMultisetTypeDownscaler {
 
 				final LabelMultisetType lmt = randomAccess.setPositionAndGet(totalOffset);
 
-				list.addAll(lmt.labelMultisetEntries());
+				list.addAll(lmt.labelMultisetEntries(), addAllRef);
 
 				/* This controls movement within the cell*/
 				for (g = 0; g < numDim; g++) {
