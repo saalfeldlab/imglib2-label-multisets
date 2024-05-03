@@ -1,22 +1,18 @@
 package net.imglib2.type.label;
 
-import net.imglib2.Interval;
 import net.imglib2.img.NativeImg;
 import net.imglib2.img.cell.CellGrid;
 import net.imglib2.type.AbstractNativeType;
-import net.imglib2.type.Index;
 import net.imglib2.type.NativeTypeFactory;
 import net.imglib2.type.label.RefList.RefIterator;
 import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.util.Fraction;
-import net.imglib2.util.Intervals;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.AbstractSet;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;

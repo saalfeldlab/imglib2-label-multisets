@@ -5,7 +5,6 @@ import net.imglib2.img.list.ListImg;
 import net.imglib2.util.Intervals;
 import org.janelia.saalfeldlab.n5.N5FSReader;
 import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
