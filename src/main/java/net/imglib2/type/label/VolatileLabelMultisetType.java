@@ -5,11 +5,14 @@ import net.imglib2.img.NativeImg;
 import net.imglib2.type.Index;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.NativeTypeFactory;
+import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.util.Fraction;
+
+import java.math.BigInteger;
 
 public class VolatileLabelMultisetType
 		extends Volatile<LabelMultisetType>
-		implements NativeType<VolatileLabelMultisetType> {
+		implements NativeType<VolatileLabelMultisetType>, IntegerType<VolatileLabelMultisetType> {
 
 	public static final VolatileLabelMultisetType type = new VolatileLabelMultisetType();
 
@@ -58,42 +61,6 @@ public class VolatileLabelMultisetType
 	public Index index() {
 
 		return t.index();
-	}
-
-	@Override
-	public void updateIndex(final int i) {
-
-		t.updateIndex(i);
-	}
-
-	@Override
-	public int getIndex() {
-
-		return t.getIndex();
-	}
-
-	@Override
-	public void incIndex() {
-
-		t.incIndex();
-	}
-
-	@Override
-	public void incIndex(final int increment) {
-
-		t.incIndex(increment);
-	}
-
-	@Override
-	public void decIndex() {
-
-		t.decIndex();
-	}
-
-	@Override
-	public void decIndex(final int decrement) {
-
-		t.decIndex(decrement);
 	}
 
 	@Override
@@ -147,5 +114,181 @@ public class VolatileLabelMultisetType
 	public static VolatileLabelMultisetType singleEntryWithNumOccurrences(final int numOccurrences) {
 
 		return new VolatileLabelMultisetType(new LabelMultisetEntry(Label.INVALID, numOccurrences));
+	}
+
+	@Override public int getInteger() {
+
+		return get().getInteger();
+	}
+
+	@Override public long getIntegerLong() {
+
+		return get().getIntegerLong();
+	}
+
+	@Override public BigInteger getBigInteger() {
+
+		return get().getBigInteger();
+	}
+
+	@Override public void setInteger(int f) {
+		get().setInteger(f);
+
+	}
+
+	@Override public void setInteger(long f) {
+		get().setInteger(f);
+	}
+
+	@Override public void setBigInteger(BigInteger b) {
+		get().setBigInteger(b);
+	}
+
+	@Override public void inc() {
+		get().inc();
+	}
+
+	@Override public void dec() {
+		get().dec();
+	}
+
+	@Override public double getMaxValue() {
+
+		return get().getMaxValue();
+	}
+
+	@Override public double getMinValue() {
+
+		return get().getMinValue();
+	}
+
+	@Override public double getMinIncrement() {
+
+		return get().getMinIncrement();
+	}
+
+	@Override public int getBitsPerPixel() {
+
+		return get().getBitsPerPixel();
+	}
+
+	@Override public int compareTo(VolatileLabelMultisetType o) {
+
+		return get().compareTo(o.get());
+	}
+
+	@Override public double getRealDouble() {
+
+		return get().getRealDouble();
+	}
+
+	@Override public float getRealFloat() {
+
+		return get().getRealFloat();
+	}
+
+	@Override public double getImaginaryDouble() {
+
+		return get().getImaginaryDouble();
+	}
+
+	@Override public float getImaginaryFloat() {
+
+		return get().getImaginaryFloat();
+	}
+
+	@Override public void setReal(float f) {
+		get().setReal(f);
+	}
+
+	@Override public void setReal(double f) {
+		get().setReal(f);
+	}
+
+	@Override public void setImaginary(float f) {
+		get().setImaginary(f);
+	}
+
+	@Override public void setImaginary(double f) {
+		get().setImaginary(f);
+	}
+
+	@Override public void setComplexNumber(float r, float i) {
+		get().setComplexNumber(r, i);
+	}
+
+	@Override public void setComplexNumber(double r, double i) {
+		get().setComplexNumber(r, i);
+	}
+
+	@Override public float getPowerFloat() {
+
+		return get().getPowerFloat();
+	}
+
+	@Override public double getPowerDouble() {
+
+		return get().getPowerDouble();
+	}
+
+	@Override public float getPhaseFloat() {
+
+	 	return get().getPhaseFloat();
+	}
+
+	@Override public double getPhaseDouble() {
+
+		return get().getPhaseDouble();
+	}
+
+	@Override public void complexConjugate() {
+		get().complexConjugate();
+	}
+
+ 	@Override public void add(VolatileLabelMultisetType c) {
+
+		get().add(c.get());
+	}
+
+	@Override public void div(VolatileLabelMultisetType c) {
+
+		get().div(c.get());
+	}
+
+	@Override public void mul(VolatileLabelMultisetType c) {
+
+		get().mul(c.get());
+	}
+
+	@Override public void mul(float c) {
+
+		get().mul(c);
+	}
+
+	@Override public void mul(double c) {
+
+		get().mul(c);
+	}
+
+	@Override public void pow(VolatileLabelMultisetType c) {
+		get().pow(c.get());
+	}
+
+	@Override public void pow(double d) {
+		get().pow(d);
+	}
+
+	@Override public void setOne() {
+
+		get().setOne();
+	}
+
+	@Override public void setZero() {
+		get().setZero();
+	}
+
+	@Override public void sub(VolatileLabelMultisetType c) {
+
+		get().sub(c.get());
 	}
 }
