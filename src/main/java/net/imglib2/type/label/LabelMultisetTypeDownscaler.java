@@ -32,7 +32,7 @@ public class LabelMultisetTypeDownscaler {
 			final int[] downscaleFactor,
 			final int maxNumEntriesPerPixel) {
 
-		final RandomAccess<LabelMultisetType> randomAccess = source.randomAccess();
+		final RandomAccess<LabelMultisetType> sourceAccess = source.randomAccess();
 
 		final int numDim = source.numDimensions();
 		final long[] sourceShape = new long[numDim];
@@ -59,7 +59,12 @@ public class LabelMultisetTypeDownscaler {
 
 		final TLongArrayList argMax = new TLongArrayList();
 
-		final LabelMultisetEntry addAllRef = list.createRef();
+		final LabelMultisetEntry singleZeroEntry = new LabelMultisetEntry(0, 1);
+
+		final LabelMultisetEntry addRef = list.createRef();
+		final LabelMultisetEntry entrySetRef = list.createRef();
+
+		int nonEmptyListCount = 0;
 
 		for (int d = 0; d < numDim; ) {
 
@@ -70,9 +75,16 @@ public class LabelMultisetTypeDownscaler {
 			// populate list with all entries from all types
 			for (int g = 0; g < numDim; ) {
 
-				final LabelMultisetType lmt = randomAccess.setPositionAndGet(totalOffset);
+				final LabelMultisetType lmt = sourceAccess.setPositionAndGet(totalOffset);
+				if ( lmt.getAccess().getListDataUsedSizeInBytes() == 0) {
+					/* this cell is non-existent, skip to the next cell */
+					break;
+				}
 
-				list.addAll(lmt.labelMultisetEntries(), addAllRef);
+
+				for (final LabelMultisetType.Entry<Label> labelEntry : lmt.entrySetWithRef(entrySetRef))
+					list.add((LabelMultisetEntry)labelEntry, addRef);
+
 
 				/* This controls movement within the cell*/
 				for (g = 0; g < numDim; g++) {
@@ -85,18 +97,28 @@ public class LabelMultisetTypeDownscaler {
 				}
 			}
 
-			// sort by count and restrict to maxNumEntriesPerPixel (if
-			// applicable)
+			/* Empty lists are fine if the whole block is empty, since we delete it.
+			 * But empty lists in a block that has other non-empty lists results in no label
+			 * over the empty list areas. We could do this (actually, I think it's a good idea)
+			 * but historically, empty/missing data was represented as ID `0`, or Label.BACKGROUND
+			 *
+			 *
+			 * NOTE: I think it's better if this behavior is changed in the future to allow empty lists which
+			 * map to Label.INVALID, so that Label.BACKGROUND isn't ambiguous whether intentional or missing. */
+			if (list.isEmpty())
+				list.add(singleZeroEntry);
+			else nonEmptyListCount++;
 
 			if (maxNumEntriesPerPixel > 0 && list.size() > maxNumEntriesPerPixel) {
 				// change order of e2, e1 for decreasing sort by count
 				list.sortByCount();
+			// change order of e2, e1 for increasing sort by count
+			list.sortByCount();
+			if (maxNumEntriesPerPixel > 0 && list.size() > maxNumEntriesPerPixel)
 				list.limitSize(maxNumEntriesPerPixel);
-				final long max = list.get(list.size() - 1).getId();
-				argMax.add(max);
-				list.sortById();
-			} else
-				argMax.add(LabelUtils.getArgMax(list));
+			final long max = list.get(list.size() - 1).getId();
+			argMax.add(max);
+			list.sortById();
 
 			boolean makeNewList = true;
 			final int hash = list.hashCode();
@@ -118,9 +140,7 @@ public class LabelMultisetTypeDownscaler {
 			if (makeNewList) {
 				writeInt(listEntryOffsets, nextListOffset, ByteOrder.BIG_ENDIAN);
 				listOffsets.add(nextListOffset);
-				nextListOffset += list.getSizeInBytes();
-
-				// add entry with max count
+				nextListOffset += (int)list.getSizeInBytes();
 			}
 
 			/* this controls movement between cells */
@@ -133,6 +153,10 @@ public class LabelMultisetTypeDownscaler {
 				}
 			}
 		}
+
+		if (nonEmptyListCount == 0 )
+			return new VolatileLabelMultisetArray(0, true, new long[]{Label.INVALID});
+
 		final IntBuffer intBuffer = ByteBuffer.wrap(listEntryOffsets.toByteArray()).asIntBuffer();
 		final int[] listOffsets = new int[intBuffer.limit()];
 		intBuffer.rewind();

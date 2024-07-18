@@ -422,7 +422,8 @@ public class LabelMultisetType extends AbstractNativeType<LabelMultisetType> imp
 	}
 
 	private void updateEntriesLocation() {
-
+		if (access.getCurrentStorageArray().length == 0)
+			return;
 		access.getValue(i.get(), entries);
 	}
 
