@@ -109,9 +109,6 @@ public class LabelMultisetTypeDownscaler {
 				list.add(singleZeroEntry);
 			else nonEmptyListCount++;
 
-			if (maxNumEntriesPerPixel > 0 && list.size() > maxNumEntriesPerPixel) {
-				// change order of e2, e1 for decreasing sort by count
-				list.sortByCount();
 			// change order of e2, e1 for increasing sort by count
 			list.sortByCount();
 			if (maxNumEntriesPerPixel > 0 && list.size() > maxNumEntriesPerPixel)

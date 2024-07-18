@@ -56,8 +56,8 @@ public class SerializationTest {
 
 		final long[] dims = {4, 4, 4};
 		final RandomAccessibleInterval<LongType> img = ArrayImgs.longs(dims);
-		final LabelMultisetType type = LabelMultisetType.singleEntryWithSingleOccurrence();
-		final RandomAccessibleInterval<LabelMultisetType> converted = Converters.convert2(img, new FromIntegerTypeConverter<>(), () -> type);
+		final LabelMultisetType lmtRef = new LabelMultisetType(new LabelMultisetEntry(1, 1));
+		final RandomAccessibleInterval<LabelMultisetType> converted = Converters.convert2(img, (i, lmt) -> {/*do nothing, just use supplier as is */}, () -> lmtRef);
 
 		final int numElements = (int)Views.flatIterable(converted).size();
 		final byte[] serializedOut = serialize(
@@ -210,16 +210,39 @@ public class SerializationTest {
 	@Test
 	public void copyTest() {
 
-		final FromIntegerTypeConverter<IntType> intToLmt = new FromIntegerTypeConverter<>();
+		final LabelMultisetType zero = new LabelMultisetType(new LabelMultisetEntry(0, 1));
 
-		final LabelMultisetType one = LabelMultisetType.singleEntryWithSingleOccurrence();
-		intToLmt.convert(new IntType(1), one);
+		final LabelMultisetType one = zero.copy();
+		one.set(1, 1);
+
+		assertEquals(0, zero.getIntegerLong());
+		assertEquals(1, zero.size());
+		assertEquals(1, zero.entrySet().size());
+		assertEquals(1, zero.count(0));
+		assertEquals(0, zero.count(1));
+		assertEquals(0, zero.count(2));
 
 		final LabelMultisetType two = one.copy();
-		intToLmt.convert(new IntType(2), two);
+		two.set(2, two.count(1));
+
+		assertEquals(0, zero.getIntegerLong());
+		assertEquals(1, zero.size());
+		assertEquals(1, zero.entrySet().size());
+		assertEquals(1, zero.count(0));
+		assertEquals(0, zero.count(1));
+		assertEquals(0, zero.count(2));
 
 		assertEquals(1, one.getIntegerLong());
+		assertEquals(1, one.size());
+		assertEquals(1, one.entrySet().size());
+		assertEquals(1, one.count(1));
+		assertEquals(0, one.count(2));
+
 		assertEquals(2, two.getIntegerLong());
+		assertEquals(1, two.entrySet().size());
+		assertEquals(1, two.size());
+		assertEquals(1, two.count(2));
+		assertEquals(0, two.count(1));
 
 	}
 

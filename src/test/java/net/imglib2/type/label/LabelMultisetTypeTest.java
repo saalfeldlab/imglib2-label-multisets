@@ -296,5 +296,7 @@ public class LabelMultisetTypeTest {
 		assertEquals(3, LabelUtils.getArgMax(entries));
 		final LabelMultisetType lmt = new LabelMultisetType(entries);
 		assertEquals(3, lmt.argMax());
+		entries.sortByCount();
+		assertEquals(3, entries.get(entries.size() - 1).getId());
 	}
 }
