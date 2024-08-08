@@ -5,7 +5,6 @@ import net.imglib2.converter.Converters;
 import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.list.ListImg;
-import net.imglib2.type.numeric.integer.IntType;
 import net.imglib2.type.numeric.integer.LongType;
 import net.imglib2.util.Fraction;
 import net.imglib2.util.Intervals;
@@ -24,6 +23,7 @@ import java.util.Random;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class SerializationTest {
 
@@ -49,6 +49,25 @@ public class SerializationTest {
 
 		Assert.assertArrayEquals("Serialized bytes differed after deserialization", serializedOut, serializedOutAfterDeserialication);
 
+	}
+
+	@Test
+	public void emptyImageSerializationTest() {
+
+		final long[] dims = {4, 4, 4};
+		final RandomAccessibleInterval<LongType> img = ArrayImgs.longs(dims);
+		final LabelMultisetType lmtRef = new LabelMultisetType(new LabelMultisetEntry(1, 0));
+		final RandomAccessibleInterval<LabelMultisetType> converted = Converters.convert2(img, (i, lmt) -> {/*do nothing, just use supplier as is */}, () -> {
+			lmtRef.set((long)(Math.random() * 1000), 0);
+			return lmtRef;
+		});
+
+		final int numElements = (int)Views.flatIterable(converted).size();
+		final byte[] serializedOut = serialize(
+				converted,
+				numElements);
+
+		assertNull("all entries empty, nothing to serialize out", serializedOut);
 	}
 
 	@Test
@@ -201,10 +220,10 @@ public class SerializationTest {
 		final byte[] serializedOut = serialize(converted, numElements);
 
 		final VolatileLabelMultisetArray arr = LabelUtils.fromBytes(serializedOut, numElements);
-		final byte[] serializedOutAfterDeserialication = new byte[LabelMultisetTypeDownscaler.getSerializedVolatileLabelMultisetArraySize(arr)];
-		LabelMultisetTypeDownscaler.serializeVolatileLabelMultisetArray(arr, serializedOutAfterDeserialication);
+		final byte[] serializedOutAfterDeserialization = new byte[LabelMultisetTypeDownscaler.getSerializedVolatileLabelMultisetArraySize(arr)];
+		LabelMultisetTypeDownscaler.serializeVolatileLabelMultisetArray(arr, serializedOutAfterDeserialization);
 
-		Assert.assertArrayEquals("Serialized bytes differed after deserialization", serializedOut, serializedOutAfterDeserialication);
+		Assert.assertArrayEquals("Serialized bytes differed after deserialization", serializedOut, serializedOutAfterDeserialization);
 	}
 
 	@Test

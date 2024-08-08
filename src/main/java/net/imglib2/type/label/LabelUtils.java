@@ -67,7 +67,7 @@ public class LabelUtils {
 
 		final ByteArrayOutputStream entryList = new ByteArrayOutputStream();
 		for (final LabelMultisetType lmt : lmts) {
-			if (!(lmt.isEmpty() || (lmt.size() == 1 && lmt.argMax() == 0) ))
+			if (!(lmt.isEmpty() || (lmt.size() == 0) ))
 				nonEmptyListCount++;
 			final int listHash = lmt.listHashCode();
 			int listOffset = listOffsets.get(listHash);
