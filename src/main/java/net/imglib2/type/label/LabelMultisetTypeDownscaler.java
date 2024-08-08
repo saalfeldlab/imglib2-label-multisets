@@ -59,7 +59,7 @@ public class LabelMultisetTypeDownscaler {
 
 		final TLongArrayList argMax = new TLongArrayList();
 
-		final LabelMultisetEntry singleZeroEntry = new LabelMultisetEntry(0, 1);
+		final LabelMultisetEntry emptyZeroEntry = new LabelMultisetEntry(0, 0);
 
 		final LabelMultisetEntry addRef = list.createRef();
 		final LabelMultisetEntry entrySetRef = list.createRef();
@@ -105,17 +105,20 @@ public class LabelMultisetTypeDownscaler {
 			 *
 			 * NOTE: I think it's better if this behavior is changed in the future to allow empty lists which
 			 * map to Label.INVALID, so that Label.BACKGROUND isn't ambiguous whether intentional or missing. */
-			if (list.isEmpty())
-				list.add(singleZeroEntry);
-			else nonEmptyListCount++;
+			if (list.isEmpty()){
+				list.add(emptyZeroEntry);
+			} else{
+				nonEmptyListCount++;
 
-			// change order of e2, e1 for increasing sort by count
-			list.sortByCount();
-			if (maxNumEntriesPerPixel > 0 && list.size() > maxNumEntriesPerPixel)
-				list.limitSize(maxNumEntriesPerPixel);
-			final long max = list.get(list.size() - 1).getId();
-			argMax.add(max);
-			list.sortById();
+				// change order of e2, e1 for increasing sort by count
+				list.sortByCount();
+				if (maxNumEntriesPerPixel > 0 && list.size() > maxNumEntriesPerPixel)
+					list.limitSize(maxNumEntriesPerPixel);
+				final long max = list.get(list.size() - 1).getId();
+				argMax.add(max);
+				list.sortById();
+			}
+
 
 			boolean makeNewList = true;
 			final int hash = list.hashCode();
