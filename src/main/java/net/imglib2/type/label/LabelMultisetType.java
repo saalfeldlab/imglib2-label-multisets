@@ -90,6 +90,51 @@ public class LabelMultisetType extends AbstractNativeType<LabelMultisetType> imp
 					super.releaseRef(ref);
 				}
 			}
+
+			@Override
+			public RefIterator<LabelMultisetEntry> iterator() {
+
+				return new RefIterator<LabelMultisetEntry>() {
+
+					private LabelMultisetEntry ref = reference != null ? reference : createRef();
+
+					private int i = 0;
+
+					@Override
+					public boolean hasNext() {
+
+						if (i < size())
+							return true;
+						else {
+							release();
+							return false;
+						}
+					}
+
+					@Override
+					public LabelMultisetEntry next() {
+
+						return get(i++, ref);
+					}
+
+					@Override
+					public void release() {
+
+						if (reference == null && ref != null) {
+							releaseRef(ref);
+							ref = null;
+						}
+					}
+
+					@Override
+					public void reset() {
+
+						if (reference == null && ref == null)
+							ref = createRef();
+						i = 0;
+					}
+				};
+			}
 		};
 
 		this.img = img;
@@ -120,7 +165,6 @@ public class LabelMultisetType extends AbstractNativeType<LabelMultisetType> imp
 					if (reference == null) {
 						it.release();
 					}
-
 				}
 
 				@Override
@@ -161,11 +205,15 @@ public class LabelMultisetType extends AbstractNativeType<LabelMultisetType> imp
 
 	public void add(LabelMultisetEntry entry) {
 
-		final Label id = entry.id;
-		final LabelMultisetEntryList lmel = labelMultisetEntries();
-		lmel.add(entry);
-		if (count(id) > count(argMax()))
-			updateArgMax(id.id());
+		final Label label = entry.id;
+		final LabelMultisetEntryList entryList = labelMultisetEntries();
+		entryList.add(entry);
+
+		final long argMax = argMax();
+		final long id = label.id();
+		if (id == argMax) return;
+		if (entryList.size() == 1 || count(id) > count(argMax))
+			updateArgMax(id);
 	}
 
 	public void addAll(Collection<? extends LabelMultisetEntry> entries) {
@@ -422,7 +470,8 @@ public class LabelMultisetType extends AbstractNativeType<LabelMultisetType> imp
 	}
 
 	private void updateEntriesLocation() {
-
+		if (access.getCurrentStorageArray().length == 0)
+			return;
 		access.getValue(i.get(), entries);
 	}
 

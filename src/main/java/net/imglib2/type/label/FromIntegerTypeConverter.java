@@ -28,11 +28,8 @@ public class FromIntegerTypeConverter<I extends IntegerType<I>> implements Conve
 	@Override
 	public void convert(final I input, final LabelMultisetType output) {
 
+
 		final long newVal = input.getIntegerLong();
-		final long[] data = getListData(output).data;
-		if (ByteUtils.getLong(data, Integer.BYTES) != newVal) {
-			ByteUtils.putLong(newVal, data, Integer.BYTES);
-			output.getAccess().setArgMax(output.getIndex(), newVal);
-		}
+		output.set(newVal, 1);
 	}
 }

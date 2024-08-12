@@ -9,9 +9,9 @@ import java.util.Iterator;
 import java.util.Set;
 
 /**
- * List of LabelMultisetEntries backed by a LongArray. Should ALWAYS remain sorted by ID. It is sorted after construction, and
+ * List of LabelMultisetEntries backed by a LongArray. Should ALWAYS remain sorted by ID, ascending. It is sorted after construction, and
  * all add operations should insert appropriately to remain sorted. If `sortByCount` is ever called (or the order is manually changed)
- * it is the developers responsiblity to `sortById()` prior to any additional calls.
+ * it is the developers responsibility to `sortById()` prior to any additional calls.
  */
 public class LabelMultisetEntryList extends MappedObjectArrayList<LabelMultisetEntry, LongMappedAccess> {
 
@@ -224,7 +224,10 @@ public class LabelMultisetEntryList extends MappedObjectArrayList<LabelMultisetE
 		sort((o1, o2) -> {
 			final int i1 = o1.getCount();
 			final int i2 = o2.getCount();
-			return Integer.compare(i1, i2);
+			final int countCompare = Integer.compare(i1, i2);
+			if (countCompare == 0)
+				return Long.compare(o2.getId(), o1.getId());
+			return countCompare;
 		});
 	}
 

@@ -63,8 +63,12 @@ public class LabelUtils {
 
 		int nextListOffset = 0;
 
+		int nonEmptyListCount = 0;
+
 		final ByteArrayOutputStream entryList = new ByteArrayOutputStream();
 		for (final LabelMultisetType lmt : lmts) {
+			if (!(lmt.isEmpty() || (lmt.size() == 0) ))
+				nonEmptyListCount++;
 			final int listHash = lmt.listHashCode();
 			int listOffset = listOffsets.get(listHash);
 			if (listOffset != listOffsets.getNoEntryValue()) {
@@ -80,6 +84,9 @@ public class LabelUtils {
 				nextListOffset = entryList.size(); //Another quirk to maintain size compatibility, see list NOTE above.
 			}
 		}
+
+		if (nonEmptyListCount == 0)
+			return null;
 
 		final byte[] entryListBytes = entryList.toByteArray();
 		dataBuffer.write(entryListBytes, 0, entryListBytes.length);

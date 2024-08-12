@@ -27,15 +27,16 @@ public class LabelMultisetTypeDownscalerTest {
 	public static final String DATASET = "sourceImg";
 
 	private static RandomAccessibleInterval<LabelMultisetType> sourceImg;
+	private static RandomAccessibleInterval<LabelMultisetType> emptyImg;
 	private static byte[] expectedDownScaledBytes;
 	private static VolatileLabelMultisetArray expectedDownScaledVlma;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 
-		N5FSReader n5Reader = new N5FSReader(DOWNSCALE_TEST_N5);
+		N5FSReader n5 = new N5FSReader(DOWNSCALE_TEST_N5);
 		/* Load expected data*/
-		sourceImg = N5Utils.open(n5Reader, DATASET);
+		sourceImg = N5Utils.open(n5, DATASET);
 		expectedDownScaledBytes = Files.readAllBytes(Paths.get(DOWNSCALE_TEST_SERIALIZED_BYTES));
 		expectedDownScaledVlma = LabelUtils.fromBytes(expectedDownScaledBytes, DOWNSCALED_NUM_ELEMENTS);
 		final byte[] sanityCheck = new byte[expectedDownScaledBytes.length];
@@ -59,27 +60,6 @@ public class LabelMultisetTypeDownscalerTest {
 
 		final VolatileLabelMultisetArray deserialized = LabelUtils.fromBytes(serializedBytes, test.getCurrentStorageArray().length);
 		VolatileLabelMultisetArrayTest.assertVolatileLabelMultisetArrayEquality(test, deserialized);
-	}
-
-	private static RandomAccessibleInterval<LabelMultisetType> generateRandomLabelMultisetImg() {
-
-		final Random rnd = new Random(10);
-
-		final int numElements = (int) Intervals.numElements(DIMENSIONS);
-		final List<LabelMultisetType> typeElements = new ArrayList<>();
-		LabelMultisetEntry obj = new LabelMultisetEntry(0, 1);
-		LabelMultisetEntry tmpObj = new LabelMultisetEntry(0, 1);
-		for (int i = 0; i < numElements; ++i) {
-			final int numEntries = rnd.nextInt(10);
-			final LabelMultisetEntryList entries = new LabelMultisetEntryList(numEntries);
-			for (int j = 0; j < numEntries; ++j) {
-				obj.setId(rnd.nextInt(100));
-				obj.setCount(rnd.nextInt(100));
-				entries.add(obj, tmpObj);
-			}
-			typeElements.add(new LabelMultisetType(entries));
-		}
-		return new ListImg<>(typeElements, DIMENSIONS);
 	}
 
 	@Test
@@ -111,9 +91,7 @@ public class LabelMultisetTypeDownscalerTest {
 		assertNotEquals(atTen.entrySet(), copy.entrySet());
 
 
-
-
-		/* NOTE: In general its not really safe to increment the index manually.
+		/* NOTE: In general it's not really safe to increment the index manually.
 		*   When moving the index, you also should trigger the `updateContainer` method,
 		*   but to do that you need to pass in the object to update against, which
 		*   is not available internally to the LabelMultisetType.
@@ -134,5 +112,27 @@ public class LabelMultisetTypeDownscalerTest {
 		/* copy and 11 SHOULD be equal now */
 		assertNotEquals(atEleven.index().get(), copy.index().get());
 		assertNotEquals(atEleven.entrySet(), copy.entrySet());
+	}
+
+
+	private static RandomAccessibleInterval<LabelMultisetType> generateRandomLabelMultisetImg() {
+
+		final Random rnd = new Random(10);
+
+		final int numElements = (int) Intervals.numElements(DIMENSIONS);
+		final List<LabelMultisetType> typeElements = new ArrayList<>();
+		LabelMultisetEntry obj = new LabelMultisetEntry(0, 1);
+		LabelMultisetEntry tmpObj = new LabelMultisetEntry(0, 1);
+		for (int i = 0; i < numElements; ++i) {
+			final int numEntries = rnd.nextInt(10);
+			final LabelMultisetEntryList entries = new LabelMultisetEntryList(numEntries);
+			for (int j = 0; j < numEntries; ++j) {
+				obj.setId(rnd.nextInt(100));
+				obj.setCount(rnd.nextInt(100));
+				entries.add(obj, tmpObj);
+			}
+			typeElements.add(new LabelMultisetType(entries));
+		}
+		return new ListImg<>(typeElements, DIMENSIONS);
 	}
 }

@@ -5,7 +5,6 @@ import net.imglib2.converter.Converters;
 import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.list.ListImg;
-import net.imglib2.type.numeric.integer.IntType;
 import net.imglib2.type.numeric.integer.LongType;
 import net.imglib2.util.Fraction;
 import net.imglib2.util.Intervals;
@@ -24,6 +23,7 @@ import java.util.Random;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class SerializationTest {
 
@@ -52,12 +52,31 @@ public class SerializationTest {
 	}
 
 	@Test
+	public void emptyImageSerializationTest() {
+
+		final long[] dims = {4, 4, 4};
+		final RandomAccessibleInterval<LongType> img = ArrayImgs.longs(dims);
+		final LabelMultisetType lmtRef = new LabelMultisetType(new LabelMultisetEntry(1, 0));
+		final RandomAccessibleInterval<LabelMultisetType> converted = Converters.convert2(img, (i, lmt) -> {/*do nothing, just use supplier as is */}, () -> {
+			lmtRef.set((long)(Math.random() * 1000), 0);
+			return lmtRef;
+		});
+
+		final int numElements = (int)Views.flatIterable(converted).size();
+		final byte[] serializedOut = serialize(
+				converted,
+				numElements);
+
+		assertNull("all entries empty, nothing to serialize out", serializedOut);
+	}
+
+	@Test
 	public void singleIdImageSerializationTest() {
 
 		final long[] dims = {4, 4, 4};
 		final RandomAccessibleInterval<LongType> img = ArrayImgs.longs(dims);
-		final LabelMultisetType type = LabelMultisetType.singleEntryWithSingleOccurrence();
-		final RandomAccessibleInterval<LabelMultisetType> converted = Converters.convert2(img, new FromIntegerTypeConverter<>(), () -> type);
+		final LabelMultisetType lmtRef = new LabelMultisetType(new LabelMultisetEntry(1, 1));
+		final RandomAccessibleInterval<LabelMultisetType> converted = Converters.convert2(img, (i, lmt) -> {/*do nothing, just use supplier as is */}, () -> lmtRef);
 
 		final int numElements = (int)Views.flatIterable(converted).size();
 		final byte[] serializedOut = serialize(
@@ -201,25 +220,48 @@ public class SerializationTest {
 		final byte[] serializedOut = serialize(converted, numElements);
 
 		final VolatileLabelMultisetArray arr = LabelUtils.fromBytes(serializedOut, numElements);
-		final byte[] serializedOutAfterDeserialication = new byte[LabelMultisetTypeDownscaler.getSerializedVolatileLabelMultisetArraySize(arr)];
-		LabelMultisetTypeDownscaler.serializeVolatileLabelMultisetArray(arr, serializedOutAfterDeserialication);
+		final byte[] serializedOutAfterDeserialization = new byte[LabelMultisetTypeDownscaler.getSerializedVolatileLabelMultisetArraySize(arr)];
+		LabelMultisetTypeDownscaler.serializeVolatileLabelMultisetArray(arr, serializedOutAfterDeserialization);
 
-		Assert.assertArrayEquals("Serialized bytes differed after deserialization", serializedOut, serializedOutAfterDeserialication);
+		Assert.assertArrayEquals("Serialized bytes differed after deserialization", serializedOut, serializedOutAfterDeserialization);
 	}
 
 	@Test
 	public void copyTest() {
 
-		final FromIntegerTypeConverter<IntType> intToLmt = new FromIntegerTypeConverter<>();
+		final LabelMultisetType zero = new LabelMultisetType(new LabelMultisetEntry(0, 1));
 
-		final LabelMultisetType one = LabelMultisetType.singleEntryWithSingleOccurrence();
-		intToLmt.convert(new IntType(1), one);
+		final LabelMultisetType one = zero.copy();
+		one.set(1, 1);
+
+		assertEquals(0, zero.getIntegerLong());
+		assertEquals(1, zero.size());
+		assertEquals(1, zero.entrySet().size());
+		assertEquals(1, zero.count(0));
+		assertEquals(0, zero.count(1));
+		assertEquals(0, zero.count(2));
 
 		final LabelMultisetType two = one.copy();
-		intToLmt.convert(new IntType(2), two);
+		two.set(2, two.count(1));
+
+		assertEquals(0, zero.getIntegerLong());
+		assertEquals(1, zero.size());
+		assertEquals(1, zero.entrySet().size());
+		assertEquals(1, zero.count(0));
+		assertEquals(0, zero.count(1));
+		assertEquals(0, zero.count(2));
 
 		assertEquals(1, one.getIntegerLong());
+		assertEquals(1, one.size());
+		assertEquals(1, one.entrySet().size());
+		assertEquals(1, one.count(1));
+		assertEquals(0, one.count(2));
+
 		assertEquals(2, two.getIntegerLong());
+		assertEquals(1, two.entrySet().size());
+		assertEquals(1, two.size());
+		assertEquals(1, two.count(2));
+		assertEquals(0, two.count(1));
 
 	}
 
