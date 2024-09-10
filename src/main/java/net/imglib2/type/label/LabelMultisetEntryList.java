@@ -13,7 +13,7 @@ import java.util.Set;
  * all add operations should insert appropriately to remain sorted. If `sortByCount` is ever called (or the order is manually changed)
  * it is the developers responsibility to `sortById()` prior to any additional calls.
  */
-public class LabelMultisetEntryList extends MappedObjectArrayList<LabelMultisetEntry, LongMappedAccess> {
+public class LabelMultisetEntryList extends MappedObjectArrayList<LabelMultisetEntry, LongMappedAccess> implements Comparable<LabelMultisetEntryList> {
 
 	public LabelMultisetEntryList() {
 
@@ -43,9 +43,8 @@ public class LabelMultisetEntryList extends MappedObjectArrayList<LabelMultisetE
 		if (!(o instanceof LabelMultisetEntryList)) return false;
 		final LabelMultisetEntryList other = (LabelMultisetEntryList)o;
 		if (other.size() != size()) return false;
-		final long[] thisData = ((LongMappedAccessData) data).getData();
-		final long[] otherData = ((LongMappedAccessData) other.data).getData();
-		return Arrays.equals(thisData, otherData);
+		if (other.hashCode() != hashCode()) return false;
+		return compareTo(other) == 0;
 	}
 
 	public LabelMultisetEntryList(final int capacity) {
@@ -395,5 +394,29 @@ public class LabelMultisetEntryList extends MappedObjectArrayList<LabelMultisetE
 			}
 		}
 		releaseRef(e1);
+	}
+
+	@Override public int compareTo(LabelMultisetEntryList o) {
+
+		final int size = size();
+
+		final int sizeCompare = Integer.compare(size, o.size());
+		if (sizeCompare != 0) return sizeCompare;
+
+		final RefIterator<LabelMultisetEntry> thisIter = iterator();
+		final RefIterator<LabelMultisetEntry> otherIter = o.iterator();
+
+		for (int i = 0; i < size; i++) {
+			final LabelMultisetEntry thisNext = thisIter.next();
+			final LabelMultisetEntry otherNext = otherIter.next();
+
+			final int idCompare = Long.compare(thisNext.getId(), otherNext.getId());
+			if (idCompare != 0) return idCompare;
+
+			final int countCompare = Long.compare(thisNext.getCount(), otherNext.getCount());
+			if (countCompare != 0) return countCompare;
+		}
+
+		return 0;
 	}
 }

@@ -1,7 +1,5 @@
 package net.imglib2.type.label;
 
-import gnu.trove.impl.Constants;
-import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntLongHashMap;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.converter.Converters;
@@ -15,6 +13,7 @@ import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Collection;
+import java.util.TreeMap;
 
 import static gnu.trove.impl.Constants.DEFAULT_CAPACITY;
 import static gnu.trove.impl.Constants.DEFAULT_LOAD_FACTOR;
@@ -59,7 +58,7 @@ public class LabelUtils {
 		 * It's now calculated during deserializtaion instead.*/
 		writeInt(dataBuffer, 0, ByteOrder.BIG_ENDIAN);
 
-		final TIntIntHashMap listOffsets = new TIntIntHashMap(DEFAULT_CAPACITY, Constants.DEFAULT_LOAD_FACTOR, -1, -1);
+		final TreeMap<LabelMultisetEntryList, Integer> listOffsets = new TreeMap<>();
 
 		int nextListOffset = 0;
 
@@ -67,11 +66,15 @@ public class LabelUtils {
 
 		final ByteArrayOutputStream entryList = new ByteArrayOutputStream();
 		for (final LabelMultisetType lmt : lmts) {
+
+			// It's not isEmpty() and size() are not equivalent in this case.
+			//	size() refers to the sum of the count() of each entry.
+			//	entries can have a count of `0`
+			//noinspection SizeReplaceableByIsEmpty
 			if (!(lmt.isEmpty() || (lmt.size() == 0) ))
 				nonEmptyListCount++;
-			final int listHash = lmt.listHashCode();
-			int listOffset = listOffsets.get(listHash);
-			if (listOffset != listOffsets.getNoEntryValue()) {
+			final Integer listOffset = listOffsets.get(lmt.labelMultisetEntries());
+			if (listOffset != null) {
 				writeInt(dataBuffer, listOffset, ByteOrder.BIG_ENDIAN);
 			} else {
 				writeInt(entryList, lmt.entrySet().size(), ByteOrder.LITTLE_ENDIAN);
@@ -79,7 +82,7 @@ public class LabelUtils {
 					writeLong(entryList, entry.getElement().id(), ByteOrder.LITTLE_ENDIAN);
 					writeInt(entryList, entry.getCount(), ByteOrder.LITTLE_ENDIAN);
 				}
-				listOffsets.put(listHash, nextListOffset);
+				listOffsets.put(lmt.copy().labelMultisetEntries(), nextListOffset);
 				writeInt(dataBuffer, nextListOffset, ByteOrder.BIG_ENDIAN);
 				nextListOffset = entryList.size(); //Another quirk to maintain size compatibility, see list NOTE above.
 			}
