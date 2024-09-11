@@ -43,7 +43,6 @@ public class LabelMultisetEntryList extends MappedObjectArrayList<LabelMultisetE
 		if (!(o instanceof LabelMultisetEntryList)) return false;
 		final LabelMultisetEntryList other = (LabelMultisetEntryList)o;
 		if (other.size() != size()) return false;
-		if (other.hashCode() != hashCode()) return false;
 		return compareTo(other) == 0;
 	}
 
