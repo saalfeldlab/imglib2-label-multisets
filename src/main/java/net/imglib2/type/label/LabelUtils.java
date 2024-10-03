@@ -1,7 +1,5 @@
 package net.imglib2.type.label;
 
-import gnu.trove.impl.Constants;
-import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntLongHashMap;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.converter.Converters;
@@ -15,12 +13,13 @@ import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Collection;
+import java.util.Set;
+import java.util.TreeMap;
 
 import static gnu.trove.impl.Constants.DEFAULT_CAPACITY;
 import static gnu.trove.impl.Constants.DEFAULT_LOAD_FACTOR;
 import static net.imglib2.type.label.AbstractLabelMultisetLoader.argMaxListSizeInBytes;
 import static net.imglib2.type.label.AbstractLabelMultisetLoader.listOffsetsSizeInBytes;
-import static net.imglib2.type.label.ByteUtils.INT_SIZE;
 
 public class LabelUtils {
 
@@ -52,40 +51,47 @@ public class LabelUtils {
 
 		final LabelMultisetEntry entryReference = new LabelMultisetEntry(0, 1);
 
-		final int argMaxSize = INT_SIZE; // in reality, the int value is always `0`, with size of 4 bytes
-		final int offsetListSize = INT_SIZE * numElements;
 		final ByteArrayOutputStream dataBuffer = new ByteArrayOutputStream();
 		/* No longer serialized out ArgMax; we do this by specifying the ArgMax size as 0;
 		 * It's now calculated during deserializtaion instead.*/
 		writeInt(dataBuffer, 0, ByteOrder.BIG_ENDIAN);
 
-		final TIntIntHashMap listOffsets = new TIntIntHashMap(DEFAULT_CAPACITY, Constants.DEFAULT_LOAD_FACTOR, -1, -1);
+		final TreeMap<ComparableLabelMultisetEntryList, Integer> listOffsets = new TreeMap<>();
 
 		int nextListOffset = 0;
 
-		int nonEmptyListCount = 0;
+		boolean allListsEmpty = true;
 
 		final ByteArrayOutputStream entryList = new ByteArrayOutputStream();
+		ComparableLabelMultisetEntryList listRef = new ComparableLabelMultisetEntryList();
 		for (final LabelMultisetType lmt : lmts) {
-			if (!(lmt.isEmpty() || (lmt.size() == 0) ))
-				nonEmptyListCount++;
-			final int listHash = lmt.listHashCode();
-			int listOffset = listOffsets.get(listHash);
-			if (listOffset != listOffsets.getNoEntryValue()) {
+
+			lmt.getAccess().getValue(lmt.index().get(), listRef);
+			final Integer listOffset = listOffsets.putIfAbsent(listRef, nextListOffset);
+			if (listOffset != null) {
 				writeInt(dataBuffer, listOffset, ByteOrder.BIG_ENDIAN);
 			} else {
-				writeInt(entryList, lmt.entrySet().size(), ByteOrder.LITTLE_ENDIAN);
-				for (final Entry<Label> entry : lmt.entrySetWithRef(entryReference)) {
+				/* deep copy the list (in-place) ONLY if we are a new list just added to the treeView */
+				final ComparableLabelMultisetEntryList swap = new ComparableLabelMultisetEntryList();
+				swap.addAll(listRef);
+				listRef.referToDataAt(swap.data, swap.getBaseOffset());
+				listRef = swap;
+
+				final Set<Entry<Label>> entries = lmt.entrySetWithRef(entryReference);
+				writeInt(entryList, entries.size(), ByteOrder.LITTLE_ENDIAN);
+				for (final Entry<Label> entry : entries) {
 					writeLong(entryList, entry.getElement().id(), ByteOrder.LITTLE_ENDIAN);
-					writeInt(entryList, entry.getCount(), ByteOrder.LITTLE_ENDIAN);
+					final int count = entry.getCount();
+					writeInt(entryList, count, ByteOrder.LITTLE_ENDIAN);
+
+					allListsEmpty = allListsEmpty && count == 0;
 				}
-				listOffsets.put(listHash, nextListOffset);
 				writeInt(dataBuffer, nextListOffset, ByteOrder.BIG_ENDIAN);
 				nextListOffset = entryList.size(); //Another quirk to maintain size compatibility, see list NOTE above.
 			}
 		}
 
-		if (nonEmptyListCount == 0)
+		if (allListsEmpty)
 			return null;
 
 		final byte[] entryListBytes = entryList.toByteArray();

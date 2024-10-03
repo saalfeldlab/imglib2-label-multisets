@@ -3,7 +3,6 @@ package net.imglib2.type.label;
 import net.imglib2.type.label.LabelMultisetType.Entry;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
@@ -43,9 +42,9 @@ public class LabelMultisetEntryList extends MappedObjectArrayList<LabelMultisetE
 		if (!(o instanceof LabelMultisetEntryList)) return false;
 		final LabelMultisetEntryList other = (LabelMultisetEntryList)o;
 		if (other.size() != size()) return false;
-		final long[] thisData = ((LongMappedAccessData) data).getData();
-		final long[] otherData = ((LongMappedAccessData) other.data).getData();
-		return Arrays.equals(thisData, otherData);
+		final ComparableLabelMultisetEntryList thisComparable = new ComparableLabelMultisetEntryList(this);
+		final ComparableLabelMultisetEntryList otherComparable = new ComparableLabelMultisetEntryList(other);
+		return thisComparable.compareTo(otherComparable) == 0;
 	}
 
 	public LabelMultisetEntryList(final int capacity) {

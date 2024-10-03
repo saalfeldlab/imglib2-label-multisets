@@ -287,8 +287,7 @@ public class LabelMultisetType extends AbstractNativeType<LabelMultisetType> imp
 					access.isValid(),
 					access.argMaxCopy());
 			/* get a new type instance */
-			final LabelMultisetType that = new LabelMultisetType(null, accessCopy);
-			return that;
+			return new LabelMultisetType(null, accessCopy);
 		}
 	}
 
@@ -702,10 +701,16 @@ public class LabelMultisetType extends AbstractNativeType<LabelMultisetType> imp
 
 		final long ours = argMax();
 		final long theirs = arg0.argMax();
-		final int initialComparison = Long.compare(ours, theirs);
 
-		if (initialComparison != 0) return initialComparison;
-		else return Long.compare(count(ours), count(theirs));
+		final int argMaxCompare = Long.compare(ours, theirs);
+		if (argMaxCompare != 0) return argMaxCompare;
+
+		final int countCompare = Long.compare(count(ours), count(theirs));
+		if (countCompare != 0) return countCompare;
+
+		final ComparableLabelMultisetEntryList thisComparable = new ComparableLabelMultisetEntryList(labelMultisetEntries());
+		final ComparableLabelMultisetEntryList otherComparable = new ComparableLabelMultisetEntryList(arg0.labelMultisetEntries());
+		return thisComparable.compareTo(otherComparable);
 	}
 
 	@Override

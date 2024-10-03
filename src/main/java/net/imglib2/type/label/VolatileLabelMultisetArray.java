@@ -112,6 +112,8 @@ public class VolatileLabelMultisetArray implements VolatileAccess, VolatileArray
 
   public long argMax(final int offset) {
 
+  	if (data.length == 0)
+	  return Label.INVALID;
 	return this.argMax[offset];
   }
 
