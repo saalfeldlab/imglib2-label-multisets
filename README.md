@@ -1,4 +1,6 @@
-# ImgLib2 Label Multisets [![Build Status](https://github.com/saalfeldlab/imglib2-label-multisets/actions/workflows/build-main.yml/badge.svg)](https://github.com/saalfeldlab/imglib2-label-multisets/actions/workflows/build-main.yml)
+[![Build Status](https://github.com/saalfeldlab/imglib2-label-multisets/actions/workflows/build.yml/badge.svg)](https://github.com/saalfeldlab/imglib2-label-multisets/actions/workflows/build.yml)
+
+# ImgLib2 Label Multisets
 
 Efficient implementation of label multisets as an ImgLib2 `NativeType` backed by primitive arrays.
 
