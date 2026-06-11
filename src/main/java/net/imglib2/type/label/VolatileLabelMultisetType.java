@@ -5,147 +5,290 @@ import net.imglib2.img.NativeImg;
 import net.imglib2.type.Index;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.NativeTypeFactory;
+import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.util.Fraction;
+
+import java.math.BigInteger;
 
 public class VolatileLabelMultisetType
 		extends Volatile<LabelMultisetType>
-		implements NativeType<VolatileLabelMultisetType> {
+		implements NativeType<VolatileLabelMultisetType>, IntegerType<VolatileLabelMultisetType> {
 
-  public static final VolatileLabelMultisetType type = new VolatileLabelMultisetType();
+	public static final VolatileLabelMultisetType type = new VolatileLabelMultisetType();
 
-  // this is the constructor if you want it to read from an array
-  public VolatileLabelMultisetType(final NativeImg<?, VolatileLabelMultisetArray> img) {
+	// this is the constructor if you want it to read from an array
+	public VolatileLabelMultisetType(final NativeImg<?, VolatileLabelMultisetArray> img) {
 
-	super(new LabelMultisetType(img));
-  }
+		super(new LabelMultisetType(img));
+	}
 
-  // this is the constructor if you want to specify the dataAccess
-  public VolatileLabelMultisetType(final VolatileLabelMultisetArray access, final boolean isValid) {
+	// this is the constructor if you want to specify the dataAccess
+	public VolatileLabelMultisetType(final VolatileLabelMultisetArray access, final boolean isValid) {
 
-	super(new LabelMultisetType(access), isValid);
-  }
+		super(new LabelMultisetType(access), isValid);
+	}
 
-  // this is the constructor if you want it to be a variable
-  public VolatileLabelMultisetType() {
+	// this is the constructor if you want it to be a variable
+	public VolatileLabelMultisetType() {
 
-	super(new LabelMultisetType(), true);
-  }
+		super(new LabelMultisetType(), true);
+	}
 
-  // this is the constructor if you want it to be a variable
-  public VolatileLabelMultisetType(final LabelMultisetEntry entry) {
+	// this is the constructor if you want it to be a variable
+	public VolatileLabelMultisetType(final LabelMultisetEntry entry) {
 
-	super(new LabelMultisetType(entry), true);
-  }
+		super(new LabelMultisetType(entry), true);
+	}
 
-  // this is the constructor if you want it to be a variable
-  public VolatileLabelMultisetType(final LabelMultisetEntryList entries) {
+	// this is the constructor if you want it to be a variable
+	public VolatileLabelMultisetType(final LabelMultisetEntryList entries) {
 
-	super(new LabelMultisetType(entries), true);
-  }
+		super(new LabelMultisetType(entries), true);
+	}
 
-  protected VolatileLabelMultisetType(final LabelMultisetType t) {
+	protected VolatileLabelMultisetType(final LabelMultisetType t) {
 
-	super(t, true);
-  }
+		super(t, true);
+	}
 
-  @Override
-  public Fraction getEntitiesPerPixel() {
+	@Override
+	public Fraction getEntitiesPerPixel() {
 
-	return t.getEntitiesPerPixel();
-  }
+		return t.getEntitiesPerPixel();
+	}
 
-  @Override
-  public Index index() {
+	@Override
+	public Index index() {
 
-	return t.index();
-  }
+		return t.index();
+	}
 
-  @Override
-  public void updateIndex(final int i) {
+	@Override
+	public VolatileLabelMultisetType createVariable() {
 
-	t.updateIndex(i);
-  }
+		return new VolatileLabelMultisetType();
+	}
 
-  @Override
-  public int getIndex() {
+	@Override
+	public VolatileLabelMultisetType copy() {
 
-	return t.getIndex();
-  }
+		return new VolatileLabelMultisetType(t.copy());
+	}
 
-  @Override
-  public void incIndex() {
+	@Override
+	public void set(final VolatileLabelMultisetType c) {
 
-	t.incIndex();
-  }
+		throw new UnsupportedOperationException();
+	}
 
-  @Override
-  public void incIndex(final int increment) {
+	@Override
+	public NativeTypeFactory<VolatileLabelMultisetType, ?> getNativeTypeFactory() {
 
-	t.incIndex(increment);
-  }
+		throw new UnsupportedOperationException();
+	}
 
-  @Override
-  public void decIndex() {
+	@Override
+	public VolatileLabelMultisetType duplicateTypeOnSameNativeImg() {
 
-	t.decIndex();
-  }
+		return new VolatileLabelMultisetType(t.duplicateTypeOnSameNativeImg());
+	}
 
-  @Override
-  public void decIndex(final int decrement) {
+	@Override
+	public void updateContainer(final Object c) {
 
-	t.decIndex(decrement);
-  }
+		t.updateContainer(c);
+		setValid(t.isValid());
+	}
 
-  @Override
-  public VolatileLabelMultisetType createVariable() {
+	@Override
+	public boolean valueEquals(final VolatileLabelMultisetType other) {
 
-	return new VolatileLabelMultisetType();
-  }
+		return isValid() && other.isValid() && t.valueEquals(other.t);
+	}
 
-  @Override
-  public VolatileLabelMultisetType copy() {
+	public static VolatileLabelMultisetType singleEntryWithSingleOccurrence() {
 
-	return new VolatileLabelMultisetType(t.copy());
-  }
+		return singleEntryWithNumOccurrences(1);
+	}
 
-  @Override
-  public void set(final VolatileLabelMultisetType c) {
+	public static VolatileLabelMultisetType singleEntryWithNumOccurrences(final int numOccurrences) {
 
-	throw new UnsupportedOperationException();
-  }
+		return new VolatileLabelMultisetType(new LabelMultisetEntry(Label.INVALID, numOccurrences));
+	}
 
-  @Override
-  public NativeTypeFactory<VolatileLabelMultisetType, ?> getNativeTypeFactory() {
+	@Override public int getInteger() {
 
-	throw new UnsupportedOperationException();
-  }
+		return get().getInteger();
+	}
 
-  @Override
-  public VolatileLabelMultisetType duplicateTypeOnSameNativeImg() {
+	@Override public long getIntegerLong() {
 
-	return new VolatileLabelMultisetType(t.duplicateTypeOnSameNativeImg());
-  }
+		return get().getIntegerLong();
+	}
 
-  @Override
-  public void updateContainer(final Object c) {
+	@Override public BigInteger getBigInteger() {
 
-	t.updateContainer(c);
-	setValid(t.isValid());
-  }
+		return get().getBigInteger();
+	}
 
-  @Override
-  public boolean valueEquals(final VolatileLabelMultisetType other) {
+	@Override public void setInteger(int f) {
+		get().setInteger(f);
 
-	return isValid() && other.isValid() && t.valueEquals(other.t);
-  }
+	}
 
-  public static VolatileLabelMultisetType singleEntryWithSingleOccurrence() {
+	@Override public void setInteger(long f) {
+		get().setInteger(f);
+	}
 
-	return singleEntryWithNumOccurrences(1);
-  }
+	@Override public void setBigInteger(BigInteger b) {
+		get().setBigInteger(b);
+	}
 
-  public static VolatileLabelMultisetType singleEntryWithNumOccurrences(final int numOccurrences) {
+	@Override public void inc() {
+		get().inc();
+	}
 
-	return new VolatileLabelMultisetType(new LabelMultisetEntry(Label.INVALID, numOccurrences));
-  }
+	@Override public void dec() {
+		get().dec();
+	}
+
+	@Override public double getMaxValue() {
+
+		return get().getMaxValue();
+	}
+
+	@Override public double getMinValue() {
+
+		return get().getMinValue();
+	}
+
+	@Override public double getMinIncrement() {
+
+		return get().getMinIncrement();
+	}
+
+	@Override public int getBitsPerPixel() {
+
+		return get().getBitsPerPixel();
+	}
+
+	@Override public int compareTo(VolatileLabelMultisetType o) {
+
+		return get().compareTo(o.get());
+	}
+
+	@Override public double getRealDouble() {
+
+		return get().getRealDouble();
+	}
+
+	@Override public float getRealFloat() {
+
+		return get().getRealFloat();
+	}
+
+	@Override public double getImaginaryDouble() {
+
+		return get().getImaginaryDouble();
+	}
+
+	@Override public float getImaginaryFloat() {
+
+		return get().getImaginaryFloat();
+	}
+
+	@Override public void setReal(float f) {
+		get().setReal(f);
+	}
+
+	@Override public void setReal(double f) {
+		get().setReal(f);
+	}
+
+	@Override public void setImaginary(float f) {
+		get().setImaginary(f);
+	}
+
+	@Override public void setImaginary(double f) {
+		get().setImaginary(f);
+	}
+
+	@Override public void setComplexNumber(float r, float i) {
+		get().setComplexNumber(r, i);
+	}
+
+	@Override public void setComplexNumber(double r, double i) {
+		get().setComplexNumber(r, i);
+	}
+
+	@Override public float getPowerFloat() {
+
+		return get().getPowerFloat();
+	}
+
+	@Override public double getPowerDouble() {
+
+		return get().getPowerDouble();
+	}
+
+	@Override public float getPhaseFloat() {
+
+	 	return get().getPhaseFloat();
+	}
+
+	@Override public double getPhaseDouble() {
+
+		return get().getPhaseDouble();
+	}
+
+	@Override public void complexConjugate() {
+		get().complexConjugate();
+	}
+
+ 	@Override public void add(VolatileLabelMultisetType c) {
+
+		get().add(c.get());
+	}
+
+	@Override public void div(VolatileLabelMultisetType c) {
+
+		get().div(c.get());
+	}
+
+	@Override public void mul(VolatileLabelMultisetType c) {
+
+		get().mul(c.get());
+	}
+
+	@Override public void mul(float c) {
+
+		get().mul(c);
+	}
+
+	@Override public void mul(double c) {
+
+		get().mul(c);
+	}
+
+	@Override public void pow(VolatileLabelMultisetType c) {
+		get().pow(c.get());
+	}
+
+	@Override public void pow(double d) {
+		get().pow(d);
+	}
+
+	@Override public void setOne() {
+
+		get().setOne();
+	}
+
+	@Override public void setZero() {
+		get().setZero();
+	}
+
+	@Override public void sub(VolatileLabelMultisetType c) {
+
+		get().sub(c.get());
+	}
 }

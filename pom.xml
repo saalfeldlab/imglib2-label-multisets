@@ -10,7 +10,7 @@
 
 	<groupId>net.imglib2</groupId>
 	<artifactId>imglib2-label-multisets</artifactId>
-	<version>0.11.6-SNAPSHOT</version>
+	<version>0.15.2-SNAPSHOT</version>
 
 	<name>ImgLib2 Label Multisets</name>
 	<description>Implementation of label multisets as an ImgLib2 native type.</description>
@@ -28,6 +28,19 @@
 	</licenses>
 
 	<developers>
+		<developer>
+			<id>cmhulbert</id>
+			<name>Caleb Hulbert</name>
+			<email>hulbertc@janelia.hhmi.org</email>
+			<url />
+			<organization>HHMI Janelia</organization>
+			<organizationUrl>http://janelia.org/</organizationUrl>
+			<roles>
+				<role>developer</role>
+				<role>maintainer </role>
+			</roles>
+			<timezone>-5</timezone>
+		</developer>
 		<developer>
 			<id>tpietzsch</id>
 			<name>Tobias Pietzsch</name>
@@ -118,12 +131,20 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+		</dependency>
 
 		<!-- Test dependencies -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.janelia.saalfeldlab</groupId>

@@ -17,7 +17,7 @@ public class MappedObjectArrayList<O extends MappedObject<O, T>, T extends Mappe
 
   private final O type;
 
-  private MappedAccessData<T> data;
+  protected MappedAccessData<T> data;
 
   private long baseOffset;
 
@@ -57,7 +57,10 @@ public class MappedObjectArrayList<O extends MappedObject<O, T>, T extends Mappe
 	this.baseOffset = baseOffset;
 	this.elementBaseOffset = baseOffset + ByteUtils.INT_SIZE;
 	data.updateAccess(access, baseOffset);
-	size = access.getInt(0);
+	if (baseOffset < data.size())
+		size = access.getInt(0);
+	else
+		size = 0;
   }
 
   public void createListAt(final MappedAccessData<T> data, final long baseOffset) {
@@ -132,7 +135,7 @@ public class MappedObjectArrayList<O extends MappedObject<O, T>, T extends Mappe
   @Override
   public int size() {
 
-	return size; //access.getInt(0);
+	return size;
   }
 
   @Override
@@ -234,12 +237,12 @@ public class MappedObjectArrayList<O extends MappedObject<O, T>, T extends Mappe
 		final int size = size();
 		ensureCapacity(size + 1);
 		setSize(size + 1);
+		setRefAt(ref, index);
 		if (index < size) {
 			final O shift = createRefAt(index + 1);
 			shift.access.copyFrom(ref.access, elementSizeInBytes() * (size - index));
 			releaseRef(shift);
 		}
-		setRefAt(ref, index);
 		ref.set(obj);
 	}
 
