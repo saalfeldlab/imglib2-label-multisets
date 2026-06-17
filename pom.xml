@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.scijava</groupId>
 		<artifactId>pom-scijava</artifactId>
-		<version>37.0.0</version>
+		<version>44.0.0</version>
 	</parent>
 
 	<groupId>net.imglib2</groupId>
@@ -106,9 +106,13 @@
 		<package-name>net.imglib2.type.label</package-name>
 		<license.licenseName>bsd_2</license.licenseName>
 		<license.copyrightOwners>Stephan Saalfeld</license.copyrightOwners>
+		<scijava.jvm.version>8</scijava.jvm.version>
 
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles>
+
+		<n5.version>4.0.1</n5.version>
+		<n5-imglib2.version>8.0.0</n5-imglib2.version>
 	</properties>
 
 	<dependencies>
