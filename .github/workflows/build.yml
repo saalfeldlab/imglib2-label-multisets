@@ -6,19 +6,34 @@ on:
       - master
     tags:
       - "*-[0-9]+.*"
+  pull_request:
+    branches:
+      - master
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v6
-      - name: Set up Java
-        uses: actions/setup-java@v5
+      - uses: actions/checkout@v7
+
+      - name: Cache m2 folder
+        uses: actions/cache@v4
+        env:
+          cache-name: cache-m2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-build-${{ env.cache-name }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
+      - name: Set up JDK
+        uses: actions/setup-java@v6
         with:
           java-version: '8'
           distribution: 'zulu'
-          cache: 'maven'
       - name: Set up CI environment
         run: .github/setup.sh
       - name: Execute the build
@@ -28,5 +43,7 @@ jobs:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           MAVEN_USER: ${{ secrets.MAVEN_USER }}
           MAVEN_PASS: ${{ secrets.MAVEN_PASS }}
+          CENTRAL_USER: ${{ secrets.CENTRAL_USER }}
+          CENTRAL_PASS: ${{ secrets.CENTRAL_PASS }}
           OSSRH_PASS: ${{ secrets.OSSRH_PASS }}
           SIGNING_ASC: ${{ secrets.SIGNING_ASC }}
