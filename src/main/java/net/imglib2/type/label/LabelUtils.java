@@ -177,7 +177,7 @@ public class LabelUtils {
 		long maxCountId = Label.INVALID;
 		for (final Entry<Label> entry : labelMultisetEntries) {
 			final int count = entry.getCount();
-			if (maxCount < count || maxCount == count && entry.getElement().id() < maxCountId) {
+			if (maxCount < count || maxCount == count && Long.compareUnsigned(entry.getElement().id(), maxCountId) < 0) {
 				maxCount = count;
 				maxCountId = entry.getElement().id();
 			}

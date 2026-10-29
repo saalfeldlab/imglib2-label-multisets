@@ -225,7 +225,7 @@ public class LabelMultisetEntryList extends MappedObjectArrayList<LabelMultisetE
 			final int i2 = o2.getCount();
 			final int countCompare = Integer.compare(i1, i2);
 			if (countCompare == 0)
-				return Long.compare(o2.getId(), o1.getId());
+				return Long.compareUnsigned(o2.getId(), o1.getId());
 			return countCompare;
 		});
 	}
