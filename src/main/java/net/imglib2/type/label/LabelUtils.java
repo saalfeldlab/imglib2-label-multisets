@@ -1,5 +1,6 @@
 package net.imglib2.type.label;
 
+import gnu.trove.list.array.TLongArrayList;
 import gnu.trove.map.hash.TIntLongHashMap;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.converter.Converters;
@@ -117,7 +118,29 @@ public class LabelUtils {
 		return new LabelMultisetType(new LabelMultisetEntry(Label.OUTSIDE, count));
 	}
 
+	/**
+	 * Deserialize a {@link VolatileLabelMultisetArray} from a byte array with a known number of elements.
+	 * <p>
+	 * Empty elements will return an argmax of {@link Label#INVALID}.
+	 *
+	 * @param bytes to deserialize into {@link VolatileLabelMultisetArray}
+	 * @param numElements number of the elements in the resulting array
+	 */
 	public static VolatileLabelMultisetArray fromBytes(final byte[] bytes, final int numElements) {
+
+		return fromBytes(bytes, numElements, Label.INVALID);
+	}
+
+	/**
+	 * Deserialize a {@link VolatileLabelMultisetArray} from a byte array with a known number of elements.
+	 * <p>
+	 * Empty elements will return an argmax of {@code emptyArgMax}.
+	 *
+	 * @param bytes to deserialize into {@link VolatileLabelMultisetArray}
+	 * @param numElements number of the elements in the resulting array
+	 * @param emptyArgMax the argMax of a pixel whose list has no entries
+	 */
+	public static VolatileLabelMultisetArray fromBytes(final byte[] bytes, final int numElements, final long emptyArgMax) {
 
 		final ByteBuffer bb = ByteBuffer.wrap(bytes);
 		LOG.debug("Creating VolatileLabelMultisetArray from {} bytes for {} elements", bytes.length, numElements);
@@ -155,7 +178,7 @@ public class LabelUtils {
 				} else {
 					if (lmel == null) lmel = new LabelMultisetEntryList();
 					lmel.referToDataAt(listData, listDataIdx);
-					argMax[i] = LabelUtils.getArgMax(lmel);
+					argMax[i] = lmel.isEmpty() ? emptyArgMax : LabelUtils.getArgMax(lmel);
 					entryOffsetToArgMax.put(listDataIdx, argMax[i]);
 				}
 			}
