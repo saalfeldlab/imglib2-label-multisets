@@ -258,37 +258,15 @@ public class LabelMultisetType extends AbstractNativeType<LabelMultisetType> imp
 		return new LabelMultisetType();
 	}
 
+	private LabelMultisetType(final LabelMultisetType source) {
+
+		this(null, copySingleElement(source));
+	}
+
 	@Override
 	public LabelMultisetType copy() {
 
-
-		if (img != null) {
-			/* If backed by an image, copy the entries only, not the entire backing data. */
-			final LabelMultisetType labelMultisetType = new LabelMultisetType();
-			labelMultisetType.labelMultisetEntries().addAll(labelMultisetEntries());
-			return labelMultisetType;
-		} else {
-			/* copy the listData */
-			final long byteSize = access.getListData().size();
-			final int longSize = access.getListData().data.length;
-			final LongMappedAccessData listDataCopy = LongMappedAccessData.factory.createStorage(byteSize);
-			System.arraycopy(access.getListData().data, 0, listDataCopy.data, 0, longSize);
-
-			/* copy the data */
-			final int[] data = access.getCurrentStorageArray();
-			final int[] dataCopy = new int[data.length];
-			System.arraycopy(data, 0, dataCopy, 0, data.length);
-
-			/* get a new access with all the copies */
-			final VolatileLabelMultisetArray accessCopy = new VolatileLabelMultisetArray(
-					dataCopy,
-					listDataCopy,
-					access.getListDataUsedSizeInBytes(),
-					access.isValid(),
-					access.argMaxCopy());
-			/* get a new type instance */
-			return new LabelMultisetType(null, accessCopy);
-		}
+		return new LabelMultisetType(this);
 	}
 
 	public int listHashCode() {
@@ -298,40 +276,47 @@ public class LabelMultisetType extends AbstractNativeType<LabelMultisetType> imp
 	@Override
 	public void set(final LabelMultisetType c) {
 
-		if (c.img != null) {
-			/* If backed by an image, copy the entries only, not the entire backing data. */
+		if (c == this)
+			return;
 
-			img = null;
-			i.set(0);
-			clear();
+		final VolatileLabelMultisetArray singleElementCopy = copySingleElement(c);
 
-			addAll(c.labelMultisetEntries());
+		if (img != null) {
+			addElementToImg(singleElementCopy);
 		} else {
-			/* copy the listData */
-			final long byteSize = c.access.getListData().size();
-			final int longSize = c.access.getListData().data.length;
-			final LongMappedAccessData listDataCopy = LongMappedAccessData.factory.createStorage(byteSize);
-			System.arraycopy(c.access.getListData().data, 0, listDataCopy.data, 0, longSize);
-
-			/* copy the data */
-			final int[] data = c.access.getCurrentStorageArray();
-			final int[] dataCopy = new int[data.length];
-			System.arraycopy(data, 0, dataCopy, 0, data.length);
-
-			/* get a new access with all the copies */
-			final VolatileLabelMultisetArray accessCopy = new VolatileLabelMultisetArray(
-					dataCopy,
-					listDataCopy,
-					c.access.getListDataUsedSizeInBytes(),
-					c.access.isValid(),
-					c.access.argMaxCopy());
-			/* get a new type instance */
-
-			img = null;
 			i.set(0);
-			access = accessCopy;
-			updateEntriesLocation();
+			access = singleElementCopy;
 		}
+		updateEntriesLocation();
+	}
+
+    /**
+	 * at a high level, when setting a value on an img backed instance, we want to set the current element to point
+	 * to a list equivalent to the type we are copying. To ensure we have the right size, we append the new list to
+	 * the end, which may require growing the list. In that case,we also need to updat the `listDataUsedSizeInBytes`.
+	 *
+	 * TODO: this should be cleaner, more internal, and more systematic, but this is a first pass to address this.
+	 *
+	 * @param singleElementAccess
+	 */
+	private void addElementToImg(VolatileLabelMultisetArray singleElementAccess) {
+
+
+		final LabelMultisetEntryList copiedEntries = new LabelMultisetEntryList();
+		singleElementAccess.getValue(0, copiedEntries);
+
+		/* handle the case when the used size in bytes is 0 or -1  */
+		final long usedSize = access.getListDataUsedSizeInBytes();
+		final LongMappedAccessData listData = access.getListData();
+		final long offset = Math.max(usedSize < 0 ? listData.size() : usedSize, Integer.BYTES);
+		final LabelMultisetEntryList appended = new LabelMultisetEntryList();
+
+		/* the list grows `listData` itself, only when it runs out of room */
+		appended.createListAt(listData, offset);
+		appended.addAll(copiedEntries);
+		access.getCurrentStorageArray()[i.get()] = Math.toIntExact(offset);
+		access.setListDataUsedSizeInBytes(offset + appended.getSizeInBytes());
+		access.setArgMax(i.get(), singleElementAccess.argMax(0));
 	}
 
 	@Override
@@ -785,6 +770,78 @@ public class LabelMultisetType extends AbstractNativeType<LabelMultisetType> imp
 	public void pow(final double d) {
 
 		throw new UnsupportedOperationException();
+	}
+
+	/**
+	 * Given a {@code source} LabelMultisetType, copy the single element that it currently refers to.
+	 * <p>
+	 * If {@code source.img} is not null, then only the specific element currently referenced is copied into the result.
+	 * Otherwise, the {@code source} is a "variable" instance, whose access holds only that one element, and is copied as is.
+	 *
+	 * @param source the type to copy the current element of
+	 * @return the single-element copy of the current element that {@code source} refers to
+	 */
+	private static VolatileLabelMultisetArray copySingleElement(final LabelMultisetType source) {
+
+		if (source.img != null)
+			return copySingleElementFromImg(source);
+		else
+			return copySingleElementFromVariable(source);
+	}
+
+	/**
+	 * For a provided LabelMultisetType, copy the entire access (list data, indices, validity, and argMax), expecting the
+	 * instance to be a "variable" instance, not an image view instance. That is, {@link #img} must be {@code null}.
+	 *
+	 * @param typeAsVariable the variable to copy from
+	 * @return copy of the variable passed in
+	 */
+	private static VolatileLabelMultisetArray copySingleElementFromVariable(LabelMultisetType typeAsVariable) {
+
+		/* copy the listData */
+		final long byteSize = typeAsVariable.access.getListData().size();
+		final int longSize = typeAsVariable.access.getListData().data.length;
+		final LongMappedAccessData listDataCopy = LongMappedAccessData.factory.createStorage(byteSize);
+		System.arraycopy(typeAsVariable.access.getListData().data, 0, listDataCopy.data, 0, longSize);
+
+		/* copy the data */
+		final int[] data = typeAsVariable.access.getCurrentStorageArray();
+		final int[] dataCopy = new int[data.length];
+		System.arraycopy(data, 0, dataCopy, 0, data.length);
+
+		/* get a new access with all the copies */
+		return new VolatileLabelMultisetArray(
+				dataCopy,
+				listDataCopy,
+				typeAsVariable.access.getListDataUsedSizeInBytes(),
+				typeAsVariable.access.isValid(),
+				typeAsVariable.access.argMaxCopy());
+	}
+
+	/**
+	 * For a provided LabelMultisetType that is backed by a non-null {@link #img}, return a new access
+	 * that copies the entries and argMax for the current position in the
+	 * {@link #img} that the provided {@code typeAsImgView} is backed by.
+	 * <p>
+	 * More explicitly, this will NOT copy the entire backing img, just the relevant data for the current position.
+	 *
+	 * @param typeAsImgView the image view to copy from
+	 * @return the new access, equivalent to a "variable" instance of the provided image view instance
+	 */
+	private static VolatileLabelMultisetArray copySingleElementFromImg(LabelMultisetType typeAsImgView) {
+
+		/* argmax max be different than the "calculated" argmax of the entries in cases where the entries
+		* are empty. In those cases, the argmax is `INVALID` by default, but either from a custom loader,
+		* or from the `fromBytes(long[], int, long)` fromBytes method, you can specify a non-default argmax
+		* for empty elements. This is particularly common when it is preferable to have `BACKGROUND` as the
+		* "missing element" value instead of `INVALID`*/
+		long[] preexistingArgMax = {typeAsImgView.argMax()};
+		final VolatileLabelMultisetArray access = new VolatileLabelMultisetArray(1, true, preexistingArgMax);
+		final LabelMultisetEntryList entries = new LabelMultisetEntryList();
+
+		access.getValue(0, entries);
+		entries.addAll(typeAsImgView.labelMultisetEntries());
+		return access;
 	}
 
 	public static class EmptyLabelMultisetTypeGenerator implements BiFunction<CellGrid, long[], byte[]> {
