@@ -13,7 +13,7 @@ public class VolatileLabelMultisetArray implements VolatileAccess, VolatileArray
 
   private final LongMappedAccessData listData;
 
-  private final long listDataUsedSizeInBytes;
+  private long listDataUsedSizeInBytes;
 
   public VolatileLabelMultisetArray(final int numEntities, final boolean isValid, final long[] argMax) {
 
@@ -78,6 +78,11 @@ public class VolatileLabelMultisetArray implements VolatileAccess, VolatileArray
   public long getListDataUsedSizeInBytes() {
 
 	return listDataUsedSizeInBytes;
+  }
+
+  public void setListDataUsedSizeInBytes(final long listDataUsedSizeInBytes) {
+
+	this.listDataUsedSizeInBytes = listDataUsedSizeInBytes;
   }
 
   @Override
