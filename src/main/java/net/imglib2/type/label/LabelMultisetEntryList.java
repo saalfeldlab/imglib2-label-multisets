@@ -108,7 +108,7 @@ public class LabelMultisetEntryList extends MappedObjectArrayList<LabelMultisetE
 
 	/**
 	 * Performs a binary search for entry with
-	 * {@link LabelMultisetEntry#getId()} <tt>id</tt> in the entire list. Note
+	 * {@link LabelMultisetEntry#getId()} {@code id} in the entire list. Note
 	 * that you <b>must</b> {@link #sortById sort} the list before doing a
 	 * search.
 	 *
@@ -123,7 +123,7 @@ public class LabelMultisetEntryList extends MappedObjectArrayList<LabelMultisetE
 
 	/**
 	 * Performs a binary search for entry with
-	 * {@link LabelMultisetEntry#getId()} <tt>id</tt> in the entire list. Note
+	 * {@link LabelMultisetEntry#getId()} {@code id} in the entire list. Note
 	 * that you <b>must</b> {@link #sortById sort} the list before doing a
 	 * search.
 	 *
@@ -139,7 +139,7 @@ public class LabelMultisetEntryList extends MappedObjectArrayList<LabelMultisetE
 
 	/**
 	 * Performs a binary search for entry with
-	 * {@link LabelMultisetEntry#getId()} <tt>id</tt> in the specified range.
+	 * {@link LabelMultisetEntry#getId()} {@code id} in the specified range.
 	 * Note that you <b>must</b> {@link #sortById sort} the list or the range
 	 * before doing a search.
 	 *
@@ -166,7 +166,7 @@ public class LabelMultisetEntryList extends MappedObjectArrayList<LabelMultisetE
 
 	/**
 	 * Performs a binary search for entry with
-	 * {@link LabelMultisetEntry#getId()} <tt>id</tt> in the specified range.
+	 * {@link LabelMultisetEntry#getId()} {@code id} in the specified range.
 	 * Note that you <b>must</b> {@link #sortById sort} the list or the range
 	 * before doing a search.
 	 *
