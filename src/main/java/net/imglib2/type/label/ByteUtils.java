@@ -1,10 +1,11 @@
 package net.imglib2.type.label;
 
-import sun.misc.Unsafe;
-
-import java.lang.reflect.Field;
-import java.security.AccessController;
-import java.security.PrivilegedExceptionAction;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
+import java.io.ByteArrayOutputStream;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
+import java.nio.ByteOrder;
 
 /**
  * Helper methods to encode and decode different data types
@@ -12,103 +13,84 @@ import java.security.PrivilegedExceptionAction;
  * array.
  *
  * @author Tobias Pietzsch &lt;tobias.pietzsch@gmail.com&gt;
+ * @author Caleb Hulbert;
  */
-//@SuppressWarnings( "restriction" )
 public class ByteUtils {
 
-	public static final int BYTE_SIZE = 1;
-
-	public static final int BOOLEAN_SIZE = 1;
-
-	public static final int INT_SIZE = 4;
-
-	public static final int LONG_SIZE = 8;
-
-	public static final int FLOAT_SIZE = 4;
-
-	public static final int DOUBLE_SIZE = 8;
+	// @formatter:off
+	/* some data is serialized little-endian (historic quirk of depending on native byte order) */
+	private static final ValueLayout.OfByte   BYTE_LAYOUT         = ValueLayout.JAVA_BYTE;
+	private static final ValueLayout.OfInt    INT_LE_UNALIGNED    = ValueLayout.JAVA_INT_UNALIGNED.withOrder(ByteOrder.LITTLE_ENDIAN);
+	private static final ValueLayout.OfLong   LONG_LE_UNALIGNED   = ValueLayout.JAVA_LONG_UNALIGNED.withOrder(ByteOrder.LITTLE_ENDIAN);
+	private static final ValueLayout.OfFloat  FLOAT_LE_UNALIGNED  = ValueLayout.JAVA_FLOAT_UNALIGNED.withOrder(ByteOrder.LITTLE_ENDIAN);
+	private static final ValueLayout.OfDouble DOUBLE_LE_UNALIGNED = ValueLayout.JAVA_DOUBLE_UNALIGNED.withOrder(ByteOrder.LITTLE_ENDIAN);
+	// @formatter:on
 
 	public static void putByte(final byte value, final long[] array, final long offset) {
-
-		UNSAFE.putByte(array, LONG_ARRAY_OFFSET + offset, value);
+		MemorySegment.ofArray(array).set(BYTE_LAYOUT, offset, value);
 	}
 
 	public static byte getByte(final long[] array, final long offset) {
-
-		return UNSAFE.getByte(array, LONG_ARRAY_OFFSET + offset);
+		return MemorySegment.ofArray(array).get(BYTE_LAYOUT, offset);
 	}
 
 	public static void putBoolean(final boolean value, final long[] array, final long offset) {
-
 		putByte(value ? (byte) 1 : (byte) 0, array, offset);
 	}
 
 	public static boolean getBoolean(final long[] array, final long offset) {
-
 		return getByte(array, offset) != (byte) 0;
 	}
 
 	public static void putInt(final int value, final long[] array, final long offset) {
-
-		UNSAFE.putInt(array, LONG_ARRAY_OFFSET + offset, value);
+		MemorySegment.ofArray(array).set(INT_LE_UNALIGNED, offset, value);
 	}
 
 	public static int getInt(final long[] array, final long offset) {
-
-		return UNSAFE.getInt(array, LONG_ARRAY_OFFSET + offset);
+		return MemorySegment.ofArray(array).get(INT_LE_UNALIGNED, offset);
 	}
 
 	public static void putLong(final long value, final long[] array, final long offset) {
-
-		UNSAFE.putLong(array, LONG_ARRAY_OFFSET + offset, value);
+		MemorySegment.ofArray(array).set(LONG_LE_UNALIGNED, offset, value);
 	}
 
 	public static long getLong(final long[] array, final long offset) {
-
-		return UNSAFE.getLong(array, LONG_ARRAY_OFFSET + offset);
+		return MemorySegment.ofArray(array).get(LONG_LE_UNALIGNED, offset);
 	}
 
 	public static void putFloat(final float value, final long[] array, final long offset) {
-
-		UNSAFE.putFloat(array, LONG_ARRAY_OFFSET + offset, value);
+		MemorySegment.ofArray(array).set(FLOAT_LE_UNALIGNED, offset, value);
 	}
 
 	public static float getFloat(final long[] array, final long offset) {
-
-		return UNSAFE.getFloat(array, LONG_ARRAY_OFFSET + offset);
+		return MemorySegment.ofArray(array).get(FLOAT_LE_UNALIGNED, offset);
 	}
 
 	public static void putDouble(final double value, final long[] array, final long offset) {
-
-		UNSAFE.putDouble(array, LONG_ARRAY_OFFSET + offset, value);
+		MemorySegment.ofArray(array).set(DOUBLE_LE_UNALIGNED, offset, value);
 	}
 
 	public static double getDouble(final long[] array, final long offset) {
-
-		return UNSAFE.getDouble(array, LONG_ARRAY_OFFSET + offset);
+		return MemorySegment.ofArray(array).get(DOUBLE_LE_UNALIGNED, offset);
 	}
 
 	// Note: offsets in bytes!
 	public static void copyBytes(final long[] srcArray, final long srcOffset, final long[] dstArray, final long dstOffset, final int size) {
-
-		UNSAFE.copyMemory(srcArray, LONG_ARRAY_OFFSET + srcOffset, dstArray, LONG_ARRAY_OFFSET + dstOffset, size);
+		MemorySegment.copy(MemorySegment.ofArray(srcArray), srcOffset, MemorySegment.ofArray(dstArray), dstOffset, size);
 	}
 
-	private static final Unsafe UNSAFE;
+	private static final VarHandle INT_LE = MethodHandles.byteArrayViewVarHandle(int[].class, ByteOrder.LITTLE_ENDIAN);
+	private static final VarHandle LONG_LE = MethodHandles.byteArrayViewVarHandle(long[].class, ByteOrder.LITTLE_ENDIAN);
 
-	static {
-		try {
-			final PrivilegedExceptionAction<Unsafe> action = () -> {
-				final Field field = Unsafe.class.getDeclaredField("theUnsafe");
-				field.setAccessible(true);
-				return (Unsafe) field.get(null);
-			};
-
-			UNSAFE = AccessController.doPrivileged(action);
-		} catch (final Exception ex) {
-			throw new RuntimeException(ex);
-		}
+	public static void writeInt(final ByteArrayOutputStream dataBuffer, final int value, final ByteOrder byteOrder) {
+		final byte[] bytes = new byte[Integer.BYTES];
+		INT_LE.set(bytes, 0, byteOrder == ByteOrder.LITTLE_ENDIAN ? value : Integer.reverseBytes(value));
+		dataBuffer.write(bytes, 0, bytes.length);
 	}
 
-	private static final long LONG_ARRAY_OFFSET = UNSAFE.arrayBaseOffset(long[].class);
+	public static void writeLong(final ByteArrayOutputStream dataBuffer, final long value, final ByteOrder byteOrder) {
+		final byte[] bytes = new byte[Long.BYTES];
+		LONG_LE.set(bytes, 0, byteOrder == ByteOrder.LITTLE_ENDIAN ? value : Long.reverseBytes(value));
+		dataBuffer.write(bytes, 0, bytes.length);
+	}
 }

@@ -8,9 +8,9 @@ public class LabelMultisetEntry
 
 	protected static final int SUPERVOXEL_ID_OFFSET = 0;
 
-	protected static final int COUNT_OFFSET = SUPERVOXEL_ID_OFFSET + ByteUtils.LONG_SIZE;
+	protected static final int COUNT_OFFSET = SUPERVOXEL_ID_OFFSET + Long.BYTES;
 
-	protected static final int SIZE_IN_BYTES = COUNT_OFFSET + ByteUtils.INT_SIZE;
+	protected static final int SIZE_IN_BYTES = COUNT_OFFSET + Integer.BYTES;
 
 	public Label id = () -> getId();
 

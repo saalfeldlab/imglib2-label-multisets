@@ -101,11 +101,11 @@ public class LabelUtils {
 	}
 
 	public static void writeInt(ByteArrayOutputStream dataBuffer, int value, ByteOrder byteOrder) {
-		dataBuffer.write(ByteBuffer.allocate(4).order(byteOrder).putInt(value).array(), 0, 4);
+		ByteUtils.writeInt(dataBuffer, value, byteOrder);
 	}
 
 	public static void writeLong(ByteArrayOutputStream dataBuffer, long value, ByteOrder byteOrder) {
-		dataBuffer.write(ByteBuffer.allocate(8).order(byteOrder).putLong(value).array(), 0, 8);
+		ByteUtils.writeLong(dataBuffer, value, byteOrder);
 	}
 
 	public static LabelMultisetType getOutOfBounds() {

@@ -36,7 +36,7 @@ public class MappedObjectArrayList<O extends MappedObject<O, T>, T extends Mappe
 
   public MappedObjectArrayList(final O type, final int capacity) {
 
-	this(type, type.storageFactory.createStorage(ByteUtils.INT_SIZE + capacity * type.getSizeInBytes()), 0);
+	this(type, type.storageFactory.createStorage(Integer.BYTES + capacity * type.getSizeInBytes()), 0);
   }
 
   protected MappedObjectArrayList(final O type, final MappedAccessData<T> data, final long baseOffset) {
@@ -55,7 +55,7 @@ public class MappedObjectArrayList<O extends MappedObject<O, T>, T extends Mappe
 
 	this.data = data;
 	this.baseOffset = baseOffset;
-	this.elementBaseOffset = baseOffset + ByteUtils.INT_SIZE;
+	this.elementBaseOffset = baseOffset + Integer.BYTES;
 	data.updateAccess(access, baseOffset);
 	if (baseOffset < data.size())
 		size = access.getInt(0);
@@ -129,7 +129,7 @@ public class MappedObjectArrayList<O extends MappedObject<O, T>, T extends Mappe
 
   public long getSizeInBytes() {
 
-	return ByteUtils.INT_SIZE + size() * type.getSizeInBytes();
+	return Integer.BYTES + size() * type.getSizeInBytes();
   }
 
   @Override

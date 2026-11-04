@@ -36,7 +36,7 @@ public class LongMappedAccessData implements MappedAccessData<LongMappedAccess> 
 
 	private long longSizeFromByteSize(final long byteSize) {
 
-		return (byteSize + ByteUtils.LONG_SIZE - 1) / ByteUtils.LONG_SIZE;
+		return (byteSize + Long.BYTES - 1) / Long.BYTES;
 	}
 
 	/**
@@ -48,7 +48,7 @@ public class LongMappedAccessData implements MappedAccessData<LongMappedAccess> 
 		final long longSize = longSizeFromByteSize(size);
 		if (longSize > Integer.MAX_VALUE)
 			throw new IllegalArgumentException(
-					"trying to create a " + getClass().getName() + " with more than " + ((long) ByteUtils.LONG_SIZE * Integer.MAX_VALUE) + " bytes.");
+					"trying to create a " + getClass().getName() + " with more than " + ((long) Long.BYTES * Integer.MAX_VALUE) + " bytes.");
 
 		this.size = size;
 		this.data = new long[(int) longSize];
@@ -73,7 +73,7 @@ public class LongMappedAccessData implements MappedAccessData<LongMappedAccess> 
 
 		if (longSize > Integer.MAX_VALUE)
 			throw new IllegalArgumentException(
-					"trying to resize a " + getClass().getName() + " with more than " + ((long) ByteUtils.LONG_SIZE * Integer.MAX_VALUE) + " bytes.");
+					"trying to resize a " + getClass().getName() + " with more than " + ((long) Long.BYTES * Integer.MAX_VALUE) + " bytes.");
 
 		final long[] datacopy = new long[(int) longSize];
 		final int copyLength = Math.min(data.length, datacopy.length);
